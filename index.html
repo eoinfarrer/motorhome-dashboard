@@ -10,31 +10,31 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
---bg:#f5f4f0;--bg2:#eceae4;--bg3:#e4e2db;
-  --border:#222;--border2:#2a2a2a;
+  --bg:#f5f4f0;--bg2:#eceae4;--bg3:#e4e2db;
+  --border:#d4d0c8;--border2:#c8c4ba;
   --text:#1a1a18;--text-dim:#555;--text-muted:#999;
-  --go:#2ecc71;--caution:#f39c12;--danger:#e74c3c;
-  --frost:#5dade2;--gold:#c8a96e;
+  --go:#1a8a4a;--caution:#c07800;--danger:#c0392b;
+  --frost:#2471a3;--gold:#9a7040;
   --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
   --safe-top:env(safe-area-inset-top,0px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
-body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
 
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
 .header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
 .wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
 .wordmark span{color:var(--gold);}
 .header-tag{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;}
-.trip-selector{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
+.trip-selector{background:white;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:4px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
 .refresh-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
 .refresh-btn.loading{opacity:0.5;pointer-events:none;}
 
 .master-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:56px;}
-.master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);}
-.master-advice{display:flex;align-items:center;padding:14px 20px;font-size:12px;color:var(--text-dim);border-left:1px solid var(--border);flex:1;line-height:1.5;}
+.master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);border-right:1px solid var(--border);}
+.master-advice{display:flex;align-items:center;padding:14px 20px;font-size:13px;color:var(--text-dim);flex:1;line-height:1.5;}
 .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
@@ -45,7 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14
 .card-sub{font-size:11px;color:var(--text-dim);}
 
 .countdown-card{grid-column:span 2;background:var(--bg2);padding:20px;display:flex;align-items:center;gap:20px;}
-.countdown-number{font-family:var(--display);font-size:clamp(48px,12vw,80px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
+.countdown-number{font-family:var(--display);font-size:clamp(36px,8vw,56px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
 .countdown-detail{flex:1;}
 .countdown-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
 .countdown-trip{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
@@ -67,45 +67,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14
 .van-card-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 
 .section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
-.section-title{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;}
-.section-meta{font-size:10px;color:var(--text-muted);}
+.section-title{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;font-weight:600;}
+.section-meta{font-size:12px;color:var(--text-muted);}
 
 .weather-list{border-bottom:1px solid var(--border);}
 .weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #111;}
 .weather-row:last-child{border-bottom:none;}
-.weather-row.today{background:var(--bg2);}
-.weather-date{font-size:11px;color:var(--text-dim);}
-.weather-date strong{display:block;font-size:12px;color:var(--text);font-weight:500;}
+.weather-row.today{background:#fdf8ee;}
+.weather-date{font-size:12px;color:var(--text-dim);}
+.weather-date strong{display:block;font-size:14px;color:var(--text);font-weight:600;}
 .weather-middle{min-width:0;}
-.weather-location{font-size:13px;color:var(--text);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.weather-condition{font-size:11px;color:var(--text-dim);}
+.weather-location{font-size:15px;color:var(--text);font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.weather-condition{font-size:13px;color:var(--text-dim);}
 .weather-stats{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-.weather-risk{font-size:11px;font-weight:500;text-align:right;}
-.weather-nums{font-size:10px;color:var(--text-muted);text-align:right;}
+.weather-risk{font-size:13px;font-weight:600;text-align:right;}
+.weather-nums{font-size:12px;color:var(--text-dim);text-align:right;}
 
 .itin-list{border-bottom:1px solid var(--border);}
 .itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid #111;}
 .itin-row:last-child{border-bottom:none;}
-.itin-row.today{background:var(--bg2);border-left:2px solid var(--gold);}
+.itin-row.today{background:#fdf8ee;border-left:3px solid var(--gold);}
 .itin-row.past{opacity:0.45;}
-.itin-date{font-size:10px;color:var(--text-muted);padding-top:2px;line-height:1.4;}
-.itin-date strong{display:block;font-size:11px;color:var(--text-dim);}
-.itin-location{font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px;}
-.itin-notes{font-size:11px;color:var(--text-muted);}
-.itin-badge{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;align-self:start;font-weight:500;}
+.itin-date{font-size:11px;color:var(--text-muted);padding-top:2px;line-height:1.4;}
+.itin-date strong{display:block;font-size:13px;color:var(--text-dim);font-weight:600;}
+.itin-location{font-size:15px;color:var(--text);font-weight:600;margin-bottom:3px;}
+.itin-notes{font-size:13px;color:var(--text-dim);}
+.itin-badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;align-self:start;font-weight:600;}
 
-.type-DEPART  {background:#1a2a1a;color:var(--go);border:1px solid #2a4a2a;}
-.type-DRIVE   {background:#1a2535;color:var(--frost);border:1px solid #253545;}
-.type-STOPOVER{background:#1f1f1a;color:var(--gold);border:1px solid #353520;}
-.type-STAY    {background:#1a1a1a;color:var(--text-dim);border:1px solid var(--border2);}
-.type-ARRIVE  {background:#1a1a2a;color:#9b59b6;border:1px solid #2a2a3a;}
-.type-RETURN  {background:#2a1a1a;color:var(--danger);border:1px solid #3a2a2a;}
+.type-DEPART  {background:#e8f5ee;color:var(--go);border:1px solid #b8dfc8;}
+.type-DRIVE   {background:#e8f0f8;color:var(--frost);border:1px solid #b8cce8;}
+.type-STOPOVER{background:#f8f0e0;color:var(--gold);border:1px solid #e0c890;}
+.type-STAY    {background:#eeece8;color:var(--text-dim);border:1px solid var(--border2);}
+.type-ARRIVE  {background:#f0e8f8;color:#7d3c98;border:1px solid #d8b8e8;}
+.type-RETURN  {background:#fde8e8;color:var(--danger);border:1px solid #f0b8b8;}
 
 .state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
 .state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
 
 .footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
-.last-updated{color:#333;margin-top:4px;font-size:10px;}
+.last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;}
 
 @media(max-width:400px){
   .grid{grid-template-columns:1fr;}
@@ -288,7 +288,9 @@ function buildVehicleCards(v){
   const bc=v.batteryV?(v.batteryV>=13?'var(--go)':v.batteryV>=12.4?'var(--caution)':'var(--danger)'):'var(--text-dim)';
   const gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
   const cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
-  return`<div class="van-grid">
+  const alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')?`<span style="font-size:12px;color:var(--danger);font-weight:600">${v.systemAlert}</span>`:'';
+  return`<div class="section-head"><span class="section-title">Vehicle · Audrey</span><span class="section-meta">${alert||v.telStatus||''}</span></div>
+  <div class="van-grid">
     <div class="van-card"><span class="van-card-icon">🔋</span><div class="van-card-value" style="color:${bc}">${v.batteryV!==null?v.batteryV+'V':'—'}</div><div class="van-card-label">Battery</div></div>
     <div class="van-card"><span class="van-card-icon">🏠</span><div class="van-card-value" style="color:${cc}">${v.cabinTempC!==null?v.cabinTempC+'°':'—'}</div><div class="van-card-label">Cabin</div></div>
     <div class="van-card"><span class="van-card-icon">🚐</span><div class="van-card-value" style="color:${gc}">${v.garageTempC!==null?v.garageTempC+'°':'—'}</div><div class="van-card-label">Garage</div></div>
