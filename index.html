@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Audrey — Mission Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d0d0d;--bg2:#141414;--bg3:#1a1a1a;
+  --border:#222;--border2:#2a2a2a;
+  --text:#e8e4dc;--text-dim:#888;--text-muted:#444;
+  --go:#2ecc71;--caution:#f39c12;--danger:#e74c3c;
+  --frost:#5dade2;--gold:#c8a96e;
+  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{background:var(--bg);}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
+
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;}
+.header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
+.wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
+.wordmark span{color:var(--gold);}
+.header-tag{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;}
+.trip-selector{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
+.refresh-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
+.refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
+.refresh-btn.loading{opacity:0.5;pointer-events:none;}
+
+.master-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:56px;}
+.master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);}
+.master-advice{display:flex;align-items:center;padding:14px 20px;font-size:12px;color:var(--text-dim);border-left:1px solid var(--border);flex:1;line-height:1.5;}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.card{background:var(--bg);padding:16px 18px;}
+.card-label{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
+.card-value{font-family:var(--display);font-size:clamp(22px,5vw,32px);font-weight:700;line-height:1;margin-bottom:4px;}
+.card-sub{font-size:11px;color:var(--text-dim);}
+
+.countdown-card{grid-column:span 2;background:var(--bg2);padding:20px;display:flex;align-items:center;gap:20px;}
+.countdown-number{font-family:var(--display);font-size:clamp(48px,12vw,80px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
+.countdown-detail{flex:1;}
+.countdown-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
+.countdown-trip{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
+.trip-status-badge{display:inline-block;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;font-family:var(--mono);}
+
+.drive-card{grid-column:span 2;background:var(--bg3);padding:16px 18px;border-top:2px solid var(--frost);}
+.drive-route{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.drive-origin,.drive-dest{font-family:var(--display);font-size:clamp(14px,3.5vw,18px);font-weight:600;}
+.drive-arrow{color:var(--frost);font-size:16px;flex-shrink:0;}
+.drive-meta{display:flex;gap:16px;flex-wrap:wrap;}
+.drive-stat{display:flex;flex-direction:column;gap:2px;}
+.drive-stat-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+.drive-stat-value{font-size:13px;color:var(--frost);font-weight:500;}
+
+.van-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.van-card{background:var(--bg);padding:14px 16px;text-align:center;}
+.van-card-icon{font-size:20px;margin-bottom:4px;display:block;}
+.van-card-value{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:700;line-height:1;margin-bottom:3px;}
+.van-card-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
+.section-title{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;}
+.section-meta{font-size:10px;color:var(--text-muted);}
+
+.weather-list{border-bottom:1px solid var(--border);}
+.weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #111;}
+.weather-row:last-child{border-bottom:none;}
+.weather-row.today{background:var(--bg2);}
+.weather-date{font-size:11px;color:var(--text-dim);}
+.weather-date strong{display:block;font-size:12px;color:var(--text);font-weight:500;}
+.weather-middle{min-width:0;}
+.weather-location{font-size:13px;color:var(--text);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.weather-condition{font-size:11px;color:var(--text-dim);}
+.weather-stats{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.weather-risk{font-size:11px;font-weight:500;text-align:right;}
+.weather-nums{font-size:10px;color:var(--text-muted);text-align:right;}
+
+.itin-list{border-bottom:1px solid var(--border);}
+.itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid #111;}
+.itin-row:last-child{border-bottom:none;}
+.itin-row.today{background:var(--bg2);border-left:2px solid var(--gold);}
+.itin-row.past{opacity:0.45;}
+.itin-date{font-size:10px;color:var(--text-muted);padding-top:2px;line-height:1.4;}
+.itin-date strong{display:block;font-size:11px;color:var(--text-dim);}
+.itin-location{font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px;}
+.itin-notes{font-size:11px;color:var(--text-muted);}
+.itin-badge{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:3px;align-self:start;font-weight:500;}
+
+.type-DEPART  {background:#1a2a1a;color:var(--go);border:1px solid #2a4a2a;}
+.type-DRIVE   {background:#1a2535;color:var(--frost);border:1px solid #253545;}
+.type-STOPOVER{background:#1f1f1a;color:var(--gold);border:1px solid #353520;}
+.type-STAY    {background:#1a1a1a;color:var(--text-dim);border:1px solid var(--border2);}
+.type-ARRIVE  {background:#1a1a2a;color:#9b59b6;border:1px solid #2a2a3a;}
+.type-RETURN  {background:#2a1a1a;color:var(--danger);border:1px solid #3a2a2a;}
+
+.state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
+.state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
+
+.footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
+.last-updated{color:#333;margin-top:4px;font-size:10px;}
+
+@media(max-width:400px){
+  .grid{grid-template-columns:1fr;}
+  .countdown-card,.drive-card{grid-column:span 1;}
+  .master-status{min-width:110px;font-size:16px;}
+  .header{padding:12px 14px 10px;}
+}
+@media(prefers-reduced-motion:reduce){.status-dot{animation:none;}}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="wordmark">Au<span>drey</span></div>
+    <div class="header-tag">Mission Control</div>
+  </div>
+  <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
+    <option value="">Loading...</option>
+  </select>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">↻ Refresh</button>
+</header>
+
+<main id="main">
+  <div class="state-message">
+    <span class="icon">🚐</span>
+    Connecting to Audrey...
+  </div>
+</main>
+
+<footer class="footer">
+  AUDREY · 8M BAILEY AUTOGRAPH
+  <div class="last-updated" id="lastUpdated"></div>
+</footer>
+
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY4_o0THKORntyf3C0rYsRwqRIuQTaTGQkqthQaJho8DHQ/exec';
+let currentData=null,currentTrip=null;
+
+async function fetchData(trip){
+  const url=trip?`${API_URL}?trip=${encodeURIComponent(trip)}`:API_URL;
+  const r=await fetch(url);
+  if(!r.ok)throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+async function loadTrip(name){currentTrip=name||null;await refresh();}
+
+async function refresh(){
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('loading');btn.textContent='↻ Loading...';
+  try{
+    const d=await fetchData(currentTrip);
+    if(d.error)throw new Error(d.error);
+    currentData=d;render(d);
+  }catch(e){renderError(e.message);}
+  finally{btn.classList.remove('loading');btn.textContent='↻ Refresh';}
+}
+
+function render(d){
+  populateTripSelector(d.trips,d.meta.tripName);
+  document.getElementById('main').innerHTML=buildMain(d);
+  const ts=new Date(d.timestamp);
+  document.getElementById('lastUpdated').textContent=
+    'Last updated '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderError(msg){
+  document.getElementById('main').innerHTML=`
+    <div class="state-message">
+      <span class="icon">⚠️</span>
+      Could not reach Audrey.<br>
+      <span style="color:#555;font-size:11px">${msg}</span><br><br>
+      Check your connection and try again.
+    </div>`;
+}
+
+function populateTripSelector(trips,active){
+  const sel=document.getElementById('tripSelector');
+  if(!trips||!trips.length)return;
+  sel.innerHTML=trips.map(t=>{
+    const label=t.name+(t.status==='ACTIVE'?' ●':t.status==='UPCOMING'?' ○':'');
+    return`<option value="${t.name}"${t.name===active?' selected':''}>${label}</option>`;
+  }).join('');
+}
+
+function buildMain(d){
+  return[
+    buildMasterBar(d.master,d.vehicle),
+    buildCountdown(d.meta),
+    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta):'',
+    buildVehicleCards(d.vehicle),
+    d.weather&&d.weather.length?buildWeather(d.weather):'',
+    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
+  ].join('');
+}
+
+function buildMasterBar(master,vehicle){
+  if(!master)return'';
+  const c=master.color||'#888';
+  const alert=vehicle&&vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK')?vehicle.systemAlert:'';
+  return`<div class="master-bar">
+    <div class="master-status" style="color:${c}">
+      <span class="status-dot" style="background:${c}"></span>${master.status}
+    </div>
+    <div class="master-advice">${alert?`<span style="color:${c};margin-right:8px">${alert}</span>`:master.advice}</div>
+  </div>`;
+}
+
+function buildCountdown(meta){
+  if(!meta)return'';
+  let number='—',label='Trip status',badgeClass='',badgeText='';
+  if(meta.tripStatus==='PRE_TRIP'&&meta.daysToDepart!==null){
+    number=meta.daysToDepart;label='Days to departure';badgeClass='type-DRIVE';badgeText='Upcoming';
+  }else if(meta.tripStatus==='ACTIVE'){
+    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'●';
+    label=meta.daysIntoTrip!==null?'Days into trip':'Active trip';
+    badgeClass='type-DEPART';badgeText='On the road';
+  }else if(meta.tripStatus==='POST_TRIP'){
+    number='✓';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
+  }
+  const dateRange=(meta.departDate&&meta.returnDate)
+    ?fmtDate(meta.departDate)+' — '+fmtDate(meta.returnDate)
+    :meta.departDate?'From '+fmtDate(meta.departDate):'';
+  return`<div class="grid"><div class="countdown-card">
+    <div class="countdown-number">${number}</div>
+    <div class="countdown-detail">
+      <div class="countdown-label">${label}</div>
+      <div class="countdown-trip">${meta.tripName||''}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        ${badgeText?`<span class="trip-status-badge ${badgeClass}">${badgeText}</span>`:''}
+        ${dateRange?`<span style="font-size:10px;color:var(--text-muted)">${dateRange}</span>`:''}
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function buildNextDrive(meta){
+  const nd=meta.nextDrive;if(!nd)return'';
+  return`<div class="grid"><div class="drive-card">
+    <div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive · ${fmtDate(nd.date)}</div>
+    <div class="drive-route">
+      <span class="drive-origin" style="color:var(--text-dim)">${meta.currentLocation||'—'}</span>
+      <span class="drive-arrow">→</span>
+      <span class="drive-dest">${nd.destination}</span>
+    </div>
+    <div class="drive-meta">
+      <div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">${nd.distanceKm?nd.distanceKm+' km':'—'}</span></div>
+      <div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">${nd.durationMin?fmtDuration(nd.durationMin):'—'}</span></div>
+      ${nd.notes?`<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">${nd.notes}</span></div>`:''}
+    </div>
+  </div></div>`;
+}
+
+function buildVehicleCards(v){
+  if(!v)return'';
+  const bc=v.batteryV?(v.batteryV>=13?'var(--go)':v.batteryV>=12.4?'var(--caution)':'var(--danger)'):'var(--text-dim)';
+  const gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
+  const cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
+  return`<div class="van-grid">
+    <div class="van-card"><span class="van-card-icon">🔋</span><div class="van-card-value" style="color:${bc}">${v.batteryV!==null?v.batteryV+'V':'—'}</div><div class="van-card-label">Battery</div></div>
+    <div class="van-card"><span class="van-card-icon">🏠</span><div class="van-card-value" style="color:${cc}">${v.cabinTempC!==null?v.cabinTempC+'°':'—'}</div><div class="van-card-label">Cabin</div></div>
+    <div class="van-card"><span class="van-card-icon">🚐</span><div class="van-card-value" style="color:${gc}">${v.garageTempC!==null?v.garageTempC+'°':'—'}</div><div class="van-card-label">Garage</div></div>
+  </div>`;
+}
+
+function buildWeather(weather){
+  const rows=weather.map(w=>{
+    const d=new Date(w.date+'T00:00:00');
+    const day=d.toLocaleDateString('en-GB',{weekday:'short'});
+    const dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const rc=riskColor(w.risk);
+    return`<div class="weather-row${w.isToday?' today':''}">
+      <div class="weather-date"><strong>${w.isToday?'Today':day}</strong>${dt}</div>
+      <div class="weather-middle">
+        <div class="weather-location">${w.location}</div>
+        <div class="weather-condition">${w.condition}</div>
+      </div>
+      <div class="weather-stats">
+        <div class="weather-risk" style="color:${rc}">${w.risk}</div>
+        <div class="weather-nums">${w.minTempC!==null?w.minTempC+'° · ':''}${w.gustKmh?w.gustKmh+' km/h':''}${w.snowMm?' · '+w.snowMm+'mm ❄️':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div><div class="weather-list">${rows}</div>`;
+}
+
+function buildItinerary(itin){
+  const rows=itin.map(r=>{
+    const d=new Date(r.date+'T00:00:00');
+    const day=d.toLocaleDateString('en-GB',{weekday:'short'});
+    const dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const cls=r.isToday?' today':r.isPast?' past':'';
+    const meta=[r.distanceKm?r.distanceKm+' km':'',r.durationMin?fmtDuration(r.durationMin):'',r.notes].filter(Boolean).join(' · ');
+    return`<div class="itin-row${cls}">
+      <div class="itin-date"><strong>${r.isToday?'Today':day}</strong>${dt}</div>
+      <div><div class="itin-location">${r.location}</div>${meta?`<div class="itin-notes">${meta}</div>`:''}</div>
+      <span class="itin-badge type-${r.type}">${r.type}</span>
+    </div>`;
+  }).join('');
+  return`<div class="section-head"><span class="section-title">Itinerary</span><span class="section-meta">${itin.length} days</span></div><div class="itin-list">${rows}</div>`;
+}
+
+function fmtDate(iso){
+  if(!iso)return'';
+  return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+}
+function fmtDuration(mins){
+  const h=Math.floor(mins/60),m=mins%60;
+  return h>0?`${h}h${m>0?' '+m+'m':''}`:m+'m';
+}
+function riskColor(risk){
+  if(!risk)return'var(--text-dim)';
+  if(risk.includes('🚫')||risk.includes('DANGER')||risk.includes('🧊')||risk.includes('ICE'))return'var(--danger)';
+  if(risk.includes('❄️')||risk.includes('💨')||risk.includes('⚠️'))return'var(--caution)';
+  if(risk.includes('✅')||risk.includes('🟢'))return'var(--go)';
+  return'var(--text-dim)';
+}
+
+refresh();
+</script>
+</body>
+</html>
