@@ -146,10 +146,33 @@ const API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY
 let currentData=null,currentTrip=null;
 
 async function fetchData(trip){
-  const url=trip?`${API_URL}?trip=${encodeURIComponent(trip)}`:API_URL;
-  const r=await fetch(url);
-  if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  return r.json();
+  const params=new URLSearchParams();
+  if(trip) params.set('trip',trip);
+  params.set('_',Date.now()); // cache bust
+  const url=`${API_URL}?${params.toString()}`;
+  
+  // Try standard fetch first, fall back to no-redirect for Safari
+  let r;
+  try {
+    r = await fetch(url, {
+      redirect: 'follow',
+      headers: { 'Accept': 'application/json' }
+    });
+  } catch(e) {
+    // Safari CORS fallback — fetch with credentials omitted
+    r = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit',
+      redirect: 'follow'
+    });
+  }
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  const text = await r.text();
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    throw new Error('Invalid response from server');
+  }
 }
 
 async function loadTrip(name){currentTrip=name||null;await refresh();}
