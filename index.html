@@ -71,7 +71,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .section-meta{font-size:12px;color:var(--text-muted);}
 
 .weather-list{border-bottom:1px solid var(--border);}
-.weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #111;}
+.weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);}
 .weather-row:last-child{border-bottom:none;}
 .weather-row.today{background:#fdf8ee;}
 .weather-date{font-size:12px;color:var(--text-dim);}
@@ -84,7 +84,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .weather-nums{font-size:12px;color:var(--text-dim);text-align:right;}
 
 .itin-list{border-bottom:1px solid var(--border);}
-.itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid #111;}
+.itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid var(--border);}
 .itin-row:last-child{border-bottom:none;}
 .itin-row.today{background:#fdf8ee;border-left:3px solid var(--gold);}
 .itin-row.past{opacity:0.45;}
@@ -298,35 +298,6 @@ function buildVehicleCards(v){
   </div>`;
 }
 
-function buildLpg(lpg){
-  if(!lpg||!lpg.current)return'';
-  const c=lpg.current;
-  const pct=Math.min(100,Math.round((c.litres/12)*100));
-  const barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
-  const totals=lpg.totalLitres?`${lpg.totalLitres.toFixed(1)}L trip total · £${lpg.totalCost.toFixed(2)}`:'';
-  return`
-    <div class="section-head">
-      <span class="section-title">LPG · Heating</span>
-      <span class="section-meta">${totals}</span>
-    </div>
-    <div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
-        <div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:${barColor}">${c.litres.toFixed(1)}L</div>
-        <div>
-          <div style="font-size:13px;color:var(--text);font-weight:500">${c.statusMsg}</div>
-          <div style="font-size:12px;color:var(--text-dim)">${c.heatSource}</div>
-        </div>
-      </div>
-      <div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:4px">
-        <span style="font-size:10px;color:var(--text-muted)">0L</span>
-        <span style="font-size:10px;color:var(--text-muted)">${pct}% · 12L tank</span>
-      </div>
-    </div>`;
-}
-
 function buildWeather(weather){
   const rows=weather.map(w=>{
     const d=new Date(w.date+'T00:00:00');
@@ -378,6 +349,29 @@ function riskColor(risk){
   if(risk.includes('❄️')||risk.includes('💨')||risk.includes('⚠️'))return'var(--caution)';
   if(risk.includes('✅')||risk.includes('🟢'))return'var(--go)';
   return'var(--text-dim)';
+}
+
+function buildLpg(lpg){
+  if(!lpg||!lpg.current)return'';
+  const c=lpg.current;
+  const pct=Math.min(100,Math.round((c.litres/12)*100));
+  const barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
+  const totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':''
+  return '<div class="section-head"><span class="section-title">LPG · Heating</span><span class="section-meta">'+totals+'</span></div>'
+    +'<div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">'
+    +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
+    +'<div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:'+barColor+'">'+c.litres.toFixed(1)+'L</div>'
+    +'<div>'
+    +'<div style="font-size:13px;color:var(--text);font-weight:500">'+c.statusMsg+'</div>'
+    +'<div style="font-size:12px;color:var(--text-dim)">'+c.heatSource+'</div>'
+    +'</div></div>'
+    +'<div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden">'
+    +'<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:4px"></div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
+    +'<span style="font-size:10px;color:var(--text-muted)">0L</span>'
+    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% · 12L tank</span>'
+    +'</div></div>';
 }
 
 refresh();
