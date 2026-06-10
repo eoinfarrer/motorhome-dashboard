@@ -226,15 +226,6 @@ function buildMain(d){
     d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
   ].join('');
 }
-  return[
-    buildMasterBar(d.master,d.vehicle),
-    buildCountdown(d.meta),
-    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta):'',
-    buildVehicleCards(d.vehicle),
-    d.weather&&d.weather.length?buildWeather(d.weather):'',
-    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
-  ].join('');
-}
 
 function buildMasterBar(master,vehicle){
   if(!master)return'';
