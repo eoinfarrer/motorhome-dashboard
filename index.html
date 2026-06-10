@@ -221,6 +221,16 @@ function buildMain(d){
     buildCountdown(d.meta),
     d.meta&&d.meta.nextDrive?buildNextDrive(d.meta):'',
     buildVehicleCards(d.vehicle),
+    d.lpg&&d.lpg.current?buildLpg(d.lpg):'',
+    d.weather&&d.weather.length?buildWeather(d.weather):'',
+    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
+  ].join('');
+}
+  return[
+    buildMasterBar(d.master,d.vehicle),
+    buildCountdown(d.meta),
+    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta):'',
+    buildVehicleCards(d.vehicle),
     d.weather&&d.weather.length?buildWeather(d.weather):'',
     d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
   ].join('');
@@ -295,6 +305,35 @@ function buildVehicleCards(v){
     <div class="van-card"><span class="van-card-icon">🏠</span><div class="van-card-value" style="color:${cc}">${v.cabinTempC!==null?v.cabinTempC+'°':'—'}</div><div class="van-card-label">Cabin</div></div>
     <div class="van-card"><span class="van-card-icon">🚐</span><div class="van-card-value" style="color:${gc}">${v.garageTempC!==null?v.garageTempC+'°':'—'}</div><div class="van-card-label">Garage</div></div>
   </div>`;
+}
+
+function buildLpg(lpg){
+  if(!lpg||!lpg.current)return'';
+  const c=lpg.current;
+  const pct=Math.min(100,Math.round((c.litres/12)*100));
+  const barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
+  const totals=lpg.totalLitres?`${lpg.totalLitres.toFixed(1)}L trip total · £${lpg.totalCost.toFixed(2)}`:'';
+  return`
+    <div class="section-head">
+      <span class="section-title">LPG · Heating</span>
+      <span class="section-meta">${totals}</span>
+    </div>
+    <div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+        <div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:${barColor}">${c.litres.toFixed(1)}L</div>
+        <div>
+          <div style="font-size:13px;color:var(--text);font-weight:500">${c.statusMsg}</div>
+          <div style="font-size:12px;color:var(--text-dim)">${c.heatSource}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <span style="font-size:10px;color:var(--text-muted)">0L</span>
+        <span style="font-size:10px;color:var(--text-muted)">${pct}% · 12L tank</span>
+      </div>
+    </div>`;
 }
 
 function buildWeather(weather){
