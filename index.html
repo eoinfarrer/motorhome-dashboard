@@ -326,10 +326,19 @@ function buildItinerary(itin){
     const dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const cls=r.isToday?' today':r.isPast?' past':'';
     const meta=[r.distanceKm?r.distanceKm+' km':'',r.durationMin?fmtDuration(r.durationMin):'',r.notes].filter(Boolean).join(' · ');
+   const mapsUrl = r.address
+      ? `https://maps.apple.com/?address=${encodeURIComponent(r.address)}`
+      : `https://maps.apple.com/?q=${encodeURIComponent(r.location)}`;
     return`<div class="itin-row${cls}">
       <div class="itin-date"><strong>${r.isToday?'Today':day}</strong>${dt}</div>
-      <div><div class="itin-location">${r.location}</div>${meta?`<div class="itin-notes">${meta}</div>`:''}</div>
-      <span class="itin-badge type-${r.type}">${r.type}</span>
+      <div>
+        <div class="itin-location">${r.location}</div>
+        ${meta?`<div class="itin-notes">${meta}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <span class="itin-badge type-${r.type}">${r.type}</span>
+        ${r.type!=='STAY'?`<a href="${mapsUrl}" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">📍 Maps</a>`:''}
+      </div>
     </div>`;
   }).join('');
   return`<div class="section-head"><span class="section-title">Itinerary</span><span class="section-meta">${itin.length} days</span></div><div class="itin-list">${rows}</div>`;
