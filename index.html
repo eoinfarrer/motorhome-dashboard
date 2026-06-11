@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Audrey — Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
+:root{
   --bg:#f5f4f0;--bg2:#eceae4;--bg3:#e4e2db;
   --border:#d4d0c8;--border2:#c8c4ba;
   --text:#1a1a18;--text-dim:#555;--text-muted:#999;
@@ -22,6 +23,7 @@
 html{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
 
+/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
 .header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
 .wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
@@ -32,18 +34,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
 .refresh-btn.loading{opacity:0.5;pointer-events:none;}
 
+/* MASTER BAR */
 .master-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:56px;}
 .master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);border-right:1px solid var(--border);}
 .master-advice{display:flex;align-items:center;padding:14px 20px;font-size:13px;color:var(--text-dim);flex:1;line-height:1.5;}
 .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
+/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
-.card{background:var(--bg);padding:16px 18px;}
-.card-label{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
-.card-value{font-family:var(--display);font-size:clamp(22px,5vw,32px);font-weight:700;line-height:1;margin-bottom:4px;}
-.card-sub{font-size:11px;color:var(--text-dim);}
-
 .countdown-card{grid-column:span 2;background:var(--bg2);padding:20px;display:flex;align-items:center;gap:20px;}
 .countdown-number{font-family:var(--display);font-size:clamp(36px,8vw,56px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
 .countdown-detail{flex:1;}
@@ -51,6 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .countdown-trip{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
 .trip-status-badge{display:inline-block;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;font-family:var(--mono);}
 
+/* NEXT DRIVE */
 .drive-card{grid-column:span 2;background:var(--bg3);padding:16px 18px;border-top:2px solid var(--frost);}
 .drive-route{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
 .drive-origin,.drive-dest{font-family:var(--display);font-size:clamp(14px,3.5vw,18px);font-weight:600;}
@@ -59,17 +59,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .drive-stat{display:flex;flex-direction:column;gap:2px;}
 .drive-stat-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 .drive-stat-value{font-size:13px;color:var(--frost);font-weight:500;}
+.card-label{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
 
-.van-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+/* VEHICLE GRID — 2x2 on mobile, 4 across on desktop */
+.van-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
 .van-card{background:var(--bg);padding:14px 16px;text-align:center;}
 .van-card-icon{font-size:20px;margin-bottom:4px;display:block;}
-.van-card-value{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:700;line-height:1;margin-bottom:3px;}
+.van-card-value{font-family:var(--display);font-size:clamp(14px,3.5vw,20px);font-weight:700;line-height:1;margin-bottom:3px;}
 .van-card-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 
+/* SECTION HEADING */
 .section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
 .section-title{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;font-weight:600;}
 .section-meta{font-size:12px;color:var(--text-muted);}
 
+/* WEATHER */
 .weather-list{border-bottom:1px solid var(--border);}
 .weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);}
 .weather-row:last-child{border-bottom:none;}
@@ -83,6 +87,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .weather-risk{font-size:13px;font-weight:600;text-align:right;}
 .weather-nums{font-size:12px;color:var(--text-dim);text-align:right;}
 
+/* ITINERARY */
 .itin-list{border-bottom:1px solid var(--border);}
 .itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid var(--border);}
 .itin-row:last-child{border-bottom:none;}
@@ -94,6 +99,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .itin-notes{font-size:13px;color:var(--text-dim);}
 .itin-badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;align-self:start;font-weight:600;}
 
+/* TYPE BADGES */
 .type-DEPART  {background:#e8f5ee;color:var(--go);border:1px solid #b8dfc8;}
 .type-DRIVE   {background:#e8f0f8;color:var(--frost);border:1px solid #b8cce8;}
 .type-STOPOVER{background:#f8f0e0;color:var(--gold);border:1px solid #e0c890;}
@@ -101,17 +107,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .type-ARRIVE  {background:#f0e8f8;color:#7d3c98;border:1px solid #d8b8e8;}
 .type-RETURN  {background:#fde8e8;color:var(--danger);border:1px solid #f0b8b8;}
 
+/* STATE */
 .state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
 .state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
 
+/* FOOTER */
 .footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
 .last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;}
 
-@media(max-width:400px){
+/* RESPONSIVE */
+@media(max-width:640px){
+  .van-grid{grid-template-columns:repeat(2,1fr);}
   .grid{grid-template-columns:1fr;}
   .countdown-card,.drive-card{grid-column:span 1;}
   .master-status{min-width:110px;font-size:16px;}
   .header{padding:12px 14px 10px;}
+  .weather-row{grid-template-columns:64px 1fr auto;}
 }
 @media(prefers-reduced-motion:reduce){.status-dot{animation:none;}}
 </style>
@@ -126,18 +137,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
   </select>
-  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">↻ Refresh</button>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#x21BB; Refresh</button>
 </header>
 
 <main id="main">
   <div class="state-message">
-    <span class="icon">🚐</span>
+    <span class="icon">&#x1F690;</span>
     Connecting to Audrey...
   </div>
 </main>
 
 <footer class="footer">
-  AUDREY · 8M BAILEY AUTOGRAPH
+  AUDREY &middot; 8M BAILEY AUTOGRAPH
   <div class="last-updated" id="lastUpdated"></div>
 </footer>
 
@@ -147,45 +158,29 @@ let currentData=null,currentTrip=null;
 
 async function fetchData(trip){
   const params=new URLSearchParams();
-  if(trip) params.set('trip',trip);
-  params.set('_',Date.now()); // cache bust
-  const url=`${API_URL}?${params.toString()}`;
-  
-  // Try standard fetch first, fall back to no-redirect for Safari
+  if(trip)params.set('trip',trip);
+  params.set('_',Date.now());
+  const url=API_URL+'?'+params.toString();
   let r;
-  try {
-    r = await fetch(url, {
-      redirect: 'follow',
-      headers: { 'Accept': 'application/json' }
-    });
-  } catch(e) {
-    // Safari CORS fallback — fetch with credentials omitted
-    r = await fetch(url, {
-      mode: 'cors',
-      credentials: 'omit',
-      redirect: 'follow'
-    });
-  }
-  if(!r.ok) throw new Error(`HTTP ${r.status}`);
-  const text = await r.text();
-  try {
-    return JSON.parse(text);
-  } catch(e) {
-    throw new Error('Invalid response from server');
-  }
+  try{r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
+  catch(e){r=await fetch(url,{mode:'cors',credentials:'omit',redirect:'follow'});}
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  const text=await r.text();
+  try{return JSON.parse(text);}
+  catch(e){throw new Error('Invalid response from server');}
 }
 
 async function loadTrip(name){currentTrip=name||null;await refresh();}
 
 async function refresh(){
   const btn=document.getElementById('refreshBtn');
-  btn.classList.add('loading');btn.textContent='↻ Loading...';
+  btn.classList.add('loading');btn.textContent='Loading...';
   try{
     const d=await fetchData(currentTrip);
     if(d.error)throw new Error(d.error);
     currentData=d;render(d);
   }catch(e){renderError(e.message);}
-  finally{btn.classList.remove('loading');btn.textContent='↻ Refresh';}
+  finally{btn.classList.remove('loading');btn.textContent='\u21BB Refresh';}
 }
 
 function render(d){
@@ -197,21 +192,17 @@ function render(d){
 }
 
 function renderError(msg){
-  document.getElementById('main').innerHTML=`
-    <div class="state-message">
-      <span class="icon">⚠️</span>
-      Could not reach Audrey.<br>
-      <span style="color:#555;font-size:11px">${msg}</span><br><br>
-      Check your connection and try again.
-    </div>`;
+  document.getElementById('main').innerHTML=
+    '<div class="state-message"><span class="icon">\u26A0\uFE0F</span>Could not reach Audrey.<br>'
+    +'<span style="color:#555;font-size:11px">'+msg+'</span><br><br>Check your connection and try again.</div>';
 }
 
 function populateTripSelector(trips,active){
   const sel=document.getElementById('tripSelector');
   if(!trips||!trips.length)return;
-  sel.innerHTML=trips.map(t=>{
-    const label=t.name+(t.status==='ACTIVE'?' ●':t.status==='UPCOMING'?' ○':'');
-    return`<option value="${t.name}"${t.name===active?' selected':''}>${label}</option>`;
+  sel.innerHTML=trips.map(function(t){
+    const label=t.name+(t.status==='ACTIVE'?' \u25CF':t.status==='UPCOMING'?' \u25CB':'');
+    return '<option value="'+t.name+'"'+(t.name===active?' selected':'')+'>'+label+'</option>';
   }).join('');
 }
 
@@ -231,151 +222,91 @@ function buildMasterBar(master,vehicle){
   if(!master)return'';
   const c=master.color||'#888';
   const alert=vehicle&&vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK')?vehicle.systemAlert:'';
-  return`<div class="master-bar">
-    <div class="master-status" style="color:${c}">
-      <span class="status-dot" style="background:${c}"></span>${master.status}
-    </div>
-    <div class="master-advice">${alert?`<span style="color:${c};margin-right:8px">${alert}</span>`:master.advice}</div>
-  </div>`;
+  return'<div class="master-bar">'
+    +'<div class="master-status" style="color:'+c+'">'
+    +'<span class="status-dot" style="background:'+c+'"></span>'+master.status
+    +'</div>'
+    +'<div class="master-advice">'+(alert?'<span style="color:'+c+';margin-right:8px">'+alert+'</span>':master.advice)+'</div>'
+    +'</div>';
 }
 
 function buildCountdown(meta){
   if(!meta)return'';
-  let number='—',label='Trip status',badgeClass='',badgeText='';
+  var number='—',label='Trip status',badgeClass='',badgeText='';
   if(meta.tripStatus==='PRE_TRIP'&&meta.daysToDepart!==null){
     number=meta.daysToDepart;label='Days to departure';badgeClass='type-DRIVE';badgeText='Upcoming';
   }else if(meta.tripStatus==='ACTIVE'){
-    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'●';
+    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'\u25CF';
     label=meta.daysIntoTrip!==null?'Days into trip':'Active trip';
     badgeClass='type-DEPART';badgeText='On the road';
   }else if(meta.tripStatus==='POST_TRIP'){
-    number='✓';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
+    number='\u2713';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
   }
-  const dateRange=(meta.departDate&&meta.returnDate)
-    ?fmtDate(meta.departDate)+' — '+fmtDate(meta.returnDate)
+  var dateRange=(meta.departDate&&meta.returnDate)
+    ?fmtDate(meta.departDate)+' \u2014 '+fmtDate(meta.returnDate)
     :meta.departDate?'From '+fmtDate(meta.departDate):'';
-  return`<div class="grid"><div class="countdown-card">
-    <div class="countdown-number">${number}</div>
-    <div class="countdown-detail">
-      <div class="countdown-label">${label}</div>
-      <div class="countdown-trip">${meta.tripName||''}</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        ${badgeText?`<span class="trip-status-badge ${badgeClass}">${badgeText}</span>`:''}
-        ${dateRange?`<span style="font-size:10px;color:var(--text-muted)">${dateRange}</span>`:''}
-      </div>
-    </div>
-  </div></div>`;
+  return'<div class="grid"><div class="countdown-card">'
+    +'<div class="countdown-number">'+number+'</div>'
+    +'<div class="countdown-detail">'
+    +'<div class="countdown-label">'+label+'</div>'
+    +'<div class="countdown-trip">'+(meta.tripName||'')+'</div>'
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +(badgeText?'<span class="trip-status-badge '+badgeClass+'">'+badgeText+'</span>':'')
+    +(dateRange?'<span style="font-size:10px;color:var(--text-muted)">'+dateRange+'</span>':'')
+    +'</div></div></div></div>';
 }
 
 function buildNextDrive(meta){
-  const nd=meta.nextDrive;if(!nd)return'';
-  return`<div class="grid"><div class="drive-card">
-    <div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive · ${fmtDate(nd.date)}</div>
-    <div class="drive-route">
-      <span class="drive-origin" style="color:var(--text-dim)">${meta.currentLocation||'—'}</span>
-      <span class="drive-arrow">→</span>
-      <span class="drive-dest">${nd.destination}</span>
-    </div>
-    <div class="drive-meta">
-      <div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">${nd.distanceKm?nd.distanceKm+' km':'—'}</span></div>
-      <div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">${nd.durationMin?fmtDuration(nd.durationMin):'—'}</span></div>
-      ${nd.notes?`<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">${nd.notes}</span></div>`:''}
-    </div>
-  </div></div>`;
+  var nd=meta.nextDrive;if(!nd)return'';
+  return'<div class="grid"><div class="drive-card">'
+    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive \u00B7 '+fmtDate(nd.date)+'</div>'
+    +'<div class="drive-route">'
+    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'\u2014')+'</span>'
+    +'<span class="drive-arrow">\u2192</span>'
+    +'<span class="drive-dest">'+nd.destination+'</span>'
+    +'</div>'
+    +'<div class="drive-meta">'
+    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'\u2014')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'\u2014')+'</span></div>'
+    +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
+    +'</div></div></div>';
 }
 
 function buildVehicleCards(v){
   if(!v)return'';
-  const bc=v.batteryV?(v.batteryV>=13?'var(--go)':v.batteryV>=12.4?'var(--caution)':'var(--danger)'):'var(--text-dim)';
-  const gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
-  const cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
-  const alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')?`<span style="font-size:12px;color:var(--danger);font-weight:600">${v.systemAlert}</span>`:'';
-  const oc = v.odometerKm ? 'var(--text)' : 'var(--text-dim)';
-  return`<div class="section-head">...
-  <div class="van-grid" style="grid-template-columns:repeat(4,1fr)">
-    <div class="van-card"><span class="van-card-icon">🔋</span>...Battery...</div>
-    <div class="van-card"><span class="van-card-icon">🏠</span>...Cabin...</div>
-    <div class="van-card"><span class="van-card-icon">🚐</span>...Garage...</div>
-    <div class="van-card"><span class="van-card-icon">🛣️</span>
-      <div class="van-card-value" style="color:${oc};font-size:clamp(13px,3vw,18px)">${v.odometerMiles?v.odometerMiles.toLocaleString()+'mi':'—'}</div>
-    <div class="van-card-label">Odometer</div>
-    </div>
-  </div>`;
-}
-
-function buildWeather(weather){
-  const rows=weather.map(w=>{
-    const d=new Date(w.date+'T00:00:00');
-    const day=d.toLocaleDateString('en-GB',{weekday:'short'});
-    const dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const rc=riskColor(w.risk);
-    return`<div class="weather-row${w.isToday?' today':''}">
-      <div class="weather-date"><strong>${w.isToday?'Today':day}</strong>${dt}</div>
-      <div class="weather-middle">
-        <div class="weather-location">${w.location}</div>
-        <div class="weather-condition">${w.condition}</div>
-      </div>
-      <div class="weather-stats">
-        <div class="weather-risk" style="color:${rc}">${w.risk}</div>
-        <div class="weather-nums">${w.minTempC!==null?w.minTempC+'° · ':''}${w.gustKmh?w.gustKmh+' km/h':''}${w.snowMm?' · '+w.snowMm+'mm ❄️':''}</div>
-      </div>
-    </div>`;
-  }).join('');
-  return`<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div><div class="weather-list">${rows}</div>`;
-}
-
-function buildItinerary(itin){
-  const rows=itin.map(r=>{
-    const d=new Date(r.date+'T00:00:00');
-    const day=d.toLocaleDateString('en-GB',{weekday:'short'});
-    const dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const cls=r.isToday?' today':r.isPast?' past':'';
-    const meta=[r.distanceKm?r.distanceKm+' km':'',r.durationMin?fmtDuration(r.durationMin):'',r.notes].filter(Boolean).join(' · ');
-   const mapsUrl = r.address
-      ? `https://maps.apple.com/?address=${encodeURIComponent(r.address)}`
-      : `https://maps.apple.com/?q=${encodeURIComponent(r.location)}`;
-      const riskHtml = (r.routeRisk && r.routeRisk.snowRisk && 
-      (r.type==='DRIVE'||r.type==='DEPART'||r.type==='STOPOVER'||r.type==='ARRIVE'||r.type==='RETURN'))
-      ? `<div style="font-size:11px;margin-top:4px;color:${riskColor(r.routeRisk.snowRisk)};font-weight:500">${r.routeRisk.snowRisk}</div>`
-      : '';
-    return`<div class="itin-row${cls}">
-      <div class="itin-date"><strong>${r.isToday?'Today':day}</strong>${dt}</div>
-      <div>
-        <div class="itin-location">${r.location}</div>
-        ${meta?`<div class="itin-notes">${meta}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-        <span class="itin-badge type-${r.type}">${r.type}</span>
-        ${r.type!=='STAY'?`<a href="${mapsUrl}" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">📍 Maps</a>`:''}
-      </div>
-    </div>`;
-  }).join('');
-  return`<div class="section-head"><span class="section-title">Itinerary</span><span class="section-meta">${itin.length} days</span></div><div class="itin-list">${rows}</div>`;
-}
-
-function fmtDate(iso){
-  if(!iso)return'';
-  return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
-}
-function fmtDuration(mins){
-  const h=Math.floor(mins/60),m=mins%60;
-  return h>0?`${h}h${m>0?' '+m+'m':''}`:m+'m';
-}
-function riskColor(risk){
-  if(!risk)return'var(--text-dim)';
-  if(risk.includes('🚫')||risk.includes('DANGER')||risk.includes('🧊')||risk.includes('ICE'))return'var(--danger)';
-  if(risk.includes('❄️')||risk.includes('💨')||risk.includes('⚠️'))return'var(--caution)';
-  if(risk.includes('✅')||risk.includes('🟢'))return'var(--go)';
-  return'var(--text-dim)';
+  var bc=v.batteryV?(v.batteryV>=13?'var(--go)':v.batteryV>=12.4?'var(--caution)':'var(--danger)'):'var(--text-dim)';
+  var gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
+  var cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
+  var oc=v.odometerMiles?'var(--text)':'var(--text-dim)';
+  var alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
+    ?'<span style="font-size:12px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
+  return'<div class="section-head">'
+    +'<span class="section-title">Vehicle \u00B7 Audrey</span>'
+    +'<span class="section-meta">'+(alert||v.telStatus||'')+'</span>'
+    +'</div>'
+    +'<div class="van-grid">'
+    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDD0B</span>'
+    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'\u2014')+'</div>'
+    +'<div class="van-card-label">Battery</div></div>'
+    +'<div class="van-card"><span class="van-card-icon">\uD83C\uDFE0</span>'
+    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'\u00B0':'\u2014')+'</div>'
+    +'<div class="van-card-label">Cabin</div></div>'
+    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDE90</span>'
+    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'\u00B0':'\u2014')+'</div>'
+    +'<div class="van-card-label">Garage</div></div>'
+    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDEE3\uFE0F</span>'
+    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'\u2014')+'</div>'
+    +'<div class="van-card-label">Odometer</div></div>'
+    +'</div>';
 }
 
 function buildLpg(lpg){
   if(!lpg||!lpg.current)return'';
-  const c=lpg.current;
-  const pct=Math.min(100,Math.round((c.litres/12)*100));
-  const barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
-  const totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':''
-  return '<div class="section-head"><span class="section-title">LPG · Heating</span><span class="section-meta">'+totals+'</span></div>'
+  var c=lpg.current;
+  var pct=Math.min(100,Math.round((c.litres/12)*100));
+  var barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
+  var totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':'';
+  return'<div class="section-head"><span class="section-title">LPG \u00B7 Heating</span><span class="section-meta">'+totals+'</span></div>'
     +'<div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">'
     +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
     +'<div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:'+barColor+'">'+c.litres.toFixed(1)+'L</div>'
@@ -388,8 +319,81 @@ function buildLpg(lpg){
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
     +'<span style="font-size:10px;color:var(--text-muted)">0L</span>'
-    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% · 12L tank</span>'
+    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% \u00B7 12L tank</span>'
     +'</div></div>';
+}
+
+function buildWeather(weather){
+  var rows=weather.map(function(w){
+    var d=new Date(w.date+'T00:00:00');
+    var day=d.toLocaleDateString('en-GB',{weekday:'short'});
+    var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    var rc=riskColor(w.risk);
+    return'<div class="weather-row'+(w.isToday?' today':'')+'">'
+      +'<div class="weather-date"><strong>'+(w.isToday?'Today':day)+'</strong>'+dt+'</div>'
+      +'<div class="weather-middle">'
+      +'<div class="weather-location">'+w.location+'</div>'
+      +'<div class="weather-condition">'+w.condition+'</div>'
+      +'</div>'
+      +'<div class="weather-stats">'
+      +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
+      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'\u00B0 \u00B7 ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' \u00B7 '+w.snowMm+'mm \u2744\uFE0F':'')+'</div>'
+      +'</div></div>';
+  }).join('');
+  return'<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div>'
+    +'<div class="weather-list">'+rows+'</div>';
+}
+
+function buildItinerary(itin){
+  var rows=itin.map(function(r){
+    var d=new Date(r.date+'T00:00:00');
+    var day=d.toLocaleDateString('en-GB',{weekday:'short'});
+    var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    var cls=r.isToday?' today':r.isPast?' past':'';
+    var meta=[
+      r.distanceKm?r.distanceKm+' km':'',
+      r.durationMin?fmtDuration(r.durationMin):'',
+      r.notes
+    ].filter(Boolean).join(' \u00B7 ');
+    var mapsUrl=r.address
+      ?'https://maps.apple.com/?address='+encodeURIComponent(r.address)
+      :'https://maps.apple.com/?q='+encodeURIComponent(r.location);
+    var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&
+      (r.type==='DRIVE'||r.type==='DEPART'||r.type==='STOPOVER'||r.type==='ARRIVE'||r.type==='RETURN'))
+      ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
+      :'';
+    var showMaps=r.type!=='STAY';
+    return'<div class="itin-row'+cls+'">'
+      +'<div class="itin-date"><strong>'+(r.isToday?'Today':day)+'</strong>'+dt+'</div>'
+      +'<div>'
+      +'<div class="itin-location">'+r.location+'</div>'
+      +(meta?'<div class="itin-notes">'+meta+'</div>':'')
+      +riskHtml
+      +'</div>'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
+      +'<span class="itin-badge type-'+r.type+'">'+r.type+'</span>'
+      +(showMaps?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">\uD83D\uDCCD Maps</a>':'')
+      +'</div>'
+      +'</div>';
+  }).join('');
+  return'<div class="section-head"><span class="section-title">Itinerary</span><span class="section-meta">'+itin.length+' days</span></div>'
+    +'<div class="itin-list">'+rows+'</div>';
+}
+
+function fmtDate(iso){
+  if(!iso)return'';
+  return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+}
+function fmtDuration(mins){
+  var h=Math.floor(mins/60),m=mins%60;
+  return h>0?h+'h'+(m>0?' '+m+'m':''):m+'m';
+}
+function riskColor(risk){
+  if(!risk)return'var(--text-dim)';
+  if(risk.includes('\uD83D\uDEAB')||risk.includes('DANGER')||risk.includes('\uD83E\uDDCA')||risk.includes('ICE'))return'var(--danger)';
+  if(risk.includes('\u2744\uFE0F')||risk.includes('\uD83D\uDCA8')||risk.includes('\u26A0\uFE0F'))return'var(--caution)';
+  if(risk.includes('\u2705')||risk.includes('\uD83D\uDFE2'))return'var(--go)';
+  return'var(--text-dim)';
 }
 
 refresh();
