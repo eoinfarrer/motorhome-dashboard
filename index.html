@@ -329,6 +329,10 @@ function buildItinerary(itin){
    const mapsUrl = r.address
       ? `https://maps.apple.com/?address=${encodeURIComponent(r.address)}`
       : `https://maps.apple.com/?q=${encodeURIComponent(r.location)}`;
+      const riskHtml = (r.routeRisk && r.routeRisk.snowRisk && 
+      (r.type==='DRIVE'||r.type==='DEPART'||r.type==='STOPOVER'||r.type==='ARRIVE'||r.type==='RETURN'))
+      ? `<div style="font-size:11px;margin-top:4px;color:${riskColor(r.routeRisk.snowRisk)};font-weight:500">${r.routeRisk.snowRisk}</div>`
+      : '';
     return`<div class="itin-row${cls}">
       <div class="itin-date"><strong>${r.isToday?'Today':day}</strong>${dt}</div>
       <div>
