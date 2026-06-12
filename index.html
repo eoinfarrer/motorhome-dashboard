@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 
 <main id="main">
   <div class="state-message">
-    <span class="icon">&#128656;</span>
+    <span class="icon">🚐</span>
     Connecting to Audrey...
   </div>
 </main>
@@ -169,7 +169,7 @@ function render(d){
 
 function renderError(msg){
   document.getElementById('main').innerHTML=
-    '<div class="state-message"><span class="icon">&#9888;</span>Could not reach Audrey.<br>'
+    '<div class="state-message"><span class="icon">⚠️</span>Could not reach Audrey.<br>'
     +'<span style="color:#555;font-size:11px">'+msg+'</span><br><br>Check your connection and try again.</div>';
 }
 
@@ -177,20 +177,21 @@ function populateTripSelector(trips,active){
   var sel=document.getElementById('tripSelector');
   if(!trips||!trips.length)return;
   sel.innerHTML=trips.map(function(t){
-    var label=t.name+(t.status==='ACTIVE'?' &bull;':t.status==='UPCOMING'?' &circ;':'');
+    var label=t.name+(t.status==='ACTIVE'?' ●':t.status==='UPCOMING'?' ○':'');
     return '<option value="'+t.name+'"'+(t.name===active?' selected':'')+'>'+label+'</option>';
   }).join('');
 }
 
 function buildMain(d){
+  var fc=d.fuelConfig||{pricePerLitre:1.182,mpg:27};
   return[
     buildMasterBar(d.master,d.vehicle),
     buildCountdown(d.meta),
-    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta):'',
+    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):'',
     buildVehicleCards(d.vehicle),
     d.lpg&&d.lpg.current?buildLpg(d.lpg):'',
     d.weather&&d.weather.length?buildWeather(d.weather):'',
-    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary):''
+    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary,fc):''
   ].join('');
 }
 
@@ -208,18 +209,18 @@ function buildMasterBar(master,vehicle){
 
 function buildCountdown(meta){
   if(!meta)return'';
-  var number='&mdash;',label='Trip status',badgeClass='',badgeText='';
+  var number='—',label='Trip status',badgeClass='',badgeText='';
   if(meta.tripStatus==='PRE_TRIP'&&meta.daysToDepart!==null){
     number=meta.daysToDepart;label='Days to departure';badgeClass='type-DRIVE';badgeText='Upcoming';
   }else if(meta.tripStatus==='ACTIVE'){
-    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'&bull;';
+    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'●';
     label=meta.daysIntoTrip!==null?'Days into trip':'Active trip';
     badgeClass='type-DEPART';badgeText='On the road';
   }else if(meta.tripStatus==='POST_TRIP'){
-    number='&#10003;';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
+    number='✓';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
   }
   var dateRange=(meta.departDate&&meta.returnDate)
-    ?fmtDate(meta.departDate)+' &mdash; '+fmtDate(meta.returnDate)
+    ?fmtDate(meta.departDate)+' — '+fmtDate(meta.returnDate)
     :meta.departDate?'From '+fmtDate(meta.departDate):'';
   return'<div class="grid"><div class="countdown-card">'
     +'<div class="countdown-number">'+number+'</div>'
@@ -232,18 +233,28 @@ function buildCountdown(meta){
     +'</div></div></div></div>';
 }
 
-function buildNextDrive(meta){
+function calcFuel(distanceKm,fc){
+  if(!distanceKm||!fc)return null;
+  var miles=distanceKm/1.60934;
+  var litres=miles/fc.mpg*4.54609;
+  var cost=litres*fc.pricePerLitre;
+  return{litres:Math.round(litres),cost:cost.toFixed(0)};
+}
+
+function buildNextDrive(meta,fc){
   var nd=meta.nextDrive;if(!nd)return'';
+  var fuel=calcFuel(nd.distanceKm,fc);
   return'<div class="grid"><div class="drive-card">'
-    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive &middot; '+fmtDate(nd.date)+'</div>'
+    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive · '+fmtDate(nd.date)+'</div>'
     +'<div class="drive-route">'
-    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'&mdash;')+'</span>'
-    +'<span class="drive-arrow">&rarr;</span>'
+    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'—')+'</span>'
+    +'<span class="drive-arrow">→</span>'
     +'<span class="drive-dest">'+nd.destination+'</span>'
     +'</div>'
     +'<div class="drive-meta">'
-    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'&mdash;')+'</span></div>'
-    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'&mdash;')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'—')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'—')+'</span></div>'
+    +(fuel?'<div class="drive-stat"><span class="drive-stat-label">Fuel est</span><span class="drive-stat-value">~'+fuel.litres+'L · £'+fuel.cost+'</span></div>':'')
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
     +'</div></div></div>';
 }
@@ -257,21 +268,21 @@ function buildVehicleCards(v){
   var alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
     ?'<span style="font-size:12px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
   return'<div class="section-head">'
-    +'<span class="section-title">Vehicle &middot; Audrey</span>'
+    +'<span class="section-title">Vehicle · Audrey</span>'
     +'<span class="section-meta">'+(alert||v.telStatus||'')+'</span>'
     +'</div>'
     +'<div class="van-grid">'
-    +'<div class="van-card"><span class="van-card-icon">&#128267;</span>'
-    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'&mdash;')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">🔋</span>'
+    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'—')+'</div>'
     +'<div class="van-card-label">Battery</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">&#127968;</span>'
-    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'&deg;':'&mdash;')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">🏠</span>'
+    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'°':'—')+'</div>'
     +'<div class="van-card-label">Cabin</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">&#128656;</span>'
-    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'&deg;':'&mdash;')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">🚐</span>'
+    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'°':'—')+'</div>'
     +'<div class="van-card-label">Garage</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">&#128739;</span>'
-    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'&mdash;')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">🛣️</span>'
+    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+'</div>'
     +'<div class="van-card-label">Odometer</div></div>'
     +'</div>';
 }
@@ -283,10 +294,10 @@ function buildLpg(lpg){
   var barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
   var totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':'';
   return'<div class="section-head">'
-    +'<span class="section-title">LPG &middot; Heating</span>'
+    +'<span class="section-title">LPG · Heating</span>'
     +'<div style="display:flex;align-items:center;gap:12px">'
     +'<span class="section-meta">'+totals+'</span>'
-    +'<button class="refill-btn" id="refillBtn" onclick="lpgRefill()">&#9981; Refill</button>'
+    +'<button class="refill-btn" id="refillBtn" onclick="lpgRefill()">⛽ Refill</button>'
     +'</div></div>'
     +'<div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">'
     +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
@@ -300,7 +311,7 @@ function buildLpg(lpg){
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
     +'<span style="font-size:10px;color:var(--text-muted)">0L</span>'
-    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% &middot; 12L tank</span>'
+    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% · 12L tank</span>'
     +'</div></div>';
 }
 
@@ -318,32 +329,33 @@ function buildWeather(weather){
       +'</div>'
       +'<div class="weather-stats">'
       +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
-      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'&deg; &middot; ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' &middot; '+w.snowMm+'mm':'')+'</div>'
+      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'° · ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' · '+w.snowMm+'mm':'')+'</div>'
       +'</div></div>';
   }).join('');
   return'<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div>'
     +'<div class="weather-list">'+rows+'</div>';
 }
 
-function buildItinerary(itin){
+function buildItinerary(itin,fc){
   var rows=itin.map(function(r){
     var d=new Date(r.date+'T00:00:00');
     var day=d.toLocaleDateString('en-GB',{weekday:'short'});
     var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     var cls=r.isToday?' today':r.isPast?' past':'';
+    var fuel=r.type==='DRIVE'?calcFuel(r.distanceKm,fc):null;
+    var fuelStr=fuel?' · ~'+fuel.litres+'L/£'+fuel.cost:'';
     var meta=[
       r.distanceKm?r.distanceKm+' km':'',
       r.durationMin?fmtDuration(r.durationMin):'',
       r.notes
-    ].filter(Boolean).join(' &middot; ');
+    ].filter(Boolean).join(' · ')+fuelStr;
     var mapsUrl=r.address
       ?'https://maps.apple.com/?address='+encodeURIComponent(r.address)
       :'https://maps.apple.com/?q='+encodeURIComponent(r.location);
-    var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)" title="Electric hookup">&#128268;</span>':'';
+    var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)" title="Electric hookup">🔌</span>':'';
     var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&r.type!=='STAY')
       ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
       :'';
-    var showMaps=r.type!=='STAY';
     return'<div class="itin-row'+cls+'">'
       +'<div class="itin-date"><strong>'+(r.isToday?'Today':day)+'</strong>'+dt+'</div>'
       +'<div>'
@@ -353,7 +365,7 @@ function buildItinerary(itin){
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
       +'<span class="itin-badge type-'+r.type+'">'+r.type+'</span>'
-      +(showMaps?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">&#128205; Maps</a>':'')
+      +(r.type!=='STAY'?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">📍 Maps</a>':'')
       +'</div>'
       +'</div>';
   }).join('');
@@ -372,7 +384,7 @@ function fmtDuration(mins){
 function riskColor(risk){
   if(!risk)return'var(--text-dim)';
   if(risk.indexOf('DANGER')>=0||risk.indexOf('ICE')>=0||risk.indexOf('EXTREME')>=0)return'var(--danger)';
-  if(risk.indexOf('CAUTION')>=0||risk.indexOf('WIND')>=0||risk.indexOf('snow')>=0||risk.indexOf('Snow')>=0||risk.indexOf('High')>=0||risk.indexOf('Moderate')>=0)return'var(--caution)';
+  if(risk.indexOf('CAUTION')>=0||risk.indexOf('WIND')>=0||risk.indexOf('High')>=0||risk.indexOf('Moderate')>=0)return'var(--caution)';
   if(risk.indexOf('Clear')>=0||risk.indexOf('OK')>=0)return'var(--go)';
   return'var(--text-dim)';
 }
@@ -391,7 +403,7 @@ async function lpgRefill(){
     var r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});
     var d=await r.json();
     if(d.error)throw new Error(d.error);
-    btn.textContent='&#10003; Refilled';
+    btn.textContent='✓ Refilled';
     btn.style.color='var(--go)';
     btn.style.opacity='1';
     setTimeout(function(){refresh();},1500);
@@ -400,7 +412,7 @@ async function lpgRefill(){
     btn.style.color='var(--danger)';
     btn.style.opacity='1';
     setTimeout(function(){
-      btn.textContent='&#9981; Refill';
+      btn.textContent='⛽ Refill';
       btn.style.color='var(--frost)';
     },3000);
   }
