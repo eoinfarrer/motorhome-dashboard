@@ -375,7 +375,7 @@ function buildItinerary(itin,fc){
     var day=d.toLocaleDateString('en-GB',{weekday:'short'});
     var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     var cls=r.isToday?' today':r.isPast?' past':'';
-    var fuel=r.type==='DRIVE'?calcFuel(r.distanceKm,fc):null;
+    var fuel=['DRIVE','DEPART','STOPOVER','ARRIVE','RETURN'].indexOf(r.type)>=0?calcFuel(r.distanceKm,fc):null;
     var fuelStr=fuel?' · ~'+fuel.litres+'L/£'+fuel.cost:'';
     var meta=[
       r.distanceKm?r.distanceKm+' km':'',
