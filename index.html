@@ -386,6 +386,7 @@ function buildItinerary(itin,fc){
       ?'https://maps.apple.com/?address='+encodeURIComponent(r.address)
       :'https://maps.apple.com/?q='+encodeURIComponent(r.location);
     var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)" title="Electric hookup">🔌</span>':'';
+    
     var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&r.type!=='STAY')
       ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
       :'';
