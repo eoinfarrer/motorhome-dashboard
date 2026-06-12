@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Audrey — Mission Control</title>
+<title>Audrey - Mission Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -22,8 +22,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
-
-/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
 .header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
 .wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
@@ -33,15 +31,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .refresh-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
 .refresh-btn.loading{opacity:0.5;pointer-events:none;}
-
-/* MASTER BAR */
 .master-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:56px;}
 .master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);border-right:1px solid var(--border);}
 .master-advice{display:flex;align-items:center;padding:14px 20px;font-size:13px;color:var(--text-dim);flex:1;line-height:1.5;}
 .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
-
-/* GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
 .countdown-card{grid-column:span 2;background:var(--bg2);padding:20px;display:flex;align-items:center;gap:20px;}
 .countdown-number{font-family:var(--display);font-size:clamp(36px,8vw,56px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
@@ -49,8 +43,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .countdown-label{font-size:10px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;}
 .countdown-trip{font-family:var(--display);font-size:clamp(16px,4vw,22px);font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.2;}
 .trip-status-badge{display:inline-block;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:20px;font-family:var(--mono);}
-
-/* NEXT DRIVE */
 .drive-card{grid-column:span 2;background:var(--bg3);padding:16px 18px;border-top:2px solid var(--frost);}
 .drive-route{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
 .drive-origin,.drive-dest{font-family:var(--display);font-size:clamp(14px,3.5vw,18px);font-weight:600;}
@@ -60,20 +52,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .drive-stat-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 .drive-stat-value{font-size:13px;color:var(--frost);font-weight:500;}
 .card-label{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
-
-/* VEHICLE GRID — 2x2 on mobile, 4 across on desktop */
 .van-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
 .van-card{background:var(--bg);padding:14px 16px;text-align:center;}
 .van-card-icon{font-size:20px;margin-bottom:4px;display:block;}
 .van-card-value{font-family:var(--display);font-size:clamp(14px,3.5vw,20px);font-weight:700;line-height:1;margin-bottom:3px;}
 .van-card-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
-
-/* SECTION HEADING */
 .section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
 .section-title{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;font-weight:600;}
 .section-meta{font-size:12px;color:var(--text-muted);}
-
-/* WEATHER */
 .weather-list{border-bottom:1px solid var(--border);}
 .weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);}
 .weather-row:last-child{border-bottom:none;}
@@ -86,8 +72,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .weather-stats{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
 .weather-risk{font-size:13px;font-weight:600;text-align:right;}
 .weather-nums{font-size:12px;color:var(--text-dim);text-align:right;}
-
-/* ITINERARY */
 .itin-list{border-bottom:1px solid var(--border);}
 .itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid var(--border);}
 .itin-row:last-child{border-bottom:none;}
@@ -98,24 +82,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .itin-location{font-size:15px;color:var(--text);font-weight:600;margin-bottom:3px;}
 .itin-notes{font-size:13px;color:var(--text-dim);}
 .itin-badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;align-self:start;font-weight:600;}
-
-/* TYPE BADGES */
 .type-DEPART  {background:#e8f5ee;color:var(--go);border:1px solid #b8dfc8;}
 .type-DRIVE   {background:#e8f0f8;color:var(--frost);border:1px solid #b8cce8;}
 .type-STOPOVER{background:#f8f0e0;color:var(--gold);border:1px solid #e0c890;}
 .type-STAY    {background:#eeece8;color:var(--text-dim);border:1px solid var(--border2);}
 .type-ARRIVE  {background:#f0e8f8;color:#7d3c98;border:1px solid #d8b8e8;}
 .type-RETURN  {background:#fde8e8;color:var(--danger);border:1px solid #f0b8b8;}
-
-/* STATE */
+.refill-btn{background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.refill-btn:hover{border-color:var(--frost);background:var(--bg3);}
 .state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
 .state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
-
-/* FOOTER */
 .footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
 .last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;}
-
-/* RESPONSIVE */
 @media(max-width:640px){
   .van-grid{grid-template-columns:repeat(2,1fr);}
   .grid{grid-template-columns:1fr;}
@@ -128,7 +106,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 </style>
 </head>
 <body>
-
 <header class="header">
   <div class="header-left">
     <div class="wordmark">Au<span>drey</span></div>
@@ -137,12 +114,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
   </select>
-  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#x21BB; Refresh</button>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#8635; Refresh</button>
 </header>
 
 <main id="main">
   <div class="state-message">
-    <span class="icon">&#x1F690;</span>
+    <span class="icon">&#128656;</span>
     Connecting to Audrey...
   </div>
 </main>
@@ -153,55 +130,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 </footer>
 
 <script>
-const API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY4_o0THKORntyf3C0rYsRwqRIuQTaTGQkqthQaJho8DHQ/exec';
-let currentData=null,currentTrip=null;
+var API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY4_o0THKORntyf3C0rYsRwqRIuQTaTGQkqthQaJho8DHQ/exec';
+var currentData=null,currentTrip=null;
 
 async function fetchData(trip){
-  const params=new URLSearchParams();
+  var params=new URLSearchParams();
   if(trip)params.set('trip',trip);
   params.set('_',Date.now());
-  const url=API_URL+'?'+params.toString();
-  let r;
+  var url=API_URL+'?'+params.toString();
+  var r;
   try{r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
   catch(e){r=await fetch(url,{mode:'cors',credentials:'omit',redirect:'follow'});}
   if(!r.ok)throw new Error('HTTP '+r.status);
-  const text=await r.text();
-  try{return JSON.parse(text);}
-  catch(e){throw new Error('Invalid response from server');}
+  var text=await r.text();
+  try{return JSON.parse(text);}catch(e){throw new Error('Invalid response from server');}
 }
 
 async function loadTrip(name){currentTrip=name||null;await refresh();}
 
 async function refresh(){
-  const btn=document.getElementById('refreshBtn');
+  var btn=document.getElementById('refreshBtn');
   btn.classList.add('loading');btn.textContent='Loading...';
   try{
-    const d=await fetchData(currentTrip);
+    var d=await fetchData(currentTrip);
     if(d.error)throw new Error(d.error);
     currentData=d;render(d);
   }catch(e){renderError(e.message);}
-  finally{btn.classList.remove('loading');btn.textContent='\u21BB Refresh';}
+  finally{btn.classList.remove('loading');btn.textContent='&#8635; Refresh';}
 }
 
 function render(d){
   populateTripSelector(d.trips,d.meta.tripName);
   document.getElementById('main').innerHTML=buildMain(d);
-  const ts=new Date(d.timestamp);
+  var ts=new Date(d.timestamp);
   document.getElementById('lastUpdated').textContent=
     'Last updated '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 
 function renderError(msg){
   document.getElementById('main').innerHTML=
-    '<div class="state-message"><span class="icon">\u26A0\uFE0F</span>Could not reach Audrey.<br>'
+    '<div class="state-message"><span class="icon">&#9888;</span>Could not reach Audrey.<br>'
     +'<span style="color:#555;font-size:11px">'+msg+'</span><br><br>Check your connection and try again.</div>';
 }
 
 function populateTripSelector(trips,active){
-  const sel=document.getElementById('tripSelector');
+  var sel=document.getElementById('tripSelector');
   if(!trips||!trips.length)return;
   sel.innerHTML=trips.map(function(t){
-    const label=t.name+(t.status==='ACTIVE'?' \u25CF':t.status==='UPCOMING'?' \u25CB':'');
+    var label=t.name+(t.status==='ACTIVE'?' &bull;':t.status==='UPCOMING'?' &circ;':'');
     return '<option value="'+t.name+'"'+(t.name===active?' selected':'')+'>'+label+'</option>';
   }).join('');
 }
@@ -220,8 +196,8 @@ function buildMain(d){
 
 function buildMasterBar(master,vehicle){
   if(!master)return'';
-  const c=master.color||'#888';
-  const alert=vehicle&&vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK')?vehicle.systemAlert:'';
+  var c=master.color||'#888';
+  var alert=vehicle&&vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK')?vehicle.systemAlert:'';
   return'<div class="master-bar">'
     +'<div class="master-status" style="color:'+c+'">'
     +'<span class="status-dot" style="background:'+c+'"></span>'+master.status
@@ -232,18 +208,18 @@ function buildMasterBar(master,vehicle){
 
 function buildCountdown(meta){
   if(!meta)return'';
-  var number='—',label='Trip status',badgeClass='',badgeText='';
+  var number='&mdash;',label='Trip status',badgeClass='',badgeText='';
   if(meta.tripStatus==='PRE_TRIP'&&meta.daysToDepart!==null){
     number=meta.daysToDepart;label='Days to departure';badgeClass='type-DRIVE';badgeText='Upcoming';
   }else if(meta.tripStatus==='ACTIVE'){
-    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'\u25CF';
+    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'&bull;';
     label=meta.daysIntoTrip!==null?'Days into trip':'Active trip';
     badgeClass='type-DEPART';badgeText='On the road';
   }else if(meta.tripStatus==='POST_TRIP'){
-    number='\u2713';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
+    number='&#10003;';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
   }
   var dateRange=(meta.departDate&&meta.returnDate)
-    ?fmtDate(meta.departDate)+' \u2014 '+fmtDate(meta.returnDate)
+    ?fmtDate(meta.departDate)+' &mdash; '+fmtDate(meta.returnDate)
     :meta.departDate?'From '+fmtDate(meta.departDate):'';
   return'<div class="grid"><div class="countdown-card">'
     +'<div class="countdown-number">'+number+'</div>'
@@ -259,15 +235,15 @@ function buildCountdown(meta){
 function buildNextDrive(meta){
   var nd=meta.nextDrive;if(!nd)return'';
   return'<div class="grid"><div class="drive-card">'
-    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive \u00B7 '+fmtDate(nd.date)+'</div>'
+    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive &middot; '+fmtDate(nd.date)+'</div>'
     +'<div class="drive-route">'
-    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'\u2014')+'</span>'
-    +'<span class="drive-arrow">\u2192</span>'
+    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'&mdash;')+'</span>'
+    +'<span class="drive-arrow">&rarr;</span>'
     +'<span class="drive-dest">'+nd.destination+'</span>'
     +'</div>'
     +'<div class="drive-meta">'
-    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'\u2014')+'</span></div>'
-    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'\u2014')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'&mdash;')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'&mdash;')+'</span></div>'
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
     +'</div></div></div>';
 }
@@ -281,21 +257,21 @@ function buildVehicleCards(v){
   var alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
     ?'<span style="font-size:12px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
   return'<div class="section-head">'
-    +'<span class="section-title">Vehicle \u00B7 Audrey</span>'
+    +'<span class="section-title">Vehicle &middot; Audrey</span>'
     +'<span class="section-meta">'+(alert||v.telStatus||'')+'</span>'
     +'</div>'
     +'<div class="van-grid">'
-    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDD0B</span>'
-    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'\u2014')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#128267;</span>'
+    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'&mdash;')+'</div>'
     +'<div class="van-card-label">Battery</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">\uD83C\uDFE0</span>'
-    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'\u00B0':'\u2014')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#127968;</span>'
+    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'&deg;':'&mdash;')+'</div>'
     +'<div class="van-card-label">Cabin</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDE90</span>'
-    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'\u00B0':'\u2014')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#128656;</span>'
+    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'&deg;':'&mdash;')+'</div>'
     +'<div class="van-card-label">Garage</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">\uD83D\uDEE3\uFE0F</span>'
-    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'\u2014')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#128739;</span>'
+    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'&mdash;')+'</div>'
     +'<div class="van-card-label">Odometer</div></div>'
     +'</div>';
 }
@@ -306,7 +282,12 @@ function buildLpg(lpg){
   var pct=Math.min(100,Math.round((c.litres/12)*100));
   var barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
   var totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':'';
-  return'<div class="section-head"><span class="section-title">LPG \u00B7 Heating</span><span class="section-meta">'+totals+'</span></div>'
+  return'<div class="section-head">'
+    +'<span class="section-title">LPG &middot; Heating</span>'
+    +'<div style="display:flex;align-items:center;gap:12px">'
+    +'<span class="section-meta">'+totals+'</span>'
+    +'<button class="refill-btn" id="refillBtn" onclick="lpgRefill()">&#9981; Refill</button>'
+    +'</div></div>'
     +'<div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">'
     +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
     +'<div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:'+barColor+'">'+c.litres.toFixed(1)+'L</div>'
@@ -319,7 +300,7 @@ function buildLpg(lpg){
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
     +'<span style="font-size:10px;color:var(--text-muted)">0L</span>'
-    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% \u00B7 12L tank</span>'
+    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% &middot; 12L tank</span>'
     +'</div></div>';
 }
 
@@ -337,7 +318,7 @@ function buildWeather(weather){
       +'</div>'
       +'<div class="weather-stats">'
       +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
-      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'\u00B0 \u00B7 ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' \u00B7 '+w.snowMm+'mm \u2744\uFE0F':'')+'</div>'
+      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'&deg; &middot; ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' &middot; '+w.snowMm+'mm':'')+'</div>'
       +'</div></div>';
   }).join('');
   return'<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div>'
@@ -354,25 +335,25 @@ function buildItinerary(itin){
       r.distanceKm?r.distanceKm+' km':'',
       r.durationMin?fmtDuration(r.durationMin):'',
       r.notes
-    ].filter(Boolean).join(' \u00B7 ');
+    ].filter(Boolean).join(' &middot; ');
     var mapsUrl=r.address
       ?'https://maps.apple.com/?address='+encodeURIComponent(r.address)
       :'https://maps.apple.com/?q='+encodeURIComponent(r.location);
-    var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&
-      (r.type==='DRIVE'||r.type==='DEPART'||r.type==='STOPOVER'||r.type==='ARRIVE'||r.type==='RETURN'))
+    var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)" title="Electric hookup">&#128268;</span>':'';
+    var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&r.type!=='STAY')
       ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
       :'';
     var showMaps=r.type!=='STAY';
     return'<div class="itin-row'+cls+'">'
       +'<div class="itin-date"><strong>'+(r.isToday?'Today':day)+'</strong>'+dt+'</div>'
       +'<div>'
-      +'<div class="itin-location">'+r.location+'</div>'
+      +'<div class="itin-location">'+r.location+ehuIcon+'</div>'
       +(meta?'<div class="itin-notes">'+meta+'</div>':'')
       +riskHtml
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
       +'<span class="itin-badge type-'+r.type+'">'+r.type+'</span>'
-      +(showMaps?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">\uD83D\uDCCD Maps</a>':'')
+      +(showMaps?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">&#128205; Maps</a>':'')
       +'</div>'
       +'</div>';
   }).join('');
@@ -390,10 +371,39 @@ function fmtDuration(mins){
 }
 function riskColor(risk){
   if(!risk)return'var(--text-dim)';
-  if(risk.includes('\uD83D\uDEAB')||risk.includes('DANGER')||risk.includes('\uD83E\uDDCA')||risk.includes('ICE'))return'var(--danger)';
-  if(risk.includes('\u2744\uFE0F')||risk.includes('\uD83D\uDCA8')||risk.includes('\u26A0\uFE0F'))return'var(--caution)';
-  if(risk.includes('\u2705')||risk.includes('\uD83D\uDFE2'))return'var(--go)';
+  if(risk.indexOf('DANGER')>=0||risk.indexOf('ICE')>=0||risk.indexOf('EXTREME')>=0)return'var(--danger)';
+  if(risk.indexOf('CAUTION')>=0||risk.indexOf('WIND')>=0||risk.indexOf('snow')>=0||risk.indexOf('Snow')>=0||risk.indexOf('High')>=0||risk.indexOf('Moderate')>=0)return'var(--caution)';
+  if(risk.indexOf('Clear')>=0||risk.indexOf('OK')>=0)return'var(--go)';
   return'var(--text-dim)';
+}
+
+async function lpgRefill(){
+  var btn=document.getElementById('refillBtn');
+  if(!btn)return;
+  btn.textContent='Logging...';
+  btn.style.opacity='0.5';
+  try{
+    var params=new URLSearchParams();
+    params.set('action','lpg_refill');
+    if(currentTrip)params.set('trip',currentTrip);
+    params.set('_',Date.now());
+    var url=API_URL+'?'+params.toString();
+    var r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.error)throw new Error(d.error);
+    btn.textContent='&#10003; Refilled';
+    btn.style.color='var(--go)';
+    btn.style.opacity='1';
+    setTimeout(function(){refresh();},1500);
+  }catch(e){
+    btn.textContent='Error';
+    btn.style.color='var(--danger)';
+    btn.style.opacity='1';
+    setTimeout(function(){
+      btn.textContent='&#9981; Refill';
+      btn.style.color='var(--frost)';
+    },3000);
+  }
 }
 
 refresh();
