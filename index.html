@@ -316,24 +316,57 @@ function buildLpg(lpg){
 }
 
 function buildWeather(weather){
-  var rows=weather.map(function(w){
-    var d=new Date(w.date+'T00:00:00');
-    var day=d.toLocaleDateString('en-GB',{weekday:'short'});
-    var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    var rc=riskColor(w.risk);
-    return'<div class="weather-row'+(w.isToday?' today':'')+'">'
-      +'<div class="weather-date"><strong>'+(w.isToday?'Today':day)+'</strong>'+dt+'</div>'
-      +'<div class="weather-middle">'
-      +'<div class="weather-location">'+w.location+'</div>'
-      +'<div class="weather-condition">'+w.condition+'</div>'
-      +'</div>'
-      +'<div class="weather-stats">'
-      +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
-      +'<div class="weather-nums">'+(w.minTempC!==null?w.minTempC+'° · ':'')+(w.gustKmh?w.gustKmh+' km/h':'')+(w.snowMm?' · '+w.snowMm+'mm':'')+'</div>'
-      +'</div></div>';
-  }).join('');
-  return'<div class="section-head"><span class="section-title">Weather</span><span class="section-meta">Today + 3 days</span></div>'
-    +'<div class="weather-list">'+rows+'</div>';
+  if(!weather||!weather.length)return'';
+
+  // Group by location preserving first-appearance order
+  var groups={},order=[];
+  weather.forEach(function(w){
+    if(!groups[w.location]){groups[w.location]=[];order.push(w.location);}
+    groups[w.location].push(w);
+  });
+
+  var now=new Date();now.setHours(0,0,0,0);
+  var tom=new Date(now.getTime()+86400000);
+  var dat=new Date(now.getTime()+2*86400000);
+
+  function dayLabel(dateStr){
+    var d=new Date(dateStr+'T00:00:00');d.setHours(0,0,0,0);
+    if(d.getTime()===now.getTime())return'Today';
+    if(d.getTime()===tom.getTime())return'Tomorrow';
+    if(d.getTime()===dat.getTime())return d.toLocaleDateString('en-GB',{weekday:'long'});
+    return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  }
+
+  var html='<div class="section-head"><span class="section-title">Weather</span>'
+    +'<span class="section-meta">Today + 3 days</span></div>'
+    +'<div class="weather-list">';
+
+  order.forEach(function(loc){
+    var rows=groups[loc];
+    html+='<div style="padding:8px 18px 4px;background:var(--bg2);border-bottom:1px solid var(--border);'
+      +'font-size:11px;letter-spacing:1px;color:var(--text-dim);font-weight:600;text-transform:uppercase">'
+      +loc+'</div>';
+    rows.forEach(function(w,idx){
+      var rc=riskColor(w.risk);
+      var last=idx===rows.length-1;
+      html+='<div class="weather-row'+(w.isToday?' today':'')+'"'
+        +(last?'':'')+' style="border-bottom:1px solid var(--border)">'
+        +'<div class="weather-date"><strong>'+dayLabel(w.date)+'</strong></div>'
+        +'<div class="weather-middle">'
+        +'<div class="weather-condition" style="font-size:14px">'+w.condition+'</div>'
+        +'</div>'
+        +'<div class="weather-stats">'
+        +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
+        +'<div class="weather-nums">'
+        +(w.minTempC!==null?w.minTempC+'° · ':'')
+        +(w.gustKmh?w.gustKmh+' km/h':'')
+        +(w.snowMm&&w.snowMm>0?' · '+w.snowMm+'mm':'')
+        +'</div></div></div>';
+    });
+  });
+
+  html+='</div>';
+  return html;
 }
 
 function buildItinerary(itin,fc){
