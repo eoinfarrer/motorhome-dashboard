@@ -389,11 +389,19 @@ function buildItinerary(itin,fc){
     var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&r.type!=='STAY')
       ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
       :'';
+    var contactHtml='';
+    if(r.contact||r.bookingRef){
+      var cparts=[];
+      if(r.contact)cparts.push('<a href="tel:'+r.contact.replace(/[^0-9+]/g,'')+'" style="color:var(--frost);text-decoration:none">📞 '+r.contact+'</a>');
+      if(r.bookingRef)cparts.push('<span style="color:var(--text-muted)">REF: '+r.bookingRef+'</span>');
+      contactHtml='<div style="font-size:11px;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap">'+cparts.join('')+'</div>';
+    }
     return'<div class="itin-row'+cls+'">'
       +'<div class="itin-date"><strong>'+(r.isToday?'Today':day)+'</strong>'+dt+'</div>'
       +'<div>'
       +'<div class="itin-location">'+r.location+ehuIcon+'</div>'
       +(meta?'<div class="itin-notes">'+meta+'</div>':'')
+      +contactHtml
       +riskHtml
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
