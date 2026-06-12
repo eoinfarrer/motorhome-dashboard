@@ -114,7 +114,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
   </select>
-  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#8635; Refresh</button>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">↻ Refresh</button>
 </header>
 
 <main id="main">
@@ -156,7 +156,7 @@ async function refresh(){
     if(d.error)throw new Error(d.error);
     currentData=d;render(d);
   }catch(e){renderError(e.message);}
-  finally{btn.classList.remove('loading');btn.textContent='&#8635; Refresh';}
+  finally{btn.classList.remove('loading');btn.textContent='↻ Refresh';}
 }
 
 function render(d){
