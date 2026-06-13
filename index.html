@@ -22,6 +22,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
+
+/* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
 .header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
 .wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
@@ -31,11 +33,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .refresh-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
 .refresh-btn.loading{opacity:0.5;pointer-events:none;}
+
+/* MASTER BAR */
 .master-bar{display:flex;align-items:stretch;border-bottom:1px solid var(--border);min-height:56px;}
 .master-status{display:flex;align-items:center;gap:10px;padding:14px 20px;font-family:var(--display);font-size:18px;font-weight:700;flex-shrink:0;min-width:140px;background:var(--bg2);border-right:1px solid var(--border);}
 .master-advice{display:flex;align-items:center;padding:14px 20px;font-size:13px;color:var(--text-dim);flex:1;line-height:1.5;}
 .status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+/* COUNTDOWN / NEXT DRIVE GRID */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
 .countdown-card{grid-column:span 2;background:var(--bg2);padding:20px;display:flex;align-items:center;gap:20px;}
 .countdown-number{font-family:var(--display);font-size:clamp(36px,8vw,56px);font-weight:800;line-height:1;color:var(--gold);flex-shrink:0;}
@@ -52,27 +58,41 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .drive-stat-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
 .drive-stat-value{font-size:13px;color:var(--frost);font-weight:500;}
 .card-label{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
-.van-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+
+/* COLLAPSIBLE SECTIONS */
+.section{border-bottom:1px solid var(--border);}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;background:var(--bg2);cursor:pointer;user-select:none;-webkit-user-select:none;}
+.section-head:hover{background:var(--bg3);}
+.section-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.section-title{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;font-weight:600;}
+.section-meta{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+.section-chevron{font-size:12px;color:var(--text-muted);transition:transform 0.2s;flex-shrink:0;margin-left:8px;}
+.section-body{overflow:hidden;transition:max-height 0.25s ease;}
+.section.collapsed .section-body{max-height:0!important;}
+.section.collapsed .section-chevron{transform:rotate(-90deg);}
+
+/* VEHICLE GRID */
+.van-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
 .van-card{background:var(--bg);padding:14px 16px;text-align:center;}
 .van-card-icon{font-size:20px;margin-bottom:4px;display:block;}
 .van-card-value{font-family:var(--display);font-size:clamp(14px,3.5vw,20px);font-weight:700;line-height:1;margin-bottom:3px;}
 .van-card-label{font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;}
-.section-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--bg2);}
-.section-title{font-size:11px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;font-weight:600;}
-.section-meta{font-size:12px;color:var(--text-muted);}
-.weather-list{border-bottom:1px solid var(--border);}
-.weather-row{display:grid;grid-template-columns:80px 1fr auto;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);}
+
+/* WEATHER */
+.weather-list{}
+.weather-row{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);}
 .weather-row:last-child{border-bottom:none;}
 .weather-row.today{background:#fdf8ee;}
 .weather-date{font-size:12px;color:var(--text-dim);}
-.weather-date strong{display:block;font-size:14px;color:var(--text);font-weight:600;}
+.weather-date strong{display:block;font-size:13px;color:var(--text);font-weight:600;}
 .weather-middle{min-width:0;}
-.weather-location{font-size:15px;color:var(--text);font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .weather-condition{font-size:13px;color:var(--text-dim);}
 .weather-stats{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
-.weather-risk{font-size:13px;font-weight:600;text-align:right;}
-.weather-nums{font-size:12px;color:var(--text-dim);text-align:right;}
-.itin-list{border-bottom:1px solid var(--border);}
+.weather-risk{font-size:12px;font-weight:600;text-align:right;}
+.weather-nums{font-size:11px;color:var(--text-dim);text-align:right;}
+.weather-loc-head{padding:7px 18px 4px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;letter-spacing:1px;color:var(--text-dim);font-weight:600;text-transform:uppercase;}
+
+/* ITINERARY */
 .itin-row{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:start;padding:12px 18px;border-bottom:1px solid var(--border);}
 .itin-row:last-child{border-bottom:none;}
 .itin-row.today{background:#fdf8ee;border-left:3px solid var(--gold);}
@@ -80,7 +100,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .itin-date{font-size:11px;color:var(--text-muted);padding-top:2px;line-height:1.4;}
 .itin-date strong{display:block;font-size:13px;color:var(--text-dim);font-weight:600;}
 .itin-location{font-size:15px;color:var(--text);font-weight:600;margin-bottom:3px;}
-.itin-notes{font-size:13px;color:var(--text-dim);}
+.itin-notes{font-size:12px;color:var(--text-dim);margin-top:1px;}
 .itin-badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:3px;align-self:start;font-weight:600;}
 .type-DEPART  {background:#e8f5ee;color:var(--go);border:1px solid #b8dfc8;}
 .type-DRIVE   {background:#e8f0f8;color:var(--frost);border:1px solid #b8cce8;}
@@ -88,24 +108,34 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .type-STAY    {background:#eeece8;color:var(--text-dim);border:1px solid var(--border2);}
 .type-ARRIVE  {background:#f0e8f8;color:#7d3c98;border:1px solid #d8b8e8;}
 .type-RETURN  {background:#fde8e8;color:var(--danger);border:1px solid #f0b8b8;}
+
+/* LPG */
 .refill-btn{background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
 .refill-btn:hover{border-color:var(--frost);background:var(--bg3);}
+
+/* MISC */
 .state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
 .state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
 .footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
 .last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;}
+
+/* RESPONSIVE */
 @media(max-width:640px){
   .van-grid{grid-template-columns:repeat(2,1fr);}
   .grid{grid-template-columns:1fr;}
   .countdown-card,.drive-card{grid-column:span 1;}
   .master-status{min-width:110px;font-size:16px;}
   .header{padding:12px 14px 10px;}
-  .weather-row{grid-template-columns:64px 1fr auto;}
+  .weather-row{grid-template-columns:70px 1fr auto;}
 }
-@media(prefers-reduced-motion:reduce){.status-dot{animation:none;}}
+@media(prefers-reduced-motion:reduce){
+  .status-dot{animation:none;}
+  .section-body,.section-chevron{transition:none;}
+}
 </style>
 </head>
 <body>
+
 <header class="header">
   <div class="header-left">
     <div class="wordmark">Au<span>drey</span></div>
@@ -114,12 +144,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
   </select>
-  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">↻ Refresh</button>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#8635; Refresh</button>
 </header>
 
 <main id="main">
   <div class="state-message">
-    <span class="icon">🚐</span>
+    <span class="icon">&#128656;</span>
     Connecting to Audrey...
   </div>
 </main>
@@ -133,6 +163,56 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 var API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY4_o0THKORntyf3C0rYsRwqRIuQTaTGQkqthQaJho8DHQ/exec';
 var currentData=null,currentTrip=null;
 
+// ── COLLAPSIBLE STATE ─────────────────────────────────────────
+// Persisted in sessionStorage so state survives refresh but resets on new visit
+var COLLAPSE_KEY='audrey_collapsed';
+function getCollapsed(){
+  try{return JSON.parse(sessionStorage.getItem(COLLAPSE_KEY)||'{}');}catch(e){return{};}
+}
+function setCollapsed(id,val){
+  var s=getCollapsed();s[id]=val;
+  try{sessionStorage.setItem(COLLAPSE_KEY,JSON.stringify(s));}catch(e){}
+}
+function toggleSection(id){
+  var el=document.getElementById('sec-'+id);
+  if(!el)return;
+  var collapsed=el.classList.toggle('collapsed');
+  setCollapsed(id,collapsed);
+}
+function applyCollapsed(){
+  var s=getCollapsed();
+  Object.keys(s).forEach(function(id){
+    if(s[id]){
+      var el=document.getElementById('sec-'+id);
+      if(el)el.classList.add('collapsed');
+    }
+  });
+  // Set max-height on all section bodies for smooth animation
+  document.querySelectorAll('.section-body').forEach(function(b){
+    if(!b.parentElement.classList.contains('collapsed')){
+      b.style.maxHeight=b.scrollHeight+'px';
+    }
+  });
+}
+
+function makeSection(id,title,meta,rightHtml,bodyHtml){
+  var chevron='<span class="section-chevron">&#8250;</span>';
+  var metaSpan=meta?'<span class="section-meta">'+meta+'</span>':'';
+  var right=rightHtml||'';
+  return '<div class="section" id="sec-'+id+'">'
+    +'<div class="section-head" onclick="toggleSection(\''+id+'\')">'
+    +'<div class="section-left">'
+    +'<span class="section-title">'+title+'</span>'
+    +metaSpan
+    +'</div>'
+    +right
+    +chevron
+    +'</div>'
+    +'<div class="section-body" style="max-height:4000px">'+bodyHtml+'</div>'
+    +'</div>';
+}
+
+// ── FETCH ─────────────────────────────────────────────────────
 async function fetchData(trip){
   var params=new URLSearchParams();
   if(trip)params.set('trip',trip);
@@ -156,7 +236,7 @@ async function refresh(){
     if(d.error)throw new Error(d.error);
     currentData=d;render(d);
   }catch(e){renderError(e.message);}
-  finally{btn.classList.remove('loading');btn.textContent='↻ Refresh';}
+  finally{btn.classList.remove('loading');btn.textContent='\u21BB Refresh';}
 }
 
 function render(d){
@@ -165,11 +245,12 @@ function render(d){
   var ts=new Date(d.timestamp);
   document.getElementById('lastUpdated').textContent=
     'Last updated '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  applyCollapsed();
 }
 
 function renderError(msg){
   document.getElementById('main').innerHTML=
-    '<div class="state-message"><span class="icon">⚠️</span>Could not reach Audrey.<br>'
+    '<div class="state-message"><span class="icon">&#9888;</span>Could not reach Audrey.<br>'
     +'<span style="color:#555;font-size:11px">'+msg+'</span><br><br>Check your connection and try again.</div>';
 }
 
@@ -177,24 +258,25 @@ function populateTripSelector(trips,active){
   var sel=document.getElementById('tripSelector');
   if(!trips||!trips.length)return;
   sel.innerHTML=trips.map(function(t){
-    var label=t.name+(t.status==='ACTIVE'?' ●':t.status==='UPCOMING'?' ○':'');
+    var label=t.name+(t.status==='ACTIVE'?' &#9679;':t.status==='UPCOMING'?' &#9675;':'');
     return '<option value="'+t.name+'"'+(t.name===active?' selected':'')+'>'+label+'</option>';
   }).join('');
 }
 
+// ── MAIN BUILDER ──────────────────────────────────────────────
 function buildMain(d){
   var fc=d.fuelConfig||{pricePerLitre:1.182,mpg:27};
-  return[
-    buildMasterBar(d.master,d.vehicle),
-    buildCountdown(d.meta),
-    d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):'',
-    buildVehicleCards(d.vehicle),
-    d.lpg&&d.lpg.current?buildLpg(d.lpg):'',
-    d.weather&&d.weather.length?buildWeather(d.weather):'',
-    d.itinerary&&d.itinerary.length?buildItinerary(d.itinerary,fc):''
-  ].join('');
+  var parts=[];
+  parts.push(buildMasterBar(d.master,d.vehicle));
+  parts.push(buildCountdown(d.meta,d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):''));
+  parts.push(buildVehicleSection(d.vehicle));
+  if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
+  if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
+  if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
+  return parts.join('');
 }
 
+// ── MASTER BAR ────────────────────────────────────────────────
 function buildMasterBar(master,vehicle){
   if(!master)return'';
   var c=master.color||'#888';
@@ -207,22 +289,23 @@ function buildMasterBar(master,vehicle){
     +'</div>';
 }
 
-function buildCountdown(meta){
+// ── COUNTDOWN + NEXT DRIVE ────────────────────────────────────
+function buildCountdown(meta,driveHtml){
   if(!meta)return'';
-  var number='—',label='Trip status',badgeClass='',badgeText='';
+  var number='&mdash;',label='Trip status',badgeClass='',badgeText='';
   if(meta.tripStatus==='PRE_TRIP'&&meta.daysToDepart!==null){
     number=meta.daysToDepart;label='Days to departure';badgeClass='type-DRIVE';badgeText='Upcoming';
   }else if(meta.tripStatus==='ACTIVE'){
-    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'●';
+    number=meta.daysIntoTrip!==null?meta.daysIntoTrip:'&#9679;';
     label=meta.daysIntoTrip!==null?'Days into trip':'Active trip';
     badgeClass='type-DEPART';badgeText='On the road';
   }else if(meta.tripStatus==='POST_TRIP'){
-    number='✓';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
+    number='&#10003;';label='Trip complete';badgeClass='type-RETURN';badgeText='Returned';
   }
   var dateRange=(meta.departDate&&meta.returnDate)
-    ?fmtDate(meta.departDate)+' — '+fmtDate(meta.returnDate)
+    ?fmtDate(meta.departDate)+' &mdash; '+fmtDate(meta.returnDate)
     :meta.departDate?'From '+fmtDate(meta.departDate):'';
-  return'<div class="grid"><div class="countdown-card">'
+  var countdown='<div class="grid"><div class="countdown-card">'
     +'<div class="countdown-number">'+number+'</div>'
     +'<div class="countdown-detail">'
     +'<div class="countdown-label">'+label+'</div>'
@@ -230,76 +313,69 @@ function buildCountdown(meta){
     +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
     +(badgeText?'<span class="trip-status-badge '+badgeClass+'">'+badgeText+'</span>':'')
     +(dateRange?'<span style="font-size:10px;color:var(--text-muted)">'+dateRange+'</span>':'')
-    +'</div></div></div></div>';
-}
-
-function calcFuel(distanceKm,fc){
-  if(!distanceKm||!fc)return null;
-  var miles=distanceKm/1.60934;
-  var litres=miles/fc.mpg*4.54609;
-  var cost=litres*fc.pricePerLitre;
-  return{litres:Math.round(litres),cost:cost.toFixed(0)};
+    +'</div></div></div>'
+    +driveHtml
+    +'</div>';
+  return countdown;
 }
 
 function buildNextDrive(meta,fc){
   var nd=meta.nextDrive;if(!nd)return'';
   var fuel=calcFuel(nd.distanceKm,fc);
-  return'<div class="grid"><div class="drive-card">'
-    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive · '+fmtDate(nd.date)+'</div>'
+  return'<div class="drive-card">'
+    +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive &middot; '+fmtDate(nd.date)+'</div>'
     +'<div class="drive-route">'
-    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'—')+'</span>'
-    +'<span class="drive-arrow">→</span>'
+    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'&mdash;')+'</span>'
+    +'<span class="drive-arrow">&rarr;</span>'
     +'<span class="drive-dest">'+nd.destination+'</span>'
     +'</div>'
     +'<div class="drive-meta">'
-    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'—')+'</span></div>'
-    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'—')+'</span></div>'
-    +(fuel?'<div class="drive-stat"><span class="drive-stat-label">Fuel est</span><span class="drive-stat-value">~'+fuel.litres+'L · £'+fuel.cost+'</span></div>':'')
+    +'<div class="drive-stat"><span class="drive-stat-label">Distance</span><span class="drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'&mdash;')+'</span></div>'
+    +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'&mdash;')+'</span></div>'
+    +(fuel?'<div class="drive-stat"><span class="drive-stat-label">Fuel est</span><span class="drive-stat-value">~'+fuel.litres+'L &middot; &pound;'+fuel.cost+'</span></div>':'')
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
-    +'</div></div></div>';
+    +'</div></div>';
 }
 
-function buildVehicleCards(v){
+// ── VEHICLE ───────────────────────────────────────────────────
+function buildVehicleSection(v){
   if(!v)return'';
   var bc=v.batteryV?(v.batteryV>=13?'var(--go)':v.batteryV>=12.4?'var(--caution)':'var(--danger)'):'var(--text-dim)';
   var gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
   var cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
   var oc=v.odometerMiles?'var(--text)':'var(--text-dim)';
-  var alert=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
-    ?'<span style="font-size:12px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
-  return'<div class="section-head">'
-    +'<span class="section-title">Vehicle · Audrey</span>'
-    +'<span class="section-meta">'+(alert||v.telStatus||'')+'</span>'
-    +'</div>'
-    +'<div class="van-grid">'
-    +'<div class="van-card"><span class="van-card-icon">🔋</span>'
-    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'—')+'</div>'
+  var alertHtml=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
+    ?'<span style="font-size:11px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
+  var statusMeta=alertHtml||(v.telStatus==='STALE'?'<span style="color:var(--text-muted);font-size:11px">Samsara sleeping</span>':v.telStatus||'');
+  var body='<div class="van-grid">'
+    +'<div class="van-card"><span class="van-card-icon">&#128267;</span>'
+    +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'&mdash;')+'</div>'
     +'<div class="van-card-label">Battery</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">🏠</span>'
-    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'°':'—')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#127968;</span>'
+    +'<div class="van-card-value" style="color:'+cc+'">'+(v.cabinTempC!==null?v.cabinTempC+'&deg;':'&mdash;')+'</div>'
     +'<div class="van-card-label">Cabin</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">🚐</span>'
-    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'°':'—')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#128656;</span>'
+    +'<div class="van-card-value" style="color:'+gc+'">'+(v.garageTempC!==null?v.garageTempC+'&deg;':'&mdash;')+'</div>'
     +'<div class="van-card-label">Garage</div></div>'
-    +'<div class="van-card"><span class="van-card-icon">🛣️</span>'
-    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(13px,3vw,18px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+'</div>'
+    +'<div class="van-card"><span class="van-card-icon">&#128739;</span>'
+    +'<div class="van-card-value" style="color:'+oc+';font-size:clamp(12px,3vw,17px)">'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'&mdash;')+'</div>'
     +'<div class="van-card-label">Odometer</div></div>'
     +'</div>';
+  return makeSection('vehicle','Vehicle &middot; Audrey','',statusMeta,body);
 }
 
-function buildLpg(lpg){
+// ── LPG ───────────────────────────────────────────────────────
+function buildLpgSection(lpg){
   if(!lpg||!lpg.current)return'';
   var c=lpg.current;
   var pct=Math.min(100,Math.round((c.litres/12)*100));
   var barColor=c.alert==='CRITICAL'?'var(--danger)':c.alert==='LOW'?'var(--caution)':'var(--go)';
   var totals=lpg.totalLitres?lpg.totalLitres.toFixed(1)+'L trip total':'';
-  return'<div class="section-head">'
-    +'<span class="section-title">LPG · Heating</span>'
-    +'<div style="display:flex;align-items:center;gap:12px">'
-    +'<span class="section-meta">'+totals+'</span>'
-    +'<button class="refill-btn" id="refillBtn" onclick="lpgRefill()">⛽ Refill</button>'
-    +'</div></div>'
-    +'<div style="background:var(--bg);padding:16px 18px;border-bottom:1px solid var(--border)">'
+  var refillBtn='<button class="refill-btn" id="refillBtn" onclick="event.stopPropagation();lpgRefill()">&#9981; Refill</button>';
+  var metaRight='<div style="display:flex;align-items:center;gap:10px">'
+    +'<span style="font-size:12px;color:var(--text-muted)">'+totals+'</span>'
+    +refillBtn+'</div>';
+  var body='<div style="padding:16px 18px">'
     +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
     +'<div style="font-family:var(--display);font-size:clamp(24px,6vw,36px);font-weight:700;color:'+barColor+'">'+c.litres.toFixed(1)+'L</div>'
     +'<div>'
@@ -311,91 +387,78 @@ function buildLpg(lpg){
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:4px">'
     +'<span style="font-size:10px;color:var(--text-muted)">0L</span>'
-    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% · 12L tank</span>'
+    +'<span style="font-size:10px;color:var(--text-muted)">'+pct+'% &middot; 12L tank</span>'
     +'</div></div>';
+  return makeSection('lpg','LPG &middot; Heating','',metaRight,body);
 }
 
-function buildWeather(weather){
+// ── WEATHER ───────────────────────────────────────────────────
+function buildWeatherSection(weather){
   if(!weather||!weather.length)return'';
-
-  // Group by location preserving first-appearance order
   var groups={},order=[];
   weather.forEach(function(w){
     if(!groups[w.location]){groups[w.location]=[];order.push(w.location);}
     groups[w.location].push(w);
   });
-
   var now=new Date();now.setHours(0,0,0,0);
   var tom=new Date(now.getTime()+86400000);
   var dat=new Date(now.getTime()+2*86400000);
-
-  function dayLabel(dateStr){
-    var d=new Date(dateStr+'T00:00:00');d.setHours(0,0,0,0);
+  function dayLabel(ds){
+    var d=new Date(ds+'T00:00:00');d.setHours(0,0,0,0);
     if(d.getTime()===now.getTime())return'Today';
     if(d.getTime()===tom.getTime())return'Tomorrow';
     if(d.getTime()===dat.getTime())return d.toLocaleDateString('en-GB',{weekday:'long'});
     return d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
   }
-
-  var html='<div class="section-head"><span class="section-title">Weather</span>'
-    +'<span class="section-meta">Today + 3 days</span></div>'
-    +'<div class="weather-list">';
-
+  var body='<div class="weather-list">';
   order.forEach(function(loc){
     var rows=groups[loc];
-    html+='<div style="padding:8px 18px 4px;background:var(--bg2);border-bottom:1px solid var(--border);'
-      +'font-size:11px;letter-spacing:1px;color:var(--text-dim);font-weight:600;text-transform:uppercase">'
-      +loc+'</div>';
-    rows.forEach(function(w,idx){
+    body+='<div class="weather-loc-head">'+loc+'</div>';
+    rows.forEach(function(w){
       var rc=riskColor(w.risk);
-      var last=idx===rows.length-1;
-      html+='<div class="weather-row'+(w.isToday?' today':'')+'"'
-        +(last?'':'')+' style="border-bottom:1px solid var(--border)">'
+      body+='<div class="weather-row'+(w.isToday?' today':'')+'">'
         +'<div class="weather-date"><strong>'+dayLabel(w.date)+'</strong></div>'
-        +'<div class="weather-middle">'
-        +'<div class="weather-condition" style="font-size:14px">'+w.condition+'</div>'
-        +'</div>'
+        +'<div class="weather-middle"><div class="weather-condition">'+w.condition+'</div></div>'
         +'<div class="weather-stats">'
         +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
         +'<div class="weather-nums">'
-        +(w.minTempC!==null?w.minTempC+'° · ':'')
+        +(w.minTempC!==null?w.minTempC+'&deg; &middot; ':'')
         +(w.gustKmh?w.gustKmh+' km/h':'')
-        +(w.snowMm&&w.snowMm>0?' · '+w.snowMm+'mm':'')
+        +(w.snowMm&&w.snowMm>0?' &middot; '+w.snowMm+'mm':'')
         +'</div></div></div>';
     });
   });
-
-  html+='</div>';
-  return html;
+  body+='</div>';
+  return makeSection('weather','Weather','Today + 3 days','',body);
 }
 
-function buildItinerary(itin,fc){
+// ── ITINERARY ─────────────────────────────────────────────────
+function buildItinerarySection(itin,fc){
   var rows=itin.map(function(r){
     var d=new Date(r.date+'T00:00:00');
     var day=d.toLocaleDateString('en-GB',{weekday:'short'});
     var dt=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     var cls=r.isToday?' today':r.isPast?' past':'';
     var fuel=['DRIVE','DEPART','STOPOVER','ARRIVE','RETURN'].indexOf(r.type)>=0?calcFuel(r.distanceKm,fc):null;
-    var fuelStr=fuel?' · ~'+fuel.litres+'L/£'+fuel.cost:'';
+    var fuelStr=fuel?' &middot; ~'+fuel.litres+'L/&pound;'+fuel.cost:'';
     var meta=[
       r.distanceKm?r.distanceKm+' km':'',
       r.durationMin?fmtDuration(r.durationMin):'',
       r.notes
-    ].filter(Boolean).join(' · ')+fuelStr;
+    ].filter(Boolean).join(' &middot; ')+fuelStr;
     var mapsUrl=r.address
       ?'https://maps.apple.com/?address='+encodeURIComponent(r.address)
       :'https://maps.apple.com/?q='+encodeURIComponent(r.location);
-    var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)" title="Electric hookup">🔌</span>':'';
-    
+    var ehuIcon=r.ehu?' <span style="font-size:11px;color:var(--frost)">&#128268;</span>':'';
     var riskHtml=(r.routeRisk&&r.routeRisk.snowRisk&&r.type!=='STAY')
-      ?'<div style="font-size:11px;margin-top:4px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
+      ?'<div style="font-size:11px;margin-top:3px;color:'+riskColor(r.routeRisk.snowRisk)+';font-weight:500">'+r.routeRisk.snowRisk+'</div>'
       :'';
     var contactHtml='';
     if(r.contact||r.bookingRef){
-      var cparts=[];
-      if(r.contact)cparts.push('<a href="tel:'+r.contact.replace(/[^0-9+]/g,'')+'" style="color:var(--frost);text-decoration:none">📞 '+r.contact+'</a>');
-      if(r.bookingRef)cparts.push('<span style="color:var(--text-muted)">REF: '+r.bookingRef+'</span>');
-      contactHtml='<div style="font-size:11px;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap">'+cparts.join('')+'</div>';
+      var cp=[];
+      if(r.contact)cp.push('<a href="tel:'+r.contact.replace(/[^0-9+]/g,'')+'" style="color:var(--frost);text-decoration:none">&#128222; '+r.contact+'</a>');
+      if(r.bookingRef)cp.push('<span style="color:var(--text-muted)">REF: '+r.bookingRef+'</span>');
+      contactHtml='<div style="font-size:11px;margin-top:3px;display:flex;gap:10px;flex-wrap:wrap">'+cp.join('')+'</div>';
     }
     return'<div class="itin-row'+cls+'">'
       +'<div class="itin-date"><strong>'+(r.isToday?'Today':day)+'</strong>'+dt+'</div>'
@@ -407,14 +470,20 @@ function buildItinerary(itin,fc){
       +'</div>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">'
       +'<span class="itin-badge type-'+r.type+'">'+r.type+'</span>'
-      +(r.type!=='STAY'?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none;letter-spacing:0.5px">📍 Maps</a>':'')
-      +'</div>'
-      +'</div>';
+      +(r.type!=='STAY'?'<a href="'+mapsUrl+'" target="_blank" style="font-size:10px;color:var(--frost);text-decoration:none">&#128205; Maps</a>':'')
+      +'</div></div>';
   }).join('');
-  return'<div class="section-head"><span class="section-title">Itinerary</span><span class="section-meta">'+itin.length+' days</span></div>'
-    +'<div class="itin-list">'+rows+'</div>';
+  return makeSection('itinerary','Itinerary',itin.length+' days','','<div>'+rows+'</div>');
 }
 
+// ── UTILITIES ─────────────────────────────────────────────────
+function calcFuel(distanceKm,fc){
+  if(!distanceKm||!fc)return null;
+  var miles=distanceKm/1.60934;
+  var litres=miles/fc.mpg*4.54609;
+  var cost=litres*fc.pricePerLitre;
+  return{litres:Math.round(litres),cost:cost.toFixed(0)};
+}
 function fmtDate(iso){
   if(!iso)return'';
   return new Date(iso+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
@@ -431,32 +500,24 @@ function riskColor(risk){
   return'var(--text-dim)';
 }
 
+// ── LPG REFILL ────────────────────────────────────────────────
 async function lpgRefill(){
   var btn=document.getElementById('refillBtn');
   if(!btn)return;
-  btn.textContent='Logging...';
-  btn.style.opacity='0.5';
+  btn.textContent='Logging...';btn.style.opacity='0.5';
   try{
     var params=new URLSearchParams();
     params.set('action','lpg_refill');
     if(currentTrip)params.set('trip',currentTrip);
     params.set('_',Date.now());
-    var url=API_URL+'?'+params.toString();
-    var r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});
+    var r=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
     var d=await r.json();
     if(d.error)throw new Error(d.error);
-    btn.textContent='✓ Refilled';
-    btn.style.color='var(--go)';
-    btn.style.opacity='1';
+    btn.textContent='&#10003; Refilled';btn.style.color='var(--go)';btn.style.opacity='1';
     setTimeout(function(){refresh();},1500);
   }catch(e){
-    btn.textContent='Error';
-    btn.style.color='var(--danger)';
-    btn.style.opacity='1';
-    setTimeout(function(){
-      btn.textContent='⛽ Refill';
-      btn.style.color='var(--frost)';
-    },3000);
+    btn.textContent='Error';btn.style.color='var(--danger)';btn.style.opacity='1';
+    setTimeout(function(){btn.textContent='&#9981; Refill';btn.style.color='var(--frost)';},3000);
   }
 }
 
