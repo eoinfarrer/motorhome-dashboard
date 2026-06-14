@@ -422,8 +422,9 @@ function buildWeatherSection(weather){
         +'<div class="weather-stats">'
         +'<div class="weather-risk" style="color:'+rc+'">'+w.risk+'</div>'
         +'<div class="weather-nums">'
-        +(w.minTempC!==null?w.minTempC+'&deg; &middot; ':'')
-        +(w.gustKmh?w.gustKmh+' km/h':'')
+        +(w.minTempC!==null?w.minTempC+'&deg;':'')
++(w.maxTempC!==null?' &mdash; '+w.maxTempC+'&deg; &middot; ':' &middot; ')
++(w.gustKmh?w.gustKmh+' km/h':'')
         +(w.snowMm&&w.snowMm>0?' &middot; '+w.snowMm+'mm':'')
         +'</div></div></div>';
     });
