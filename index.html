@@ -425,7 +425,7 @@ function buildWeatherSection(weather){
         +(w.minTempC!==null?w.minTempC+'&deg;':'')
 +(w.maxTempC!==null?' &mdash; '+w.maxTempC+'&deg; &middot; ':' &middot; ')
 +(w.gustKmh?w.gustKmh+' km/h':'')
-+(w.windDir?' '+w.windDir:'')
++(w.windDir?' '+w.windDir.replace(/\s*\(\d+°\)/,''):'')
         +(w.snowMm&&w.snowMm>0?' &middot; '+w.snowMm+'mm':'')
         +'</div></div></div>';
     });
