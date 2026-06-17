@@ -345,13 +345,11 @@ function buildVehicleSection(v){
   var cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
   var oc=v.odometerMiles?'var(--text)':'var(--text-dim)';
   var locationLink='';
-if(v.lat&&v.lon){
-  var mapsUrl='https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey';
-  locationLink='<a href="'+mapsUrl+'" target="_blank" style="font-size:11px;color:var(--frost);text-decoration:none" onclick="event.stopPropagation()">&#128205; Current location</a>';
-}
-var statusMeta=locationLink;
-}
-var statusMeta=alertHtml||locationLink||v.telStatus||'';
+  if(v.lat&&v.lon){
+    var mapsUrl='https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey';
+    locationLink='<a href="'+mapsUrl+'" target="_blank" style="font-size:11px;color:var(--frost);text-decoration:none" onclick="event.stopPropagation()">&#128205; Current location</a>';
+  }
+  var statusMeta=locationLink;
   var body='<div class="van-grid">'
     +'<div class="van-card"><span class="van-card-icon">&#128267;</span>'
     +'<div class="van-card-value" style="color:'+bc+'">'+(v.batteryV!==null?v.batteryV+'V':'&mdash;')+'</div>'
