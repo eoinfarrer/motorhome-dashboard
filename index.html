@@ -344,12 +344,12 @@ function buildVehicleSection(v){
   var gc=v.garageTempC!==null?(v.garageTempC<=2?'var(--danger)':v.garageTempC<=5?'var(--frost)':'var(--text)'):'var(--text-dim)';
   var cc=v.cabinTempC!==null?(v.cabinTempC<15?'var(--frost)':v.cabinTempC>26?'var(--caution)':'var(--go)'):'var(--text-dim)';
   var oc=v.odometerMiles?'var(--text)':'var(--text-dim)';
-  var alertHtml=v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK')
-    ?'<span style="font-size:11px;color:var(--danger);font-weight:600">'+v.systemAlert+'</span>':'';
   var locationLink='';
 if(v.lat&&v.lon){
   var mapsUrl='https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey';
   locationLink='<a href="'+mapsUrl+'" target="_blank" style="font-size:11px;color:var(--frost);text-decoration:none" onclick="event.stopPropagation()">&#128205; Current location</a>';
+}
+var statusMeta=locationLink;
 }
 var statusMeta=alertHtml||locationLink||v.telStatus||'';
   var body='<div class="van-grid">'
