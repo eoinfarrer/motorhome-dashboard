@@ -347,7 +347,13 @@ function buildVehicleSection(v){
   var locationLink='';
   if(v.lat&&v.lon){
     var mapsUrl='https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey';
-    locationLink='<a href="'+mapsUrl+'" target="_blank" style="font-size:11px;color:var(--frost);text-decoration:none" onclick="event.stopPropagation()">&#128205; Current location</a>';
+    var staleStr='';
+    if(v.locationTimestamp){
+      var mins=Math.round((Date.now()-new Date(v.locationTimestamp).getTime())/60000);
+      var hrs=Math.floor(mins/60);
+      staleStr=hrs>0?' ('+hrs+'h ago)':mins>1?' ('+mins+'m ago)':'';
+    }
+    locationLink='<a href="'+mapsUrl+'" target="_blank" style="font-size:11px;color:var(--frost);text-decoration:none" onclick="event.stopPropagation()">&#128205; Current location'+staleStr+'</a>';
   }
   var statusMeta=locationLink;
   var body='<div class="van-grid">'
