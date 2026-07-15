@@ -404,6 +404,17 @@ function buildLpgSection(lpg){
 // ── WEATHER ───────────────────────────────────────────────────
 function buildWeatherSection(weather){
   if(!weather||!weather.length)return'';
+
+  // Limit display to today + 3 days
+  var now=new Date();now.setHours(0,0,0,0);
+  var cutoff=new Date(now.getTime()+3*86400000);
+  weather=weather.filter(function(w){
+    var d=new Date(w.date+'T00:00:00');
+    return d<=cutoff;
+  });
+  if(!weather.length)return'';
+
+  // Group by location preserving first-appearance order
   var groups={},order=[];
   weather.forEach(function(w){
     if(!groups[w.location]){groups[w.location]=[];order.push(w.location);}
