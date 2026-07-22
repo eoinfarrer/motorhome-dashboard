@@ -272,6 +272,7 @@ function buildMain(d){
   parts.push(buildVehicleSection(d.vehicle));
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
+  if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
   if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
   return parts.join('');
 }
@@ -541,6 +542,102 @@ async function lpgRefill(){
     btn.textContent='Error';btn.style.color='var(--danger)';btn.style.opacity='1';
     setTimeout(function(){btn.textContent='&#9981; Refill';btn.style.color='var(--frost)';},3000);
   }
+}
+
+// ── ADD to index.html before refresh() ────────────────────────
+
+function buildSnowSection(snow, meta, itin) {
+  if (!snow || !snow.resorts || !snow.resorts.length) return '';
+  if (meta.season !== 'winter') return '';
+
+  var todayRow  = itin ? itin.find(function(r){ return r.isToday; }) : null;
+  var todayType = todayRow ? todayRow.type : null;
+  var isDrive   = todayType && ['DRIVE','DEPART','ARRIVE','RETURN'].includes(todayType);
+  var isStay    = todayType === 'STAY';
+
+  // ── Section meta summary ────────────────────────────────────
+  var summaryParts = [];
+  if (snow.hasPowder)   summaryParts.push('❄️ Powder');
+  if (snow.hasBluebird) summaryParts.push('☀️ Bluebird');
+  if (snow.passBlocked) summaryParts.push('🚫 Pass closed');
+  var sectionMeta = summaryParts.join(' &middot; ') || 'Conditions updated';
+
+  // ── Pass status block ───────────────────────────────────────
+  var passHtml = '';
+  if (snow.passes && snow.passes.length) {
+    passHtml = '<div style="padding:10px 18px;border-bottom:1px solid var(--border)">'
+      + '<div style="font-size:10px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">Pass Status</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+      + snow.passes.map(function(p){
+          var c = p.status.includes('Open') ? 'var(--go)'
+                : p.status.includes('Closed') ? 'var(--danger)'
+                : 'var(--caution)';
+          return '<div style="font-size:12px">'
+            + '<span style="color:var(--text-dim)">' + p.name + '</span> '
+            + '<span style="color:' + c + ';font-weight:600">' + p.status + '</span>'
+            + '</div>';
+        }).join('')
+      + '</div></div>';
+  }
+
+  // ── Resort cards ────────────────────────────────────────────
+  var resortsHtml = snow.resorts.map(function(r) {
+    var snowColor = r.snowCm >= 10 ? 'var(--frost)'
+                  : r.snowCm >= 3  ? 'var(--go)'
+                  : 'var(--text-muted)';
+    var windColor = r.windKmh > 50 ? 'var(--danger)'
+                  : r.windKmh > 30 ? 'var(--caution)'
+                  : 'var(--go)';
+    var fitColor  = r.fitment.includes('Chains') ? 'var(--danger)'
+                  : r.fitment.includes('3PMSF')  ? 'var(--caution)'
+                  : 'var(--go)';
+
+    // Special day badges
+    var badges = '';
+    if (r.isPowder)   badges += '<span style="font-size:10px;background:#e8f0f8;color:var(--frost);padding:2px 6px;border-radius:3px;margin-left:6px">❄️ Powder</span>';
+    if (r.isBluebird) badges += '<span style="font-size:10px;background:#fdf8ee;color:var(--gold);padding:2px 6px;border-radius:3px;margin-left:6px">☀️ Bluebird</span>';
+
+    return '<div style="padding:12px 18px;border-bottom:1px solid var(--border)">'
+      // Resort name + badges
+      + '<div style="display:flex;align-items:center;margin-bottom:8px;flex-wrap:wrap">'
+      + '<span style="font-family:var(--display);font-size:14px;font-weight:600">' + r.name + '</span>'
+      + '<span style="font-size:11px;color:var(--text-muted);margin-left:6px">' + r.elevationM + 'm</span>'
+      + badges
+      + '</div>'
+      // Stats grid
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">'
+      // Snow
+      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase">3-Day Snow</div>'
+      + '<div style="font-size:16px;font-weight:700;color:' + snowColor + '">' + r.snowCm + 'cm</div></div>'
+      // Freeze level
+      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase">Freeze Level</div>'
+      + '<div style="font-size:16px;font-weight:700;color:var(--frost)">' + (r.freezeM ? (r.freezeM/1000).toFixed(1) + 'km' : '&mdash;') + '</div></div>'
+      // Wind
+      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase">Wind</div>'
+      + '<div style="font-size:16px;font-weight:700;color:' + windColor + '">' + r.windKmh + ' km/h</div></div>'
+      + '</div>'
+      // Condition + fitment risk
+      + '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px">'
+      + '<span style="color:var(--text-dim)">' + r.condition + '</span>'
+      + '<span style="color:' + fitColor + ';font-weight:600">' + r.fitment + '</span>'
+      + '</div>'
+      // Trend
+      + (r.trend ? '<div style="font-size:11px;color:var(--text-muted);margin-top:3px">' + r.trend + '</div>' : '')
+      + '</div>';
+  }).join('');
+
+  var body = passHtml + resortsHtml;
+
+  // ── Drive day — add road risk context ──────────────────────
+  if (isDrive && snow.resorts.length) {
+    var r0 = snow.resorts[0];
+    var roadRisk = r0.snowAtVanLevel
+      ? '<div style="padding:10px 18px;background:#fdf8ee;border-bottom:1px solid var(--border);font-size:12px;color:var(--caution);font-weight:600">&#9888; Snow possible at van level — freeze level ' + r0.freezeM + 'm</div>'
+      : '<div style="padding:10px 18px;background:#f0f8f0;border-bottom:1px solid var(--border);font-size:12px;color:var(--go)">&#10003; Freeze level above route — rain not snow at van level</div>';
+    body = roadRisk + body;
+  }
+
+  return makeSection('snow', 'Snow &middot; Conditions', sectionMeta, '', body);
 }
 
 refresh();
