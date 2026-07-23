@@ -246,6 +246,9 @@ function render(d){
   document.getElementById('lastUpdated').textContent=
     'Last updated '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   applyCollapsed();
+  // Budget collapsed by default
+  var collapsed = getCollapsed();
+  if (!('budget' in collapsed)) setCollapsed('budget', true);
 }
 
 function renderError(msg){
@@ -273,7 +276,9 @@ function buildMain(d){
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
   if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
+  if(d.budget)parts.push(buildBudgetSection(d.budget));
   if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
+  if(d.budget)parts.push(buildBudgetSection(d.budget));
   return parts.join('');
 }
 
@@ -633,6 +638,73 @@ function buildSnowSection(snow, meta, itin) {
 
   var body = roadRiskHtml + passHtml + resortsHtml;
   return makeSection('snow', 'Snow &middot; Conditions', sectionMeta, '', body);
+}
+
+function buildBudgetSection(budget) {
+  if (!budget) return '';
+
+  var total    = budget.estimateTotal;
+  var actual   = budget.actualTotal;
+  var hasActual = Object.values(budget.manual).some(function(m){ return m.actual !== null; });
+  var rateNote = budget.rate ? '1€ = £' + budget.rate.toFixed(4) : '';
+
+  // Section meta — headline figure
+  var sectionMeta = hasActual
+    ? 'Est £' + total.toLocaleString() + ' · Act £' + actual.toLocaleString()
+    : 'Est £' + total.toLocaleString();
+
+  // Table helper
+  function row(label, est, act, notes, isEur) {
+    var actStr = act !== null ? '£' + Math.round(act).toLocaleString() : '—';
+    var estStr = '£' + Math.round(est).toLocaleString();
+    var origStr = isEur && est ? ' <span style="font-size:10px;color:var(--text-muted)">(' + Math.round(est / (budget.rate||0.85)) + '€)</span>' : '';
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      + '<td style="padding:6px 0;color:var(--text-dim);font-size:13px">' + label
+      + (notes ? '<div style="font-size:10px;color:var(--text-muted)">' + notes + '</div>' : '')
+      + '</td>'
+      + '<td style="padding:6px 0;text-align:right;font-size:13px;color:var(--text)">' + estStr + origStr + '</td>'
+      + '<td style="padding:6px 0;text-align:right;font-size:13px;color:'
+      + (act !== null ? 'var(--go)' : 'var(--text-muted)') + '">' + actStr + '</td>'
+      + '</tr>';
+  }
+
+  var body = '<div style="padding:0 18px 12px">'
+    // Column headers
+    + '<table style="width:100%;border-collapse:collapse;margin-top:12px">'
+    + '<thead><tr>'
+    + '<th style="text-align:left;font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;padding-bottom:6px">Category</th>'
+    + '<th style="text-align:right;font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;padding-bottom:6px">Estimate</th>'
+    + '<th style="text-align:right;font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;padding-bottom:6px">Actual</th>'
+    + '</tr></thead><tbody>';
+
+  // Auto-calculated rows
+  if (budget.auto) {
+    if (budget.auto.fuel)      body += row('Fuel',      budget.auto.fuel.estimate,      null, '', false);
+    if (budget.auto.lpg)       body += row('LPG',       budget.auto.lpg.estimate,       null, '', false);
+    if (budget.auto.campsites) body += row('Campsites', budget.auto.campsites.estimate, null, '', false);
+  }
+
+  // Manual rows from trip sheet budget block
+  Object.keys(budget.manual).forEach(function(label) {
+    var m = budget.manual[label];
+    body += row(label, m.estimate, m.actual, m.notes, m.isEur);
+  });
+
+  // Total row
+  body += '<tr>'
+    + '<td style="padding:10px 0 4px;font-weight:700;font-family:var(--display);font-size:14px">Total</td>'
+    + '<td style="padding:10px 0 4px;text-align:right;font-weight:700;font-family:var(--display);font-size:14px;color:var(--gold)">£' + total.toLocaleString() + '</td>'
+    + '<td style="padding:10px 0 4px;text-align:right;font-weight:700;font-family:var(--display);font-size:14px;color:'
+    + (hasActual ? 'var(--go)' : 'var(--text-muted)') + '">'
+    + (hasActual ? '£' + actual.toLocaleString() : '—') + '</td>'
+    + '</tr>'
+    + '</tbody></table>'
+    + (rateNote ? '<div style="font-size:10px;color:var(--text-muted);margin-top:6px">' + rateNote + '</div>' : '')
+    + '</div>';
+
+  // Collapsed by default — pass 'true' as 5th arg to makeSection
+  var section = makeSection('budget', 'Budget', sectionMeta, '', body);
+  return section;
 }
 
 refresh();
