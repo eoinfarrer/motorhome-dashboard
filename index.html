@@ -274,6 +274,7 @@ function buildMain(d){
   parts.push(buildCountdown(d.meta,d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):''));
   parts.push(buildVehicleSection(d.vehicle));
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
+  if(d.fuelConfig)parts.push(buildPricesSection(d.fuelConfig));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
   if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
   if(d.budget)parts.push(buildBudgetSection(d.budget));
@@ -704,6 +705,46 @@ function buildBudgetSection(budget) {
   // Collapsed by default — pass 'true' as 5th arg to makeSection
   var section = makeSection('budget', 'Budget', sectionMeta, '', body);
   return section;
+}
+
+function buildPricesSection(fc){
+  if(!fc)return'';
+  var body='<div style="padding:14px 18px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">'
+    +'<div>'
+    +'<div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">Diesel</div>'
+    +'<div style="display:flex;align-items:center;gap:8px">'
+    +'<span style="font-family:var(--display);font-size:20px;font-weight:700">&pound;'+( fc.pricePerLitre?fc.pricePerLitre.toFixed(3):'—')+'</span>'
+    +'<span style="font-size:11px;color:var(--text-muted)">/L</span>'
+    +'<button onclick="event.stopPropagation();editPrice(\'diesel\',\''+( fc.pricePerLitre||1.182)+'\')" style="background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer">Edit</button>'
+    +'</div></div>'
+    +'<div>'
+    +'<div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">LPG</div>'
+    +'<div style="display:flex;align-items:center;gap:8px">'
+    +'<span style="font-family:var(--display);font-size:20px;font-weight:700">&pound;'+(fc.lpgPrice?fc.lpgPrice.toFixed(3):'—')+'</span>'
+    +'<span style="font-size:11px;color:var(--text-muted)">/L</span>'
+    +'<button onclick="event.stopPropagation();editPrice(\'lpg\',\''+(fc.lpgPrice||0.95)+'\')" style="background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer">Edit</button>'
+    +'</div></div>'
+    +'</div></div>';
+  return makeSection('prices','Prices &middot; Settings','','',body);
+}
+
+async function editPrice(type,current){
+  var newVal=prompt((type==='diesel'?'Diesel':'LPG')+' price per litre (\u00a3):',current);
+  if(!newVal||isNaN(parseFloat(newVal)))return;
+  try{
+    var params=new URLSearchParams();
+    params.set('action','update_price');
+    params.set('type',type);
+    params.set('value',parseFloat(newVal));
+    params.set('_',Date.now());
+    var r=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.error)throw new Error(d.error);
+    setTimeout(function(){refresh();},500);
+  }catch(e){
+    alert('Failed to update: '+e.message);
+  }
 }
 
 refresh();
