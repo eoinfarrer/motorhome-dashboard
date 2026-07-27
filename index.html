@@ -369,9 +369,37 @@ function buildCountdown(meta,driveHtml){
   return countdown;
 }
 
+snowsection final · JS
+// ── REPLACE buildNextDrive in index.html ─────────────────────
+ 
 function buildNextDrive(meta,fc){
   var nd=meta.nextDrive;if(!nd)return'';
   var fuel=calcFuel(nd.distanceKm,fc);
+ 
+  // Pass strip — winter trips, drive days only
+  var passHtml='';
+  if(currentData&&currentData.snowStatus&&currentData.snowStatus.passes&&currentData.meta&&currentData.meta.season==='winter'){
+    var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(meta.todayType)>=0;
+    var isTmrw=nd.date===fmtDateISO(new Date(Date.now()+86400000));
+    if(isDrive||isTmrw){
+      var passes=currentData.snowStatus.passes;
+      if(passes.length){
+        passHtml='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">'
+          +'<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">Passes on route</div>'
+          +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+          +passes.map(function(p){
+            var c=p.status.includes('Open')?'var(--go)':p.status.includes('Closed')?'var(--danger)':'var(--caution)';
+            var icon=p.status.includes('Open')?'✅':p.status.includes('Closed')?'❌':'⚠️';
+            return'<span style="font-size:11px">'
+              +icon+' <span style="color:var(--text-dim)">'+p.name.replace(' Pass','')+'</span>'
+              +' <strong style="color:'+c+'">'+p.status.replace('✅ ','').replace('❌ ','').replace('⚠️ ','')+'</strong>'
+              +'</span>';
+          }).join('<span style="color:var(--border2)">&nbsp;·&nbsp;</span>')
+          +'</div></div>';
+      }
+    }
+  }
+ 
   return'<div class="drive-card">'
     +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive &middot; '+fmtDate(nd.date)+'</div>'
     +'<div class="drive-route">'
@@ -384,7 +412,14 @@ function buildNextDrive(meta,fc){
     +'<div class="drive-stat"><span class="drive-stat-label">Drive time</span><span class="drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'&mdash;')+'</span></div>'
     +(fuel?'<div class="drive-stat"><span class="drive-stat-label">Fuel est</span><span class="drive-stat-value">~'+fuel.litres+'L &middot; &pound;'+fuel.cost+'</span></div>':'')
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
-    +'</div></div>';
+    +'</div>'
+    +passHtml
+    +'</div>';
+}
+ 
+// helper — format date as yyyy-MM-dd for comparison
+function fmtDateISO(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 
 // ── VEHICLE ───────────────────────────────────────────────────
@@ -595,94 +630,200 @@ async function lpgRefill(){
 
 // ── ADD to index.html before refresh() ────────────────────────
 
+/ ── REPLACE buildSnowSection in index.html ───────────────────
+ 
 function buildSnowSection(snow, meta, itin) {
   if (!snow || !snow.resorts || !snow.resorts.length) return '';
   if (meta.season !== 'winter') return '';
-
+ 
   var todayRow  = itin ? itin.find(function(r){ return r.isToday; }) : null;
   var todayType = todayRow ? todayRow.type : null;
   var isDrive   = todayType && ['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(todayType) >= 0;
-
-  // Section meta
+ 
+  // ── Section meta ─────────────────────────────────────────────
   var summaryParts = [];
   if (snow.hasPowder)   summaryParts.push('❄️ Powder');
   if (snow.hasBluebird) summaryParts.push('☀️ Bluebird');
   if (snow.passBlocked) summaryParts.push('🚫 Pass closed');
   var sectionMeta = summaryParts.join(' · ') || snow.resorts.length + ' resorts';
-
-  // Pass status block
-  var passHtml = '';
-  if (snow.passes && snow.passes.length) {
-    passHtml = '<div style="padding:10px 18px;border-bottom:1px solid var(--border);background:var(--bg2)">'
-      + '<div style="font-size:10px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px">Pass Status</div>'
-      + '<div style="display:flex;flex-wrap:wrap;gap:8px">'
-      + snow.passes.map(function(p){
-          var c = p.status.includes('Open') ? 'var(--go)'
-                : p.status.includes('Closed') ? 'var(--danger)'
-                : 'var(--caution)';
-          return '<span style="font-size:12px;color:var(--text-dim)">'
-            + p.name + ' <strong style="color:' + c + '">' + p.status + '</strong></span>';
-        }).join(' &middot; ')
-      + '</div></div>';
-  }
-
-  // Drive day road risk banner
+ 
+  // ── Resort summary strip ─────────────────────────────────────
+  var resortStrip = '<div style="display:grid;grid-template-columns:repeat('+Math.min(snow.resorts.length,4)+',1fr);border-bottom:1px solid var(--border)">'
+    + snow.resorts.slice(0,4).map(function(r, idx) {
+        var scoreColor = r.ssScore >= 80 ? 'var(--frost)'
+                       : r.ssScore >= 60 ? 'var(--go)'
+                       : r.ssScore >= 40 ? 'var(--caution)'
+                       : r.ssScore > 0   ? 'var(--danger)'
+                       : 'var(--text-muted)';
+        var snowNum = r.snowDepthCm > 0
+          ? '<div style="font-size:16px;font-weight:700;font-family:var(--display);color:var(--frost);line-height:1;margin-bottom:2px">'+r.snowDepthCm+'cm</div>'
+          : '<div style="font-size:16px;font-weight:700;font-family:var(--display);color:var(--text-muted);line-height:1;margin-bottom:2px">—</div>';
+        var badge = r.isPowder
+          ? '<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:#ddeeff;color:#185fa5;font-weight:600">❄️</span>'
+          : r.isBluebird
+          ? '<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:#fdf0d8;color:#7a4800;font-weight:600">☀️</span>'
+          : '<span style="height:14px;display:inline-block"></span>';
+        return '<div style="padding:10px 6px;text-align:center;border-right:'+(idx<snow.resorts.length-1?'1px solid var(--border)':'none')+';cursor:pointer" onclick="toggleResortCard(\'rc-'+idx+'\')">'
+          +'<div style="font-size:9px;color:var(--text-muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r.name+'</div>'
+          + snowNum
+          +'<div style="display:flex;align-items:center;justify-content:center;gap:3px;margin-bottom:3px">'
+          +'<div style="width:6px;height:6px;border-radius:50%;background:'+scoreColor+'"></div>'
+          +'<span style="font-size:10px;color:var(--text-muted)">'+(r.ssScore>0?r.ssScore:'—')+'</span>'
+          +'</div>'
+          + badge
+          +'</div>';
+      }).join('')
+    + '</div>';
+ 
+  // ── Van context strip ────────────────────────────────────────
+  var r0 = snow.resorts[0];
+  var vanAlert = r0 && r0.snowAtVanLevel
+    ? '<span style="font-size:10px;font-weight:600;color:var(--caution);background:#fcf8e3;padding:2px 8px;border-radius:4px">❄️ Snow at van level</span>'
+    : '';
+  var vanStrip = '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">'
+    +'<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">🚐 Van · '+(r0&&r0.elevationM?r0.elevationM.toLocaleString()+'m':'—')+'</span>'
+    +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'
+    +(r0&&r0.botTempC!==null?'<span style="font-size:11px;color:var(--text-dim)">🌡️ <strong style="color:var(--text)">'+r0.botTempC+'°C</strong></span>':'')
+    +(r0&&r0.freezeM?'<span style="font-size:11px;color:var(--text-dim)">↑ Freeze <strong style="color:var(--text)">'+Math.round(r0.freezeM).toLocaleString()+'m</strong></span>':'')
+    +(r0&&r0.botWindKh?'<span style="font-size:11px;color:var(--text-dim)">💨 <strong style="color:var(--text)">'+r0.botWindKh+' km/h</strong></span>':'')
+    + vanAlert
+    +'</div></div>';
+ 
+  // ── Drive day road risk banner ───────────────────────────────
   var roadRiskHtml = '';
-  if (isDrive && snow.resorts.length) {
-    var r0 = snow.resorts[0];
+  if (isDrive && r0) {
     roadRiskHtml = r0.snowAtVanLevel
-      ? '<div style="padding:10px 18px;background:#fdf8ee;border-bottom:1px solid var(--border);font-size:12px;color:var(--caution);font-weight:600">⚠️ Snow possible at van level — freeze level ' + r0.freezeM + 'm</div>'
-      : '<div style="padding:10px 18px;background:#f0f8f0;border-bottom:1px solid var(--border);font-size:12px;color:var(--go)">✅ Freeze level above route — rain not snow at van level</div>';
+      ? '<div style="padding:9px 14px;background:#fdf8ee;border-bottom:1px solid var(--border);font-size:12px;color:var(--caution);font-weight:600">⚠️ Snow possible at van level — freeze level '+Math.round(r0.freezeM).toLocaleString()+'m</div>'
+      : '<div style="padding:9px 14px;background:#f0f8f0;border-bottom:1px solid var(--border);font-size:12px;color:var(--go)">✅ Freeze level above route — rain not snow at van level</div>';
   }
-
-  // Resort cards
-  var resortsHtml = snow.resorts.map(function(r) {
-    var snowColor = r.snowCm >= 10 ? 'var(--frost)'
-                  : r.snowCm >= 3  ? 'var(--go)'
-                  : 'var(--text-muted)';
-    var windColor = r.windKmh > 50 ? 'var(--danger)'
-                  : r.windKmh > 30 ? 'var(--caution)'
-                  : 'var(--go)';
-    var fitColor  = r.fitment.includes('Chains') ? 'var(--danger)'
-                  : r.fitment.includes('3PMSF')  ? 'var(--caution)'
-                  : 'var(--go)';
-
+ 
+  // ── Per-resort collapsible cards ─────────────────────────────
+  var resortsHtml = snow.resorts.map(function(r, idx) {
+ 
+    // Score colour
+    var scoreColor = r.ssScore >= 80 ? 'var(--frost)'
+                   : r.ssScore >= 60 ? 'var(--go)'
+                   : r.ssScore >= 40 ? 'var(--caution)'
+                   : r.ssScore > 0   ? 'var(--danger)'
+                   : 'var(--text-muted)';
+ 
+    // Badges
     var badges = '';
-    if (r.isPowder)   badges += ' <span style="font-size:10px;background:#e8f0f8;color:var(--frost);padding:2px 6px;border-radius:3px">❄️ Powder</span>';
-    if (r.isBluebird) badges += ' <span style="font-size:10px;background:#fdf8ee;color:var(--gold);padding:2px 6px;border-radius:3px">☀️ Bluebird</span>';
-
-    // Format freeze level as metres not km
-    var freezeStr = r.freezeM ? Math.round(r.freezeM).toLocaleString() + 'm' : '—';
-
-    return '<div style="padding:12px 18px;border-bottom:1px solid var(--border)">'
-      // Header row — name · elevation · badges
-      + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px">'
-      + '<span style="font-family:var(--display);font-size:14px;font-weight:700;color:var(--text)">' + r.name + '</span>'
-      + '<span style="font-size:11px;color:var(--text-muted);background:var(--bg3);padding:2px 6px;border-radius:3px">' + r.elevationM.toLocaleString() + 'm</span>'
+    if (r.isPowder)   badges += ' <span style="font-size:9px;background:#ddeeff;color:#185fa5;padding:1px 5px;border-radius:3px;font-weight:600">❄️ Powder</span>';
+    if (r.isBluebird) badges += ' <span style="font-size:9px;background:#fdf0d8;color:#7a4800;padding:1px 5px;border-radius:3px;font-weight:600">☀️ Bluebird</span>';
+ 
+    // Base depth bar colour
+    var depthColor = r.snowDepthCm >= 100 ? 'var(--frost)'
+                   : r.snowDepthCm >= 60  ? 'var(--go)'
+                   : r.snowDepthCm >= 30  ? 'var(--caution)'
+                   : r.snowDepthCm > 0    ? 'var(--danger)'
+                   : 'var(--border2)';
+    var depthPct = Math.min(100, Math.round((r.snowDepthCm / 150) * 100));
+ 
+    // Elevation temps — use WWO if available, fall back to Open-Meteo
+    var botTemp = r.botTempC !== null ? r.botTempC + '°' : '—';
+    var midTemp = r.midTempC !== null ? r.midTempC + '°' : '—';
+    var topTemp = r.topTempC !== null ? r.topTempC + '°' : '—';
+    var botWind = r.botWindKh || r.windKmh || 0;
+    var midWind = r.midWindKh || 0;
+    var topWind = r.topWindKh || 0;
+ 
+    // Wind colour
+    function windColor(w) {
+      return w > 50 ? 'var(--danger)' : w > 30 ? 'var(--caution)' : 'var(--go)';
+    }
+ 
+    // Fitment colour
+    var fitColor = r.fitment && r.fitment.includes('Chains') ? 'var(--danger)'
+                 : r.fitment && r.fitment.includes('3PMSF')  ? 'var(--caution)'
+                 : 'var(--go)';
+ 
+    // Collapsed by default except first resort
+    var isFirst = idx === 0;
+    var cardId  = 'rc-' + idx;
+ 
+    return '<div style="border-top:1px solid var(--border)" id="'+cardId+'">'
+      // Card header — always visible
+      +'<div style="display:flex;align-items:center;padding:11px 14px;cursor:pointer;gap:8px" onclick="toggleResortCard(\''+cardId+'\')">'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+      +'<span style="font-size:13px;font-weight:700;font-family:var(--display);color:var(--text)">'+r.name+'</span>'
       + badges
-      + '</div>'
-      // Stats row
-      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px">'
-      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px">3-Day Snow</div>'
-      + '<div style="font-size:18px;font-weight:700;color:' + snowColor + '">' + r.snowCm + 'cm</div></div>'
-      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px">Freeze Level</div>'
-      + '<div style="font-size:18px;font-weight:700;color:var(--frost)">' + freezeStr + '</div></div>'
-      + '<div><div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:2px">Wind</div>'
-      + '<div style="font-size:18px;font-weight:700;color:' + windColor + '">' + r.windKmh + ' km/h</div></div>'
-      + '</div>'
-      // Bottom row — condition | fitment | trend
-      + '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px">'
-      + '<span style="color:var(--text-dim)">' + r.condition + '</span>'
-      + '<div style="display:flex;gap:8px;align-items:center">'
-      + '<span style="color:' + fitColor + ';font-weight:600">' + r.fitment + '</span>'
-      + (r.trend ? '<span style="color:var(--text-muted)">' + r.trend + '</span>' : '')
-      + '</div></div>'
-      + '</div>';
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--text-muted)">'
+      +(r.elevationM?r.elevationM.toLocaleString()+'m':'')
+      +(r.snowDepthCm?' &middot; '+r.snowDepthCm+'cm base':'')
+      +(r.ssRating?' &middot; '+r.ssRating:'')
+      +'</div></div>'
+      // Score chip
+      +'<div style="display:flex;align-items:center;gap:5px;flex-shrink:0">'
+      +'<span style="font-size:15px;font-weight:700;font-family:var(--display);color:'+scoreColor+'">'+(r.ssScore>0?r.ssScore:'—')+'</span>'
+      +'<div style="width:36px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">'
+      +'<div style="height:100%;width:'+(r.ssScore||0)+'%;background:'+scoreColor+';border-radius:2px"></div>'
+      +'</div></div>'
+      +'<span class="rc-chev-'+cardId+'" style="font-size:12px;color:var(--gold);transition:transform 0.2s;display:inline-block;transform:'+(isFirst?'':'rotate(-90deg)')+'">›</span>'
+      +'</div>'
+      // Card body — collapsible
+      +'<div class="rc-body-'+cardId+'" style="border-top:1px solid var(--border);display:'+(isFirst?'block':'none')+'">'
+ 
+      // Base depth bar
+      +'<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)">'
+      +'<span style="font-size:20px;font-weight:700;font-family:var(--display);color:'+depthColor+';min-width:58px">'+(r.snowDepthCm?r.snowDepthCm+'cm':'—')+'</span>'
+      +'<div style="flex:1">'
+      +'<div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:3px">'
+      +'<div style="height:100%;width:'+depthPct+'%;background:'+depthColor+';border-radius:4px"></div>'
+      +'</div>'
+      +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted)">'
+      +'<span>0</span><span>Base depth</span><span>150cm</span>'
+      +'</div></div></div>'
+ 
+      // Elevation strip — bottom / mid / top
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
+      +[
+        {label:'Valley', temp:botTemp, wind:botWind, alt:r.elevationM},
+        {label:'Piste',  temp:midTemp, wind:midWind, alt:r.elevationM?Math.round(r.elevationM*1.3):null},
+        {label:'Summit', temp:topTemp, wind:topWind, alt:null}
+      ].map(function(e, ei) {
+        return '<div style="padding:8px 10px;text-align:center;border-right:'+(ei<2?'1px solid var(--border)':'none')+'">'
+          +'<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px">'+e.label+'</div>'
+          +'<div style="font-size:17px;font-weight:700;font-family:var(--display);line-height:1;margin-bottom:2px">'+e.temp+'</div>'
+          +'<div style="font-size:9px;color:'+windColor(e.wind)+'">💨 '+e.wind+' km/h</div>'
+          +(e.alt?'<div style="font-size:9px;color:var(--text-muted)">'+e.alt.toLocaleString()+'m</div>':'')
+          +'</div>';
+      }).join('')
+      +'</div>'
+ 
+      // Condition + fitment + trend row
+      +'<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">'
+      +'<span style="font-size:12px;color:var(--text-dim)">'+r.condition+'</span>'
+      +'<div style="display:flex;gap:8px;align-items:center;font-size:11px">'
+      +(r.fitment?'<span style="color:'+fitColor+';font-weight:600">'+r.fitment+'</span>':'')
+      +(r.trend?'<span style="color:var(--text-muted)">'+r.trend+'</span>':'')
+      +(r.chanceSnow>0?'<span style="color:var(--frost)">'+r.chanceSnow+'% snow</span>':'')
+      +'</div></div>'
+ 
+      // SnowSure tagline if available
+      +(r.ssTagline?'<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);font-style:italic;border-bottom:1px solid var(--border);background:var(--bg2)">'+r.ssTagline+'</div>':'')
+ 
+      +'</div></div>';
+ 
   }).join('');
-
-  var body = roadRiskHtml + passHtml + resortsHtml;
+ 
+  var body = roadRiskHtml + resortStrip + vanStrip + resortsHtml;
   return makeSection('snow', 'Snow &middot; Conditions', sectionMeta, '', body);
 }
+ 
+// Toggle individual resort card
+function toggleResortCard(id) {
+  var body  = document.querySelector('.rc-body-' + id);
+  var chev  = document.querySelector('.rc-chev-' + id);
+  if (!body) return;
+  var open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  if (chev) chev.style.transform = open ? '' : 'rotate(-90deg)';
+}
+
+
 
 function buildBudgetSection(budget) {
   if (!budget) return '';
