@@ -117,7 +117,49 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .state-message{padding:40px 20px;text-align:center;color:var(--text-muted);font-size:12px;line-height:1.8;}
 .state-message .icon{font-size:32px;display:block;margin-bottom:12px;}
 .footer{padding:20px;text-align:center;font-size:10px;color:var(--text-muted);letter-spacing:1px;border-top:1px solid var(--border);}
-.last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;}
+.last-updated{color:var(--text-muted);margin-top:4px;font-size:11px;margin-bottom:12px;}
+.footer-wordmark{font-family:var(--display);font-size:14px;font-weight:800;color:var(--text-dim);letter-spacing:-0.5px;margin-bottom:2px;}
+.settings-toggle{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:4px;cursor:pointer;margin-top:8px;transition:all 0.15s;}
+.settings-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.settings-panel{text-align:left;margin-top:12px;display:none;}
+.settings-panel.open{display:block;}
+.settings-group{border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px;background:var(--bg);}
+.settings-group-head{padding:7px 14px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.settings-group-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:600;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row-label{font-size:12px;color:var(--text-dim);}
+.settings-row-right{display:flex;align-items:center;gap:8px;}
+.settings-row-value{font-size:14px;font-weight:700;font-family:var(--display);color:var(--text);}
+.settings-row-unit{font-size:10px;color:var(--text-muted);}
+.s-edit-btn{background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:3px;cursor:pointer;}
+.s-edit-btn:hover{border-color:var(--frost);background:var(--bg3);}
+.resort-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border);}
+.resort-row:last-child{border-bottom:none;}
+.resort-name-s{font-size:12px;color:var(--text-dim);}
+.resort-name-s.inactive{color:var(--text-muted);}
+.resort-sub-s{font-size:9px;color:var(--text-muted);}
+.resort-row-right{display:flex;align-items:center;gap:8px;}
+.toggle{width:32px;height:18px;border-radius:9px;cursor:pointer;transition:background 0.2s;position:relative;border:none;outline:none;flex-shrink:0;}
+.toggle-on{background:var(--go);}
+.toggle-off{background:var(--border2);}
+.toggle-knob{position:absolute;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 2px rgba(0,0,0,0.2);}
+.toggle-on .toggle-knob{left:16px;}
+.toggle-off .toggle-knob{left:2px;}
+.toggle-lbl{font-size:10px;}
+.toggle-lbl-on{color:var(--go);}
+.toggle-lbl-off{color:var(--text-muted);}
+.remove-btn{background:none;border:none;color:var(--text-muted);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;}
+.remove-btn:hover{color:var(--danger);}
+.add-resort-row{display:flex;gap:8px;padding:10px 14px;}
+.add-resort-input{flex:1;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;outline:none;}
+.add-resort-input:focus{border-color:var(--frost);}
+.add-resort-input::placeholder{color:var(--text-muted);}
+.add-resort-btn{background:none;border:1px solid var(--border2);color:var(--frost);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;}
+.add-resort-btn:hover{border-color:var(--frost);}
+.settings-note{padding:6px 14px;font-size:9px;color:var(--text-muted);background:var(--bg2);border-top:1px solid var(--border);}
+.trip-select{width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:4px;outline:none;margin:8px 14px;width:calc(100% - 28px);}
+.trip-select:focus{border-color:var(--frost);}
 
 /* RESPONSIVE */
 @media(max-width:640px){
@@ -155,8 +197,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 </main>
 
 <footer class="footer">
-  AUDREY &middot; 8M BAILEY AUTOGRAPH
+  <div class="footer-wordmark">Au<span style="color:var(--gold)">drey</span></div>
+  <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">8M BAILEY AUTOGRAPH</div>
   <div class="last-updated" id="lastUpdated"></div>
+  <button class="settings-toggle" id="settingsBtn" onclick="toggleSettings()">⚙️ Settings</button>
+  <div class="settings-panel" id="settingsPanel"></div>
 </footer>
 
 <script>
@@ -274,7 +319,6 @@ function buildMain(d){
   parts.push(buildCountdown(d.meta,d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):''));
   parts.push(buildVehicleSection(d.vehicle));
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
-  if(d.fuelConfig)parts.push(buildPricesSection(d.fuelConfig));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
   if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
   if(d.budget)parts.push(buildBudgetSection(d.budget));
@@ -747,6 +791,157 @@ async function editPrice(type,current){
   }
 }
 
+// ── SETTINGS PANEL ────────────────────────────────────────────
+function toggleSettings(){
+  var panel=document.getElementById('settingsPanel');
+  var btn=document.getElementById('settingsBtn');
+  var open=panel.classList.toggle('open');
+  btn.textContent=open?'✕ Close':'⚙️ Settings';
+  if(open&&currentData)renderSettings(currentData);
+}
+
+function renderSettings(d){
+  var fc=d.fuelConfig||{};
+  var trips=d.trips||[];
+  var resorts=d.snowStatus&&d.snowStatus.resorts?d.snowStatus.resorts:[];
+  var html='';
+
+  // Default trip
+  html+='<div class="settings-group">'
+    +'<div class="settings-group-head"><span class="settings-group-title">Default trip</span></div>'
+    +'<div style="padding:10px 14px">'
+    +'<select class="trip-select" onchange="updateDefaultTrip(this.value)">'
+    +'<option value="">Auto — most recent active or upcoming</option>'
+    +trips.map(function(t){
+      var sel=t.name===(d.meta&&d.meta.tripName)?'selected':'';
+      return'<option value="'+t.name+'" '+sel+'>'+t.name+'</option>';
+    }).join('')
+    +'</select></div></div>';
+
+  // Fuel & costs
+  html+='<div class="settings-group">'
+    +'<div class="settings-group-head"><span class="settings-group-title">Fuel &amp; costs</span></div>'
+    +settingsRow('Diesel',fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—','£/L','diesel')
+    +settingsRow('LPG',fc.lpgPrice?fc.lpgPrice.toFixed(2):'—','£/L','lpg')
+    +settingsRow('Motorhome MPG',fc.mpg?fc.mpg.toFixed(1):'—','mpg','mpg')
+    +settingsRow('LPG tank',fc.tankLitres||'12','L','tank')
+    +'</div>';
+
+  // Snow resorts — winter only
+  if(d.meta&&d.meta.season==='winter'||true){ // show always for config purposes
+    html+='<div class="settings-group">'
+      +'<div class="settings-group-head"><span class="settings-group-title">Snow resorts</span></div>'
+      +'<div id="resortList">';
+
+    // Active resorts from SnowStatus sheet — read from API
+    var allResorts=d.allResorts||resorts;
+    allResorts.forEach(function(r){
+      var active=r.active!==false;
+      html+='<div class="resort-row" id="rr-'+r.name.replace(/\s/g,'_')+'">'
+        +'<div><div class="resort-name-s'+(active?'':' inactive')+'">'+r.name+'</div>'
+        +'<div class="resort-sub-s">'+(r.elevationM?r.elevationM+'m':'')+'</div></div>'
+        +'<div class="resort-row-right">'
+        +'<button class="toggle '+(active?'toggle-on':'toggle-off')+'" onclick="toggleResortActive(this,\''+r.name+'\')" aria-label="Toggle '+r.name+'">'
+        +'<div class="toggle-knob"></div></button>'
+        +'<span class="toggle-lbl '+(active?'toggle-lbl-on':'toggle-lbl-off')+'">'+(active?'Active':'Off')+'</span>'
+        +'<button class="remove-btn" onclick="removeResort(\''+r.name+'\')" title="Remove resort">✕</button>'
+        +'</div></div>';
+    });
+
+    html+='</div>'
+      +'<div class="add-resort-row">'
+      +'<input class="add-resort-input" id="resortInput" type="text" placeholder="Resort name or SnowSure slug…">'
+      +'<button class="add-resort-btn" onclick="addResort()">+ Add</button>'
+      +'</div>'
+      +'<div class="settings-note">Toggles update SnowStatus sheet. Changes take effect on next refresh.</div>'
+      +'</div>';
+  }
+
+  document.getElementById('settingsPanel').innerHTML=html;
+}
+
+function settingsRow(label,val,unit,type){
+  return'<div class="settings-row">'
+    +'<span class="settings-row-label">'+label+'</span>'
+    +'<div class="settings-row-right">'
+    +'<span class="settings-row-value">'+val+'</span>'
+    +'<span class="settings-row-unit">'+unit+'</span>'
+    +'<button class="s-edit-btn" onclick="editSetting(\''+type+'\',\''+val+'\')">Edit</button>'
+    +'</div></div>';
+}
+
+async function editSetting(type,current){
+  var labels={diesel:'Diesel price (£/L)',lpg:'LPG price (£/L)',mpg:'Motorhome MPG',tank:'LPG tank size (L)'};
+  var newVal=prompt(labels[type]+':',current);
+  if(!newVal||isNaN(parseFloat(newVal)))return;
+  try{
+    var params=new URLSearchParams();
+    params.set('action','update_setting');
+    params.set('type',type);
+    params.set('value',parseFloat(newVal));
+    params.set('_',Date.now());
+    var r=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.error)throw new Error(d.error);
+    await refresh();
+    renderSettings(currentData);
+  }catch(e){alert('Failed: '+e.message);}
+}
+
+async function toggleResortActive(btn,name){
+  var isOn=btn.classList.contains('toggle-on');
+  btn.classList.toggle('toggle-on',!isOn);
+  btn.classList.toggle('toggle-off',isOn);
+  var lbl=btn.nextElementSibling;
+  lbl.textContent=isOn?'Off':'Active';
+  lbl.className='toggle-lbl '+(isOn?'toggle-lbl-off':'toggle-lbl-on');
+  var nameEl=btn.closest('.resort-row').querySelector('.resort-name-s');
+  if(isOn)nameEl.classList.add('inactive');else nameEl.classList.remove('inactive');
+  try{
+    var params=new URLSearchParams();
+    params.set('action','toggle_resort');
+    params.set('resort',name);
+    params.set('active',String(!isOn));
+    params.set('_',Date.now());
+    await fetch(API_URL+'?'+params.toString(),{redirect:'follow'});
+  }catch(e){console.error('Toggle resort failed:',e);}
+}
+
+async function removeResort(name){
+  if(!confirm('Remove '+name+' from resort list?'))return;
+  try{
+    var params=new URLSearchParams();
+    params.set('action','remove_resort');
+    params.set('resort',name);
+    params.set('_',Date.now());
+    await fetch(API_URL+'?'+params.toString(),{redirect:'follow'});
+    var row=document.getElementById('rr-'+name.replace(/\s/g,'_'));
+    if(row)row.remove();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
+async function addResort(){
+  var input=document.getElementById('resortInput');
+  var val=input.value.trim();
+  if(!val)return;
+  try{
+    var params=new URLSearchParams();
+    params.set('action','add_resort');
+    params.set('resort',val);
+    params.set('_',Date.now());
+    var r=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
+    var d=await r.json();
+    if(d.error)throw new Error(d.error);
+    input.value='';
+    await refresh();
+    renderSettings(currentData);
+  }catch(e){alert('Failed to add resort: '+e.message);}
+}
+
+function updateDefaultTrip(name){
+  // Store in sessionStorage — trip selector already handles the display
+  if(name)loadTrip(name);
+}
 refresh();
 </script>
 </body>
