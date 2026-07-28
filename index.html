@@ -284,15 +284,80 @@ async function refresh(){
   finally{btn.classList.remove('loading');btn.textContent='\u21BB Refresh';}
 }
 
+function getSmartDefaults(meta) {
+  var status   = meta.tripStatus   || 'PRE_TRIP';
+  var dayType  = meta.todayType    || null;
+  var isWinter = meta.season       === 'winter';
+  var isDrive  = dayType && ['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(dayType) >= 0;
+  var isStay   = dayType === 'STAY';
+
+  // Base defaults — most things collapsed
+  var d = {
+    vehicle:   true,
+    lpg:       true,
+    weather:   false,
+    snow:      true,
+    budget:    true,
+    itinerary: true,
+    prices:    true
+  };
+
+  if (status === 'PRE_TRIP') {
+    d.itinerary = false; // show itinerary so you can plan
+    d.budget    = true;  // budget collapsed until needed
+    d.weather   = false; // weather always useful
+  }
+
+  if (status === 'ACTIVE') {
+    if (isDrive) {
+      d.vehicle   = false; // battery/temps matter on road
+      d.weather   = false; // conditions for today
+      d.itinerary = true;  // don't need full itinerary while driving
+      d.snow      = isWinter ? false : true; // snow open on winter drive days
+    }
+    if (isStay) {
+      d.lpg       = false; // heating tonight
+      d.weather   = false; // conditions today
+      d.snow      = isWinter ? false : true; // snow open on stay days in winter
+      d.vehicle   = true;  // less critical on stay days
+      d.itinerary = true;  // don't need itinerary on stay days
+    }
+  }
+
+  if (status === 'POST_TRIP') {
+    d.budget    = false; // reconcile actuals
+    d.vehicle   = true;
+    d.weather   = true;
+    d.itinerary = true;
+    d.snow      = true;
+  }
+
+  return d;
+}
+
 function render(d){
-  populateTripSelector(d.trips,d.meta.tripName);
-  // Set budget collapsed by default BEFORE rendering
-  var c=getCollapsed();
-  if(!('budget' in c))setCollapsed('budget',true);
-  document.getElementById('main').innerHTML=buildMain(d);
-  var ts=new Date(d.timestamp);
-  document.getElementById('lastUpdated').textContent=
-    'Last updated '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  populateTripSelector(d.trips, d.meta.tripName);
+
+  // Reset collapsed state when trip changes
+  var lastTrip = sessionStorage.getItem('audrey_trip');
+  if (lastTrip !== d.meta.tripName) {
+    sessionStorage.removeItem(COLLAPSE_KEY);
+    sessionStorage.setItem('audrey_trip', d.meta.tripName);
+  }
+
+  // Apply smart defaults only if no user preferences stored yet
+  var existing = getCollapsed();
+  if (Object.keys(existing).length === 0) {
+    var defaults = getSmartDefaults(d.meta);
+    Object.keys(defaults).forEach(function(id) {
+      setCollapsed(id, defaults[id]);
+    });
+  }
+
+  document.getElementById('main').innerHTML = buildMain(d);
+  var ts = new Date(d.timestamp);
+  document.getElementById('lastUpdated').textContent =
+    'Last updated ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
   applyCollapsed();
 }
 
