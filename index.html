@@ -808,7 +808,7 @@ function buildSnowSection(snow, meta, itin) {
       +'<span style="font-size:13px;font-weight:700;font-family:var(--display);color:var(--text)">'+r.name+'</span>'
       + badges
       +'</div>'
-      +'<div style="font-size:10px;color:var(--text-muted)">'
+      +'<div style="font-size:11px;color:var(--text-dim)">'
       +(r.elevationM?r.elevationM.toLocaleString()+'m':'')
       +(r.snowDepthCm?' &middot; '+r.snowDepthCm+'cm base':'')
       +(r.ssRating?' &middot; '+r.ssRating:'')
@@ -861,7 +861,7 @@ function buildSnowSection(snow, meta, itin) {
       +'</div></div>'
  
       // SnowSure tagline if available
-      +(r.ssTagline?'<div style="padding:6px 14px;font-size:11px;color:var(--text-muted);font-style:italic;border-bottom:1px solid var(--border);background:var(--bg2)">'+r.ssTagline+'</div>':'')
+      +(r.ssTagline?'<div style="padding:8px 14px;font-size:12px;color:var(--text-dim);border-bottom:1px solid var(--border);background:var(--bg2)">'+r.ssTagline+'</div>':'')
 
       // 3-day forecast strip
       +(r.forecast3d&&r.forecast3d.length
