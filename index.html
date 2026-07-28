@@ -740,7 +740,10 @@ function buildSnowSection(snow, meta, itin) {
     ? '<span style="font-size:10px;font-weight:600;color:var(--caution);background:#fcf8e3;padding:2px 8px;border-radius:4px">❄️ Snow at van level</span>'
     : '';
   var vanStrip = '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">'
-    +'<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">🚐 Van · '+(r0&&r0.elevationM?r0.elevationM.toLocaleString()+'m':'—')+'</span>'
+    +(function(){
+      var vanElev = currentData&&currentData.vehicle&&currentData.vehicle.vanElevationM;
+      return '<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">🚐 Van · '+(vanElev?vanElev.toLocaleString()+'m':'—')+'</span>';
+    })()
     +'<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">'
     +(r0&&r0.botTempC!==null?'<span style="font-size:11px;color:var(--text-dim)">🌡️ <strong style="color:var(--text)">'+r0.botTempC+'°C</strong></span>':'')
     +(r0&&r0.freezeM?'<span style="font-size:11px;color:var(--text-dim)">↑ Freeze <strong style="color:var(--text)">'+Math.round(r0.freezeM).toLocaleString()+'m</strong></span>':'')
