@@ -321,8 +321,8 @@ function buildMain(d){
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
   if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
-  if(d.budget)parts.push(buildBudgetSection(d.budget));
   if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
+  if(d.budget)parts.push(buildBudgetSection(d.budget));
   return parts.join('');
 }
 
