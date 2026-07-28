@@ -828,12 +828,24 @@ function buildSnowSection(snow, meta, itin) {
  
 // Toggle individual resort card
 function toggleResortCard(id) {
-  var body  = document.querySelector('.rc-body-' + id);
-  var chev  = document.querySelector('.rc-chev-' + id);
+  var body = document.querySelector('.rc-body-' + id);
+  var chev = document.querySelector('.rc-chev-' + id);
   if (!body) return;
   var open = body.style.display === 'none';
-  body.style.display = open ? 'block' : 'none';
-  if (chev) chev.style.transform = open ? '' : 'rotate(-90deg)';
+
+  // Close all other cards first
+  document.querySelectorAll('[class^="rc-body-"]').forEach(function(el) {
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('[class^="rc-chev-"]').forEach(function(el) {
+    el.style.transform = 'rotate(-90deg)';
+  });
+
+  // Open clicked card if it was closed
+  if (open) {
+    body.style.display = 'block';
+    if (chev) chev.style.transform = '';
+  }
 }
 
 
