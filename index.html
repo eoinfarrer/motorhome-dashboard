@@ -295,6 +295,7 @@ function getSmartDefaults(meta) {
   var d = {
     vehicle:   true,
     lpg:       true,
+    running: true,
     weather:   false,
     snow:      true,
     budget:    true,
@@ -382,6 +383,7 @@ function buildMain(d){
   var parts=[];
   parts.push(buildMasterBar(d.master,d.vehicle));
   parts.push(buildCountdown(d.meta,d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):''));
+  if(d.runningTotal)parts.push(buildRunningTotalSection(d.runningTotal));
   parts.push(buildVehicleSection(d.vehicle));
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
@@ -1174,6 +1176,33 @@ async function addResort(){
 function updateDefaultTrip(name){
   // Store in sessionStorage — trip selector already handles the display
   if(name)loadTrip(name);
+}
+
+
+function buildRunningTotalSection(rt) {
+  if (!rt) return '';
+  var body = '<div style="padding:12px 16px">'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">'
+    + '<div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px">Distance</div>'
+    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:var(--frost)">'+rt.totalKm+'<span style="font-size:11px;font-weight:400;color:var(--text-muted)"> km</span></div></div>'
+    + '<div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px">Drive time</div>'
+    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:var(--frost)">'+rt.durationStr+'</div></div>'
+    + '<div><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:3px">Fuel cost</div>'
+    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:var(--frost)">'+(rt.fuelCost?'&pound;'+rt.fuelCost:'&mdash;')+'</div></div>'
+    + '</div>'
+    // Leg breakdown
+    + '<div style="border-top:1px solid var(--border);padding-top:10px">'
+    + rt.legs.map(function(l){
+        return '<div style="display:grid;grid-template-columns:70px 1fr auto auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">'
+          + '<span style="color:var(--text-muted)">'+l.date.substring(5).replace('-','/')+'</span>'
+          + '<span style="color:var(--text-dim)">'+l.from+' → '+l.to+'</span>'
+          + '<span style="color:var(--frost);font-weight:600">'+l.km+'km</span>'
+          + '<span style="color:var(--text-muted)">'+l.fuel+'L</span>'
+          + '</div>';
+      }).join('')
+    + '</div></div>';
+
+  return makeSection('running', 'Trip so far &middot; '+rt.legCount+' drives', rt.totalKm+'km &middot; £'+(rt.fuelCost||'—'), '', body);
 }
 refresh();
 </script>
