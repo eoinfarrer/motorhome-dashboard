@@ -839,6 +839,22 @@ function buildSnowSection(snow, meta, itin) {
       +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted)">'
       +'<span>0</span><span>Base depth</span><span>150cm</span>'
       +'</div></div></div>'
+
+      // Snow history strip
+      +(r.snow24hCm||r.snow7dCm||r.seasonTotalCm
+        ?'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
+          +[
+            {label:'24h snow',  val:r.snow24hCm,     unit:'cm'},
+            {label:'7d snow',   val:r.snow7dCm,      unit:'cm'},
+            {label:'Season',    val:r.seasonTotalCm, unit:'cm'}
+          ].map(function(s){
+            return '<div style="padding:7px 10px;text-align:center;border-right:1px solid var(--border)">'
+              +'<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">'+s.label+'</div>'
+              +'<div style="font-size:15px;font-weight:700;font-family:var(--display);color:'+(s.val>0?'var(--frost)':'var(--text-muted)')+'">'+s.val+s.unit+'</div>'
+              +'</div>';
+          }).join('')
+          +'</div>'
+        :'')
  
       // Elevation strip — bottom / mid / top
       +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
@@ -875,6 +891,7 @@ function buildSnowSection(snow, meta, itin) {
           +'<div style="display:flex;gap:10px;font-size:11px;color:var(--text-dim)">'
           +'<span><strong style="color:var(--text)">'+r.liftsOpen+'</strong>/'+r.liftsTotal+' lifts</span>'
           +(r.runsTotal>0?'<span><strong style="color:var(--text)">'+r.runsOpen+'</strong>/'+r.runsTotal+' runs</span>':'')
+          +(r.surfaceCondition?'<span style="color:var(--text-muted)">'+r.surfaceCondition+'</span>':'')
           +'</div></div>'
           +'<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">'
           +'<div style="height:100%;width:'+Math.min(100,Math.round((r.liftsOpen/r.liftsTotal)*100))+'%;background:var(--frost);border-radius:3px"></div>'
