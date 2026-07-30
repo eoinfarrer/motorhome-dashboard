@@ -867,7 +867,19 @@ function buildSnowSection(snow, meta, itin) {
  
       // SnowSure tagline if available
       +(r.ssTagline?'<div style="padding:8px 14px;font-size:12px;color:var(--text-dim);border-bottom:1px solid var(--border);background:var(--bg2)">'+r.ssTagline+'</div>':'')
-
+// Lifts and runs
+      +(r.liftsTotal>0
+        ?'<div style="padding:8px 14px;border-bottom:1px solid var(--border)">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">'
+          +'<span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Lifts &amp; runs</span>'
+          +'<div style="display:flex;gap:10px;font-size:11px;color:var(--text-dim)">'
+          +'<span><strong style="color:var(--text)">'+r.liftsOpen+'</strong>/'+r.liftsTotal+' lifts</span>'
+          +(r.runsTotal>0?'<span><strong style="color:var(--text)">'+r.runsOpen+'</strong>/'+r.runsTotal+' runs</span>':'')
+          +'</div></div>'
+          +'<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">'
+          +'<div style="height:100%;width:'+Math.min(100,Math.round((r.liftsOpen/r.liftsTotal)*100))+'%;background:var(--frost);border-radius:3px"></div>'
+          +'</div></div>'
+        :'')
       // 3-day forecast strip
       +(r.forecast3d&&r.forecast3d.length
         ?'<div>'
