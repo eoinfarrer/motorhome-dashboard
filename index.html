@@ -1647,8 +1647,9 @@ async function runGPXAnalysis() {
     });
     var data = await r.json();
  
+    console.log('API response:', JSON.stringify(data).substring(0, 500));
     if (data.error) throw new Error(data.error);
-    if (!data.success) throw new Error('Analysis failed');
+    if (!data.success) throw new Error('Analysis failed — ' + JSON.stringify(data).substring(0, 200));
  
     cyclingResults = data;
     renderCyclingResults(data);
