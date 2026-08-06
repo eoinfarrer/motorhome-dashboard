@@ -252,11 +252,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">8M BAILEY AUTOGRAPH</div>
   <div class="last-updated" id="lastUpdated"></div>
   <button class="settings-toggle" id="settingsBtn" onclick="toggleSettings()">⚙️ Settings</button>
-<button class="settings-toggle" id="cyclingBtn" onclick="openCyclingModal()" style="margin-left:8px">
-  🚴 Analyse ride
-</button>
- 
-<!-- Cycling modal -->
+  <button class="settings-toggle" id="cyclingBtn" onclick="openCyclingModal()" style="margin-left:8px">🚴 Analyse ride</button>
+  <div class="settings-panel" id="settingsPanel"></div>
+</footer>
+
+<!-- Cycling modal — outside footer -->
 <div class="cycling-modal-overlay" id="cyclingModalOverlay" onclick="closeCyclingModalIfOutside(event)">
   <div class="cycling-modal" id="cyclingModal">
     <div class="cycling-modal-head">
@@ -270,7 +270,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 </div>
 <div class="settings-panel" id="settingsPanel"></div>
   
-</footer>
 
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbyrSj4d_ZA6IMnIfD5ZhT3DHY4_o0THKORntyf3C0rYsRwqRIuQTaTGQkqthQaJho8DHQ/exec';
