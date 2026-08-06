@@ -174,6 +174,57 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   .status-dot{animation:none;}
   .section-body,.section-chevron{transition:none;}
 }
+
+.cycling-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;}
+.cycling-modal-overlay.open{display:flex;}
+.cycling-modal{background:var(--bg);width:100%;max-height:92vh;border-radius:12px 12px 0 0;overflow-y:auto;}
+.cycling-modal-head{padding:14px 16px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.cycling-modal-title{font-family:var(--display);font-size:15px;font-weight:800;}
+.cycling-modal-close{background:none;border:none;font-size:20px;color:var(--text-muted);cursor:pointer;padding:0 4px;}
+.cycling-upload{padding:20px 16px;text-align:center;border-bottom:1px solid var(--border);}
+.cycling-upload-area{border:2px dashed var(--border2);border-radius:8px;padding:24px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;}
+.cycling-upload-area:hover{border-color:var(--frost);background:var(--bg2);}
+.cycling-upload-area.dragover{border-color:var(--frost);background:var(--bg2);}
+.cycling-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.cycling-input-group{display:flex;flex-direction:column;gap:4px;}
+.cycling-input-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+.cycling-input{background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:4px;width:100%;outline:none;}
+.cycling-input:focus{border-color:var(--frost);}
+.cycling-analyse-btn{width:100%;padding:13px;background:var(--frost);color:#fff;border:none;border-radius:6px;font-family:var(--display);font-size:14px;font-weight:700;cursor:pointer;}
+.cycling-analyse-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.cycling-results{padding:0;}
+.cycling-route-header{padding:14px 16px;border-bottom:1px solid var(--border);}
+.cycling-route-name{font-family:var(--display);font-size:16px;font-weight:800;margin-bottom:4px;}
+.cycling-route-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0;}
+.cycling-stat-val{font-size:16px;font-weight:700;font-family:var(--display);color:var(--frost);}
+.cycling-stat-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
+.cycling-risk-banner{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.cycling-seg{border-bottom:1px solid var(--border);cursor:pointer;}
+.cycling-seg:last-child{border-bottom:none;}
+.cycling-seg:hover{background:var(--bg3);}
+.cycling-seg-head{display:flex;align-items:center;padding:10px 16px;gap:8px;}
+.cycling-seg-km{font-size:10px;color:var(--text-muted);min-width:38px;}
+.cycling-seg-left{flex:1;}
+.cycling-seg-name{font-size:13px;font-weight:700;font-family:var(--display);}
+.cycling-seg-alt{font-size:10px;color:var(--text-muted);}
+.cycling-seg-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.cycling-seg-eta{font-size:11px;color:var(--text-dim);}
+.cycling-seg-body{padding:10px 16px;background:var(--bg2);border-top:1px solid var(--border);display:none;}
+.cycling-seg-body.open{display:block;}
+.cycling-wx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+.cycling-wx-item{text-align:center;}
+.cycling-wx-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;}
+.cycling-wx-val{font-size:15px;font-weight:700;font-family:var(--display);}
+.cycling-alert{padding:7px 10px;border-radius:4px;font-size:11px;margin-bottom:5px;line-height:1.4;}
+.cycling-alert:last-child{margin-bottom:0;}
+.c-alert-storm{background:#fdf0f0;color:#8b1a1a;border-left:3px solid #8b1a1a;}
+.c-alert-wind{background:#eaf3fb;color:#1a5276;border-left:3px solid #1a5276;}
+.c-alert-heat{background:#fdf8ee;color:#7d4e00;border-left:3px solid #7d4e00;}
+.c-alert-cold{background:#eaf0fb;color:#1a3276;border-left:3px solid #1a3276;}
+.c-alert-ok{background:#f0f8f2;color:var(--go);border-left:3px solid var(--go);}
+.cycling-gpx-download{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg2);}
+.cycling-loading{padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
+
 </style>
 </head>
 <body>
@@ -201,7 +252,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">8M BAILEY AUTOGRAPH</div>
   <div class="last-updated" id="lastUpdated"></div>
   <button class="settings-toggle" id="settingsBtn" onclick="toggleSettings()">⚙️ Settings</button>
-  <div class="settings-panel" id="settingsPanel"></div>
+<button class="settings-toggle" id="cyclingBtn" onclick="openCyclingModal()" style="margin-left:8px">
+  🚴 Analyse ride
+</button>
+ 
+<!-- Cycling modal -->
+<div class="cycling-modal-overlay" id="cyclingModalOverlay" onclick="closeCyclingModalIfOutside(event)">
+  <div class="cycling-modal" id="cyclingModal">
+    <div class="cycling-modal-head">
+      <span class="cycling-modal-title">🚴 Ride Weather Analysis</span>
+      <button class="cycling-modal-close" onclick="closeCyclingModal()">✕</button>
+    </div>
+    <div id="cyclingModalBody">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+<div class="settings-panel" id="settingsPanel"></div>
+  
 </footer>
 
 <script>
@@ -1207,6 +1275,237 @@ function updateDefaultTrip(name){
   if(name)loadTrip(name);
 }
 
+// ── GPX PARSER MODULE — paste into index.html ────────────────
+// Handles both namespaced (Strava) and non-namespaced GPX files
+// Works with <trk>/<trkpt> and <rte>/<rtept> formats
+
+// ── Main parse function ───────────────────────────────────────
+function parseGPX(xmlText) {
+  var parser = new DOMParser();
+  var doc    = parser.parseFromString(xmlText, 'text/xml');
+
+  // Handle namespace — Strava uses http://www.topografix.com/GPX/1/1
+  // Try namespaced first, fall back to non-namespaced
+  var NS = 'http://www.topografix.com/GPX/1/1';
+
+  function getPoints(tag) {
+    var pts = doc.getElementsByTagNameNS(NS, tag);
+    if (!pts.length) pts = doc.getElementsByTagName(tag);
+    return Array.from(pts);
+  }
+
+  function getText(el, tag) {
+    var found = el.getElementsByTagNameNS(NS, tag);
+    if (!found.length) found = el.getElementsByTagName(tag);
+    return found.length ? found[0].textContent.trim() : '';
+  }
+
+  // Get track points (recorded) or route points (planned)
+  var points = getPoints('trkpt');
+  if (!points.length) points = getPoints('rtept');
+  if (!points.length) return null;
+
+  // Extract lat/lon/elevation per point
+  var trackPoints = [];
+  var cumKm = 0;
+  var prevLat, prevLon;
+
+  points.forEach(function(pt, i) {
+    var lat = parseFloat(pt.getAttribute('lat'));
+    var lon = parseFloat(pt.getAttribute('lon'));
+    var ele = parseFloat(getText(pt, 'ele')) || 0;
+
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    if (i > 0 && prevLat !== undefined) {
+      cumKm += haversineKm(prevLat, prevLon, lat, lon);
+    }
+
+    trackPoints.push({
+      lat:        lat,
+      lon:        lon,
+      ele:        ele,
+      distanceKm: Math.round(cumKm * 10) / 10
+    });
+
+    prevLat = lat;
+    prevLon = lon;
+  });
+
+  if (!trackPoints.length) return null;
+
+  // Route name
+  var nameEl = doc.getElementsByTagNameNS(NS, 'name');
+  if (!nameEl.length) nameEl = doc.getElementsByTagName('name');
+  var routeName = nameEl.length ? nameEl[0].textContent.trim() : 'Route';
+
+  // Total elevation gain
+  var totalEleGain = 0;
+  for (var i = 1; i < trackPoints.length; i++) {
+    var gain = trackPoints[i].ele - trackPoints[i-1].ele;
+    if (gain > 0) totalEleGain += gain;
+  }
+
+  return {
+    name:        routeName,
+    totalKm:     Math.round(trackPoints[trackPoints.length-1].distanceKm * 10) / 10,
+    totalEleM:   Math.round(totalEleGain),
+    minEle:      Math.round(Math.min.apply(null, trackPoints.map(function(p){ return p.ele; }))),
+    maxEle:      Math.round(Math.max.apply(null, trackPoints.map(function(p){ return p.ele; }))),
+    points:      trackPoints
+  };
+}
+
+// ── Haversine distance ────────────────────────────────────────
+function haversineKm(lat1, lon1, lat2, lon2) {
+  var R    = 6371;
+  var dLat = (lat2-lat1) * Math.PI/180;
+  var dLon = (lon2-lon1) * Math.PI/180;
+  var a    = Math.sin(dLat/2)*Math.sin(dLat/2)
+           + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)
+           * Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── Wind bearing calculation ──────────────────────────────────
+function calcBearing(lat1, lon1, lat2, lon2) {
+  var dLon  = (lon2-lon1) * Math.PI/180;
+  var lat1r = lat1 * Math.PI/180;
+  var lat2r = lat2 * Math.PI/180;
+  var y     = Math.sin(dLon) * Math.cos(lat2r);
+  var x     = Math.cos(lat1r)*Math.sin(lat2r) - Math.sin(lat1r)*Math.cos(lat2r)*Math.cos(dLon);
+  return (Math.atan2(y, x) * 180/Math.PI + 360) % 360;
+}
+
+// ── Segment detection — finds key climbs and cols ─────────────
+function detectSegments(gpx, startTime, paceMinPerKm) {
+  var points = gpx.points;
+  paceMinPerKm = paceMinPerKm || 4.5; // default pace flat
+
+  // Sample every Nth point for performance
+  var SAMPLE = Math.max(1, Math.floor(points.length / 150));
+  var sampled = [];
+  for (var i = 0; i < points.length; i += SAMPLE) {
+    sampled.push(points[i]);
+  }
+
+  // Find local elevation maxima (col summits)
+  var rawSummits = [];
+  var WIN = 3; // window either side
+
+  for (var i = WIN; i < sampled.length - WIN; i++) {
+    var pt  = sampled[i];
+    var ele = pt.ele;
+
+    // Check if local maximum
+    var isMax = true;
+    for (var j = i-WIN; j <= i+WIN; j++) {
+      if (j !== i && sampled[j].ele >= ele) { isMax = false; break; }
+    }
+
+    if (!isMax || ele < 800) continue; // ignore low-altitude noise
+
+    // Check elevation gain approaching summit
+    var lookbackEle = sampled[Math.max(0, i-10)].ele;
+    var gain = ele - lookbackEle;
+    if (gain < 80) continue; // not a significant climb
+
+    // Calculate ETA at this point
+    var etaMins = calcETA(pt.distanceKm, paceMinPerKm, gain);
+    var eta     = new Date(startTime.getTime() + etaMins * 60000);
+
+    // Route bearing at this segment (for crosswind calculation)
+    var prevPt = sampled[Math.max(0, i-5)];
+    var bearing = calcBearing(prevPt.lat, prevPt.lon, pt.lat, pt.lon);
+
+    rawSummits.push({
+      lat:        pt.lat,
+      lon:        pt.lon,
+      ele:        Math.round(ele),
+      distanceKm: pt.distanceKm,
+      etaISO:     eta.toISOString(),
+      etaStr:     formatTime_(eta),
+      elevGain:   Math.round(gain),
+      bearing:    Math.round(bearing),
+      type:       'summit'
+    });
+  }
+
+  // Deduplicate summits within 1km of each other — keep highest
+  var summits = [];
+  rawSummits.forEach(function(s) {
+    var nearby = summits.findIndex(function(existing) {
+      return Math.abs(existing.distanceKm - s.distanceKm) < 1.0;
+    });
+    if (nearby >= 0) {
+      if (s.ele > summits[nearby].ele) summits[nearby] = s;
+    } else {
+      summits.push(s);
+    }
+  });
+
+  // Add start
+  var startPt = points[0];
+  var startEta = new Date(startTime.getTime());
+  summits.unshift({
+    lat: startPt.lat, lon: startPt.lon, ele: Math.round(startPt.ele),
+    distanceKm: 0, etaISO: startEta.toISOString(),
+    etaStr: formatTime_(startEta), elevGain: 0,
+    bearing: 0, type: 'start', name: 'Start'
+  });
+
+  // Add finish
+  var finishPt  = points[points.length-1];
+  var totalMins = calcETA(finishPt.distanceKm, paceMinPerKm, 0);
+  var finishEta = new Date(startTime.getTime() + totalMins * 60000);
+  summits.push({
+    lat: finishPt.lat, lon: finishPt.lon, ele: Math.round(finishPt.ele),
+    distanceKm: finishPt.distanceKm, etaISO: finishEta.toISOString(),
+    etaStr: formatTime_(finishEta), elevGain: 0,
+    bearing: 0, type: 'finish', name: 'Finish'
+  });
+
+  return summits;
+}
+
+// ── ETA calculation — pace adjusted for gradient ──────────────
+function calcETA(distanceKm, basePaceMinPerKm, elevGain) {
+  // Rough gradient penalty — 1% grade adds ~30sec/km
+  var gradientPenalty = elevGain > 0 ? (elevGain / distanceKm) * 0.005 : 0;
+  var adjustedPace    = basePaceMinPerKm * (1 + Math.min(gradientPenalty, 1.5));
+  return distanceKm * adjustedPace;
+}
+
+// ── Format time helper ────────────────────────────────────────
+function formatTime_(date) {
+  return date.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+
+// ── Generate alert GPX for Garmin ────────────────────────────
+function generateAlertGPX(routeName, segments) {
+  var wpts = segments.filter(function(s) {
+    return s.overallRisk && s.overallRisk !== 'ok' && s.type !== 'start';
+  });
+
+  if (!wpts.length) return null;
+
+  var xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<gpx version="1.1" creator="Audrey · Cima">\n'
+    + '  <metadata><name>' + routeName + ' · Cima Alerts</name></metadata>\n';
+
+  wpts.forEach(function(s) {
+    var alertLabel = s.risks && s.risks.length ? s.risks[0].label.substring(0,30) : '⚠️ Check conditions';
+    xml += '  <wpt lat="' + s.lat + '" lon="' + s.lon + '">\n'
+        +  '    <ele>' + s.ele + '</ele>\n'
+        +  '    <name>' + alertLabel + '</name>\n'
+        +  '    <desc>km ' + s.distanceKm + ' · ETA ' + s.etaStr
+        +  ' · ' + (s.tempC !== undefined ? s.tempC + '°C' : '') + '</desc>\n'
+        +  '  </wpt>\n';
+  });
+
+  xml += '</gpx>';
+  return xml;
+}
 
 function buildRunningTotalSection(rt) {
   if (!rt) return '';
@@ -1233,6 +1532,275 @@ function buildRunningTotalSection(rt) {
 
   return makeSection('running', 'Trip so far &middot; '+rt.legCount+' drives', rt.totalKm+'km &middot; £'+(rt.fuelCost||'—'), '', body);
 }
+
+var cyclingGPX     = null; // parsed GPX object
+var cyclingSegments = null; // detected segments
+var cyclingResults  = null; // weather analysis results
+ 
+function openCyclingModal() {
+  document.getElementById('cyclingModalOverlay').classList.add('open');
+  renderCyclingUpload();
+}
+ 
+function closeCyclingModal() {
+  document.getElementById('cyclingModalOverlay').classList.remove('open');
+}
+ 
+function closeCyclingModalIfOutside(e) {
+  if (e.target === document.getElementById('cyclingModalOverlay')) closeCyclingModal();
+}
+ 
+function renderCyclingUpload() {
+  var body = document.getElementById('cyclingModalBody');
+  body.innerHTML = '<div class="cycling-upload">'
+    + '<div class="cycling-upload-area" id="cyclingDropZone" onclick="document.getElementById(\'cyclingFileInput\').click()">'
+    + '<div style="font-size:28px;margin-bottom:6px">🗺️</div>'
+    + '<div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:4px">Upload GPX file</div>'
+    + '<div style="font-size:11px;color:var(--text-muted)">Strava · Garmin · RideWithGPS · Komoot</div>'
+    + '</div>'
+    + '<input type="file" id="cyclingFileInput" accept=".gpx" style="display:none" onchange="handleGPXFile(event)">'
+    + '<div class="cycling-inputs">'
+    + '<div class="cycling-input-group">'
+    + '<label class="cycling-input-label">Start time</label>'
+    + '<input class="cycling-input" type="time" id="cyclingStartTime" value="06:30">'
+    + '</div>'
+    + '<div class="cycling-input-group">'
+    + '<label class="cycling-input-label">Pace (min/km flat)</label>'
+    + '<input class="cycling-input" type="number" id="cyclingPace" value="4.5" step="0.5" min="2" max="10">'
+    + '</div>'
+    + '</div>'
+    + '<button class="cycling-analyse-btn" id="cyclingAnalyseBtn" onclick="runGPXAnalysis()" disabled>Select a GPX file to analyse</button>'
+    + '</div>';
+ 
+  // Set up drag and drop
+  var dropZone = document.getElementById('cyclingDropZone');
+  dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    var file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.gpx')) processGPXFile(file);
+  });
+}
+ 
+function handleGPXFile(event) {
+  var file = event.target.files[0];
+  if (file) processGPXFile(file);
+}
+ 
+function processGPXFile(file) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var gpx = parseGPX(e.target.result);
+    if (!gpx) {
+      alert('Could not parse GPX file — check format');
+      return;
+    }
+    cyclingGPX = gpx;
+ 
+    // Update upload area to show file loaded
+    var dropZone = document.getElementById('cyclingDropZone');
+    dropZone.innerHTML = '<div style="font-size:20px;margin-bottom:4px">✅</div>'
+      + '<div style="font-family:var(--display);font-size:13px;font-weight:700">' + gpx.name + '</div>'
+      + '<div style="font-size:11px;color:var(--text-muted)">'
+      + gpx.totalKm + 'km &middot; ' + gpx.totalEleM.toLocaleString() + 'm &middot; '
+      + gpx.points.length.toLocaleString() + ' points</div>';
+ 
+    // Enable analyse button
+    var btn = document.getElementById('cyclingAnalyseBtn');
+    btn.disabled = false;
+    btn.textContent = '🌤️ Analyse weather for this route';
+  };
+  reader.readAsText(file);
+}
+ 
+async function runGPXAnalysis() {
+  if (!cyclingGPX) return;
+ 
+  var startTimeStr = document.getElementById('cyclingStartTime').value || '06:30';
+  var pace         = parseFloat(document.getElementById('cyclingPace').value) || 4.5;
+ 
+  // Build start datetime — use today's date + selected time
+  var today    = new Date();
+  var parts    = startTimeStr.split(':');
+  var startDt  = new Date(today.getFullYear(), today.getMonth(), today.getDate(),
+                          parseInt(parts[0]), parseInt(parts[1]), 0);
+ 
+  // Detect segments
+  cyclingSegments = detectSegments(cyclingGPX, startDt, pace);
+ 
+  // Show loading
+  document.getElementById('cyclingModalBody').innerHTML =
+    '<div class="cycling-loading">🌤️ Fetching weather for ' + cyclingSegments.length + ' segments...<br>'
+    + '<span style="font-size:11px;color:var(--text-muted)">This takes a few seconds</span></div>';
+ 
+  try {
+    var params = new URLSearchParams();
+    params.set('action',    'analyse_gpx');
+    params.set('segments',  JSON.stringify(cyclingSegments));
+    params.set('routeName', cyclingGPX.name);
+    params.set('totalKm',   cyclingGPX.totalKm);
+    params.set('totalEleM', cyclingGPX.totalEleM);
+    params.set('_',         Date.now());
+ 
+    var r = await fetch(API_URL + '?' + params.toString(), {
+      redirect: 'follow',
+      headers: { 'Accept': 'application/json' }
+    });
+    var data = await r.json();
+ 
+    if (data.error) throw new Error(data.error);
+    if (!data.success) throw new Error('Analysis failed');
+ 
+    cyclingResults = data;
+    renderCyclingResults(data);
+ 
+  } catch(err) {
+    document.getElementById('cyclingModalBody').innerHTML =
+      '<div class="cycling-loading" style="color:var(--danger)">❌ Analysis failed: ' + err.message + '</div>';
+  }
+}
+ 
+function renderCyclingResults(data) {
+  var segs = data.segments || [];
+ 
+  // Overall risk colour
+  var riskColor = data.routeRisk === 'danger'  ? 'var(--danger)'
+                : data.routeRisk === 'caution' ? 'var(--caution)'
+                : 'var(--go)';
+  var riskLabel = data.routeRisk === 'danger'  ? '🔴 High risk'
+                : data.routeRisk === 'caution' ? '🟡 Caution'
+                : '🟢 All clear';
+ 
+  // Check if any alerts for GPX download
+  var hasAlerts = segs.some(function(s){ return s.overallRisk && s.overallRisk !== 'ok'; });
+ 
+  var html = ''
+    // Route header
+    + '<div class="cycling-route-header">'
+    + '<div class="cycling-route-name">' + (data.routeName || 'Route') + '</div>'
+    + '<div class="cycling-route-stats">'
+    + '<div class="cycling-stat"><div class="cycling-stat-val">' + data.totalKm + '</div><div class="cycling-stat-label">km</div></div>'
+    + '<div class="cycling-stat"><div class="cycling-stat-val">' + (data.totalEleM||0).toLocaleString() + '</div><div class="cycling-stat-label">metres</div></div>'
+    + '<div class="cycling-stat"><div class="cycling-stat-val">' + segs.length + '</div><div class="cycling-stat-label">segments</div></div>'
+    + '</div></div>'
+    // Risk banner
+    + '<div class="cycling-risk-banner">'
+    + '<span style="font-family:var(--display);font-size:13px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</span>'
+    + '<button onclick="openCyclingModal()" style="background:none;border:none;font-size:11px;color:var(--frost);cursor:pointer">← New route</button>'
+    + '</div>'
+    // Segments
+    + '<div>';
+ 
+  segs.forEach(function(seg, idx) {
+    var riskIcon = seg.overallRisk === 'danger'  ? '🔴'
+                 : seg.overallRisk === 'caution' ? '⚠️'
+                 : seg.type === 'finish'         ? '🏁'
+                 : seg.type === 'start'          ? '🚴'
+                 : '✅';
+ 
+    var segName = seg.type === 'start'  ? 'Start'
+                : seg.type === 'finish' ? 'Finish'
+                : seg.ele + 'm col';
+ 
+    html += '<div class="cycling-seg" onclick="toggleCyclingSeg(\'cs' + idx + '\')">'
+      + '<div class="cycling-seg-head">'
+      + '<div class="cycling-seg-km">km ' + seg.distanceKm + '</div>'
+      + '<div class="cycling-seg-left">'
+      + '<div class="cycling-seg-name">' + segName + '</div>'
+      + '<div class="cycling-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr + '</div>'
+      + '</div>'
+      + '<div class="cycling-seg-right">'
+      + '<span style="font-size:11px;color:var(--text-dim)">'
+      + (seg.tempC !== null && seg.tempC !== undefined ? seg.tempC + '°' : '') + '</span>'
+      + '<span style="font-size:18px">' + riskIcon + '</span>'
+      + '</div></div>'
+      // Expanded body
+      + '<div class="cycling-seg-body" id="cs' + idx + '">';
+ 
+    if (seg.error) {
+      html += '<div class="cycling-alert c-alert-ok">⚠️ Could not fetch weather: ' + seg.error + '</div>';
+    } else {
+      html += '<div class="cycling-wx-grid">'
+        + '<div class="cycling-wx-item"><div class="cycling-wx-label">Temp</div>'
+        + '<div class="cycling-wx-val" style="color:' + (seg.tempC > 28 ? 'var(--caution)' : seg.tempC < 5 ? 'var(--frost)' : 'var(--text)') + '">'
+        + (seg.tempC !== null ? seg.tempC + '°C' : '—') + '</div></div>'
+        + '<div class="cycling-wx-item"><div class="cycling-wx-label">Wind</div>'
+        + '<div class="cycling-wx-val" style="color:' + (seg.windKmh > 35 ? 'var(--danger)' : seg.windKmh > 20 ? 'var(--caution)' : 'var(--go)') + '">'
+        + seg.windKmh + 'km/h</div></div>'
+        + '<div class="cycling-wx-item"><div class="cycling-wx-label">Rain</div>'
+        + '<div class="cycling-wx-val" style="color:' + (seg.precipProb > 60 ? 'var(--danger)' : seg.precipProb > 30 ? 'var(--caution)' : 'var(--go)') + '">'
+        + seg.precipProb + '%</div></div>'
+        + '</div>'
+        + '<div style="font-size:12px;color:var(--text-dim);margin-bottom:8px">' + (seg.condition || '') + '</div>';
+ 
+      if (seg.risks && seg.risks.length) {
+        seg.risks.forEach(function(r) {
+          var cls = r.type === 'storm' ? 'c-alert-storm'
+                  : r.type === 'wind'  ? 'c-alert-wind'
+                  : r.type === 'heat'  ? 'c-alert-heat'
+                  : 'c-alert-cold';
+          html += '<div class="cycling-alert ' + cls + '">' + r.label + '</div>';
+        });
+      } else {
+        html += '<div class="cycling-alert c-alert-ok">✅ Clear conditions at this segment</div>';
+      }
+    }
+ 
+    html += '</div></div>';
+  });
+ 
+  html += '</div>';
+ 
+  // Alert GPX download
+  if (hasAlerts) {
+    html += '<div class="cycling-gpx-download">'
+      + '<div style="font-size:12px;font-weight:600;color:var(--go);margin-bottom:4px">📎 Alert GPX ready</div>'
+      + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:10px">'
+      + 'Waypoint alerts at risk segments — load to Garmin Connect tonight, syncs overnight.</div>'
+      + '<button onclick="downloadAlertGPX()" style="width:100%;padding:11px;background:var(--go);color:#fff;border:none;border-radius:6px;font-family:var(--display);font-size:13px;font-weight:700;cursor:pointer">'
+      + '⬇️ Download alert GPX</button>'
+      + '</div>';
+  }
+ 
+  document.getElementById('cyclingModalBody').innerHTML = html;
+}
+ 
+function toggleCyclingSeg(id) {
+  var body = document.getElementById(id);
+  if (!body) return;
+  var open = body.classList.contains('open');
+  document.querySelectorAll('.cycling-seg-body').forEach(function(b){ b.classList.remove('open'); });
+  if (!open) body.classList.add('open');
+}
+ 
+function downloadAlertGPX() {
+  if (!cyclingResults || !cyclingSegments) return;
+ 
+  // Merge weather results back into segments for GPX generation
+  var enriched = cyclingSegments.map(function(seg, i) {
+    return Object.assign({}, seg, cyclingResults.segments[i] || {});
+  });
+ 
+  var gpxContent = generateAlertGPX(cyclingResults.routeName, enriched);
+  if (!gpxContent) {
+    alert('No risk alerts detected — no GPX needed!');
+    return;
+  }
+ 
+  // Download the file
+  var blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = (cyclingResults.routeName || 'route').replace(/\s+/g,'-') + '-cima-alerts.gpx';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+ 
 refresh();
 </script>
 </body>
