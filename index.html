@@ -1380,7 +1380,7 @@ function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
   flatSpeedKmh  = flatSpeedKmh  || 35;
   climbSpeedKmh = climbSpeedKmh || 10;
   var paceMinPerKm = 60 / flatSpeedKmh;
-  console.log('detectSegments — maxEle:', gpx.maxEle, 'points:', points.length, 'flatSpeed:', flatSpeedKmh);
+  
 
   // Sample every Nth point for performance
   // More samples for shorter routes — better resolution
