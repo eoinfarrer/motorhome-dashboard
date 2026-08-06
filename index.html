@@ -1635,17 +1635,26 @@ async function runGPXAnalysis() {
     + '<span style="font-size:11px;color:var(--text-muted)">This takes a few seconds</span></div>';
  
   try {
-    var r = await fetch(API_URL + '?action=analyse_gpx&_=' + Date.now(), {
-      method: 'POST',
+    // Trim segments to key fields only for GET request
+    var trimmedSegs = cyclingSegments.map(function(s) {
+      return {
+        lat: s.lat, lon: s.lon, ele: s.ele,
+        distanceKm: s.distanceKm, etaISO: s.etaISO,
+        etaStr: s.etaStr, type: s.type, bearing: s.bearing || 0
+      };
+    });
+
+    var params = new URLSearchParams();
+    params.set('action',    'analyse_gpx');
+    params.set('segments',  JSON.stringify(trimmedSegs));
+    params.set('routeName', cyclingGPX.name);
+    params.set('totalKm',   cyclingGPX.totalKm);
+    params.set('totalEleM', cyclingGPX.totalEleM);
+    params.set('_',         Date.now());
+
+    var r = await fetch(API_URL + '?' + params.toString(), {
       redirect: 'follow',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        action:    'analyse_gpx',
-        segments:  JSON.stringify(cyclingSegments),
-        routeName: cyclingGPX.name,
-        totalKm:   cyclingGPX.totalKm,
-        totalEleM: cyclingGPX.totalEleM
-      }).toString()
+      headers: { 'Accept': 'application/json' }
     });
     var data = await r.json();
  
