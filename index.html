@@ -1662,7 +1662,16 @@ async function runGPXAnalysis() {
  
   // Detect segments
   cyclingSegments = detectSegments(cyclingGPX, startDt, flatSpeed, climbSpeed);
- 
+ // Cap at 10 segments to avoid URL length issues
+  if (cyclingSegments.length > 10) {
+    var start  = cyclingSegments[0];
+    var finish = cyclingSegments[cyclingSegments.length - 1];
+    var middle = cyclingSegments.slice(1, -1)
+      .sort(function(a,b){ return b.ele - a.ele; }) // highest first
+      .slice(0, 8);
+    middle.sort(function(a,b){ return a.distanceKm - b.distanceKm; }); // restore order
+    cyclingSegments = [start].concat(middle).concat([finish]);
+  }
   console.log('Segments to analyse:', JSON.stringify(cyclingSegments).substring(0, 500));
   console.log('Segment count:', cyclingSegments ? cyclingSegments.length : 'null');
   // Show loading
