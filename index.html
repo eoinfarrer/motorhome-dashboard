@@ -1751,7 +1751,7 @@ function renderCyclingResults(data) {
       + '<div class="cycling-seg-left">'
       + '<div class="cycling-seg-name">' + segName + '</div>'
       +'<div class="cycling-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr
-      +(seg.crosswindAngle > 45 && seg.crosswindAngle < 135 ? ' · ⚠️ Crosswind' : '')
+      +(seg.crosswindAngle > 45 && seg.crosswindAngle < 135 && seg.windKmh > 25 ? ' · ⚠️ Crosswind' : '')
       +'</div>'
       + '</div>'
       + '<div class="cycling-seg-right">'
