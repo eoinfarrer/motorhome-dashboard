@@ -1635,7 +1635,7 @@ async function runGPXAnalysis() {
     + '<span style="font-size:11px;color:var(--text-muted)">This takes a few seconds</span></div>';
  
   try {
-    vvar r = await fetch(API_URL + '?action=analyse_gpx&_=' + Date.now(), {
+    var r = await fetch(API_URL + '?action=analyse_gpx&_=' + Date.now(), {
       method: 'POST',
       redirect: 'follow',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
