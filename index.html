@@ -1382,7 +1382,9 @@ function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
   var paceMinPerKm = 60 / flatSpeedKmh;
 
   // Sample every Nth point for performance
-  var SAMPLE = Math.max(1, Math.floor(points.length / 150));
+  // More samples for shorter routes — better resolution
+  var targetSamples = gpx.totalKm > 100 ? 150 : gpx.totalKm > 50 ? 200 : 300;
+  var SAMPLE = Math.max(1, Math.floor(points.length / targetSamples));
   var sampled = [];
   for (var i = 0; i < points.length; i += SAMPLE) {
     sampled.push(points[i]);
@@ -1439,8 +1441,10 @@ function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
   // Deduplicate summits within 1km of each other — keep highest
   var summits = [];
   rawSummits.forEach(function(s) {
+    // Smaller dedup window for local routes — 0.5km, 2km for Alpine
+    var dedupKm = gpx.maxEle > 1000 ? 2.0 : 0.5;
     var nearby = summits.findIndex(function(existing) {
-      return Math.abs(existing.distanceKm - s.distanceKm) < 1.0;
+      return Math.abs(existing.distanceKm - s.distanceKm) < dedupKm;
     });
     if (nearby >= 0) {
       if (s.ele > summits[nearby].ele) summits[nearby] = s;
