@@ -1375,9 +1375,11 @@ function calcBearing(lat1, lon1, lat2, lon2) {
 }
 
 // ── Segment detection — finds key climbs and cols ─────────────
-function detectSegments(gpx, startTime, paceMinPerKm) {
+function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
   var points = gpx.points;
-  paceMinPerKm = paceMinPerKm || 4.5; // default pace flat
+  flatSpeedKmh  = flatSpeedKmh  || 35;
+  climbSpeedKmh = climbSpeedKmh || 10;
+  var paceMinPerKm = 60 / flatSpeedKmh;
 
   // Sample every Nth point for performance
   var SAMPLE = Math.max(1, Math.floor(points.length / 150));
@@ -1410,7 +1412,7 @@ function detectSegments(gpx, startTime, paceMinPerKm) {
     if (gain < 80) continue; // not a significant climb
 
     // Calculate ETA at this point
-    var etaMins = calcETA(pt.distanceKm, paceMinPerKm, gain);
+    var etaMins = calcETA(pt.distanceKm, flatSpeedKmh, gain, climbSpeedKmh);
     var eta     = new Date(startTime.getTime() + etaMins * 60000);
 
     // Route bearing at this segment (for crosswind calculation)
@@ -1455,7 +1457,7 @@ function detectSegments(gpx, startTime, paceMinPerKm) {
 
   // Add finish
   var finishPt  = points[points.length-1];
-  var totalMins = calcETA(finishPt.distanceKm, paceMinPerKm, 0);
+  var totalMins = calcETA(finishPt.distanceKm, flatSpeedKmh, 0, climbSpeedKmh);
   var finishEta = new Date(startTime.getTime() + totalMins * 60000);
   summits.push({
     lat: finishPt.lat, lon: finishPt.lon, ele: Math.round(finishPt.ele),
@@ -1468,11 +1470,18 @@ function detectSegments(gpx, startTime, paceMinPerKm) {
 }
 
 // ── ETA calculation — pace adjusted for gradient ──────────────
-function calcETA(distanceKm, basePaceMinPerKm, elevGain) {
-  // Rough gradient penalty — 1% grade adds ~30sec/km
-  var gradientPenalty = elevGain > 0 ? (elevGain / distanceKm) * 0.005 : 0;
-  var adjustedPace    = basePaceMinPerKm * (1 + Math.min(gradientPenalty, 1.5));
-  return distanceKm * adjustedPace;
+function calcETA(distanceKm, flatSpeedKmh, elevGain, climbSpeedKmh) {
+  climbSpeedKmh = climbSpeedKmh || flatSpeedKmh * 0.35;
+  if (distanceKm <= 0) return 0;
+  var gradientPct  = elevGain > 0 ? (elevGain / (distanceKm * 1000)) * 100 : 0;
+  var blendFactor  = Math.min(gradientPct / 8, 1);
+  var effectiveSpd = flatSpeedKmh * (1 - blendFactor) + climbSpeedKmh * blendFactor;
+  return (distanceKm / effectiveSpd) * 60;
+}
+
+function windDegToArrow(deg) {
+  var arrows = ['↓','↙','←','↖','↑','↗','→','↘'];
+  return arrows[Math.round((deg || 0) / 45) % 8];
 }
 
 // ── Format time helper ────────────────────────────────────────
@@ -1564,8 +1573,18 @@ function renderCyclingUpload() {
     + '<input class="cycling-input" type="time" id="cyclingStartTime" value="06:30">'
     + '</div>'
     + '<div class="cycling-input-group">'
-    + '<label class="cycling-input-label">Pace (min/km flat)</label>'
-    + '<input class="cycling-input" type="number" id="cyclingPace" value="4.5" step="0.5" min="2" max="10">'
+    + '<label class="cycling-input-label">Flat speed (km/h)</label>'
+    + '<input class="cycling-input" type="number" id="cyclingFlatSpeed" value="35" step="1" min="10" max="60">'
+    + '</div>'
+    + '</div>'
+    + '<div class="cycling-inputs">'
+    + '<div class="cycling-input-group">'
+    + '<label class="cycling-input-label">Climbing speed (km/h)</label>'
+    + '<input class="cycling-input" type="number" id="cyclingClimbSpeed" value="10" step="1" min="5" max="25">'
+    + '</div>'
+    + '<div class="cycling-input-group">'
+    + '<label class="cycling-input-label">Start date</label>'
+    + '<input class="cycling-input" type="date" id="cyclingDate" value="">'
     + '</div>'
     + '</div>'
     + '<button class="cycling-analyse-btn" id="cyclingAnalyseBtn" onclick="runGPXAnalysis()" disabled>Select a GPX file to analyse</button>'
@@ -1618,19 +1637,27 @@ async function runGPXAnalysis() {
   if (!cyclingGPX) return;
  
   var startTimeStr = document.getElementById('cyclingStartTime').value || '06:30';
-  var pace         = parseFloat(document.getElementById('cyclingPace').value) || 4.5;
+  var flatSpeed  = parseFloat(document.getElementById('cyclingFlatSpeed').value)  || 35;
+  var climbSpeed = parseFloat(document.getElementById('cyclingClimbSpeed').value) || 10;
+  var pace       = 60 / flatSpeed; // kept for compatibility
  
-  // Build start datetime — if time is in the past use tomorrow
+  // Build start datetime — use date picker if set, else today/tomorrow
   var now      = new Date();
   var parts    = startTimeStr.split(':');
-  var startDt  = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
-                          parseInt(parts[0]), parseInt(parts[1]), 0);
-  if (startDt <= now) {
-    startDt.setDate(startDt.getDate() + 1);
+  var dateInput = document.getElementById('cyclingDate').value;
+  var startDt;
+  if (dateInput) {
+    var dp = dateInput.split('-');
+    startDt = new Date(parseInt(dp[0]), parseInt(dp[1])-1, parseInt(dp[2]),
+                       parseInt(parts[0]), parseInt(parts[1]), 0);
+  } else {
+    startDt = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+                       parseInt(parts[0]), parseInt(parts[1]), 0);
+    if (startDt <= now) startDt.setDate(startDt.getDate() + 1);
   }
  
   // Detect segments
-  cyclingSegments = detectSegments(cyclingGPX, startDt, pace);
+  cyclingSegments = detectSegments(cyclingGPX, startDt, flatSpeed, climbSpeed);
  
   console.log('Segments to analyse:', JSON.stringify(cyclingSegments).substring(0, 500));
   console.log('Segment count:', cyclingSegments ? cyclingSegments.length : 'null');
@@ -1723,7 +1750,9 @@ function renderCyclingResults(data) {
       + '<div class="cycling-seg-km">km ' + seg.distanceKm + '</div>'
       + '<div class="cycling-seg-left">'
       + '<div class="cycling-seg-name">' + segName + '</div>'
-      + '<div class="cycling-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr + '</div>'
+      +'<div class="cycling-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr
+      +(seg.crosswindAngle > 45 && seg.crosswindAngle < 135 ? ' · ⚠️ Crosswind' : '')
+      +'</div>'
       + '</div>'
       + '<div class="cycling-seg-right">'
       + '<span style="font-size:11px;color:var(--text-dim)">'
@@ -1740,9 +1769,11 @@ function renderCyclingResults(data) {
         + '<div class="cycling-wx-item"><div class="cycling-wx-label">Temp</div>'
         + '<div class="cycling-wx-val" style="color:' + (seg.tempC > 28 ? 'var(--caution)' : seg.tempC < 5 ? 'var(--frost)' : 'var(--text)') + '">'
         + (seg.tempC !== null ? seg.tempC + '°C' : '—') + '</div></div>'
-        + '<div class="cycling-wx-item"><div class="cycling-wx-label">Wind</div>'
-        + '<div class="cycling-wx-val" style="color:' + (seg.windKmh > 35 ? 'var(--danger)' : seg.windKmh > 20 ? 'var(--caution)' : 'var(--go)') + '">'
-        + seg.windKmh + 'km/h</div></div>'
+        +'<div class="cycling-wx-item"><div class="cycling-wx-label">Wind</div>'
+      +'<div class="cycling-wx-val" style="color:'+( seg.windKmh > 35 ? 'var(--danger)' : seg.windKmh > 20 ? 'var(--caution)' : 'var(--go)')+'">'
+      + seg.windKmh + 'km/h</div>'
+      +'<div style="font-size:9px;color:var(--text-muted)">'
+      + windDegToArrow(seg.windDeg) + ' ' + (seg.windDeg||0) + '°</div></div>'
         + '<div class="cycling-wx-item"><div class="cycling-wx-label">Rain</div>'
         + '<div class="cycling-wx-val" style="color:' + (seg.precipProb > 60 ? 'var(--danger)' : seg.precipProb > 30 ? 'var(--caution)' : 'var(--go)') + '">'
         + seg.precipProb + '%</div></div>'
