@@ -1620,11 +1620,14 @@ async function runGPXAnalysis() {
   var startTimeStr = document.getElementById('cyclingStartTime').value || '06:30';
   var pace         = parseFloat(document.getElementById('cyclingPace').value) || 4.5;
  
-  // Build start datetime — use today's date + selected time
-  var today    = new Date();
+  // Build start datetime — if time is in the past use tomorrow
+  var now      = new Date();
   var parts    = startTimeStr.split(':');
-  var startDt  = new Date(today.getFullYear(), today.getMonth(), today.getDate(),
+  var startDt  = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
                           parseInt(parts[0]), parseInt(parts[1]), 0);
+  if (startDt <= now) {
+    startDt.setDate(startDt.getDate() + 1);
+  }
  
   // Detect segments
   cyclingSegments = detectSegments(cyclingGPX, startDt, pace);
