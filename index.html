@@ -1549,7 +1549,8 @@ function buildRunningTotalSection(rt) {
   return makeSection('running', 'Trip so far &middot; '+rt.legCount+' drives', rt.totalKm+'km &middot; £'+(rt.fuelCost||'—'), '', body);
 }
 
-var cyclingGPX     = null; // parsed GPX object
+cyclingGPX = gpx;
+    console.log('GPX parsed — maxEle:', gpx.maxEle, 'totalKm:', gpx.totalKm, 'points:', gpx.points.length);
 var cyclingSegments = null; // detected segments
 var cyclingResults  = null; // weather analysis results
  
