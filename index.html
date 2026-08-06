@@ -1402,14 +1402,18 @@ function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
       if (j !== i && sampled[j].ele >= ele) { isMax = false; break; }
     }
 
-    // Auto threshold — 60% of max elevation or 300m minimum
-    var eleThreshold = Math.max(300, gpx.maxEle * 0.6);
+    // Auto threshold — adaptive based on route max elevation
+    // Alpine: 60% of max ele (e.g. 2000m route → 1200m threshold)
+    // Yorkshire: much lower — 20% of max ele or 100m minimum
+    var eleThreshold = gpx.maxEle > 1000
+      ? Math.max(800,  gpx.maxEle * 0.6)   // Alpine — high cols only
+      : Math.max(50,   gpx.maxEle * 0.2);  // Local — any meaningful summit
+
     if (!isMax || ele < eleThreshold) continue;
 
-    // Check elevation gain approaching summit
-    var lookbackEle = sampled[Math.max(0, i-10)].ele;
-    var gain = ele - lookbackEle;
-    if (gain < 80) continue; // not a significant climb
+    // Gain threshold — also adaptive
+    var gainThreshold = gpx.maxEle > 1000 ? 80 : 30; // 30m gain for local routes
+    if (gain < gainThreshold) continue;
 
     // Calculate ETA at this point
     var etaMins = calcETA(pt.distanceKm, flatSpeedKmh, gain, climbSpeedKmh);
