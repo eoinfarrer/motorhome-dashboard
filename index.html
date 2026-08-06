@@ -1400,7 +1400,9 @@ function detectSegments(gpx, startTime, paceMinPerKm) {
       if (j !== i && sampled[j].ele >= ele) { isMax = false; break; }
     }
 
-    if (!isMax || ele < 800) continue; // ignore low-altitude noise
+    // Auto threshold — 60% of max elevation or 300m minimum
+    var eleThreshold = Math.max(300, gpx.maxEle * 0.6);
+    if (!isMax || ele < eleThreshold) continue;
 
     // Check elevation gain approaching summit
     var lookbackEle = sampled[Math.max(0, i-10)].ele;
@@ -1814,4 +1816,3 @@ refresh();
 </script>
 </body>
 </html>
-< cache bust Thu  6 Aug 2026 11:34:55 BST -->
