@@ -1627,6 +1627,8 @@ async function runGPXAnalysis() {
   // Detect segments
   cyclingSegments = detectSegments(cyclingGPX, startDt, pace);
  
+  console.log('Segments to analyse:', JSON.stringify(cyclingSegments).substring(0, 500));
+  console.log('Segment count:', cyclingSegments ? cyclingSegments.length : 'null');
   // Show loading
   document.getElementById('cyclingModalBody').innerHTML =
     '<div class="cycling-loading">🌤️ Fetching weather for ' + cyclingSegments.length + ' segments...<br>'
