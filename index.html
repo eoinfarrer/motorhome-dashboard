@@ -1413,8 +1413,12 @@ function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
 
     if (!isMax || ele < eleThreshold) continue;
 
+    // Calculate elevation gain approaching summit
+    var lookbackEle = sampled[Math.max(0, i-10)].ele;
+    var gain = ele - lookbackEle;
+
     // Gain threshold — also adaptive
-    var gainThreshold = gpx.maxEle > 1000 ? 80 : 30; // 30m gain for local routes
+    var gainThreshold = gpx.maxEle > 1000 ? 80 : 30;
     if (gain < gainThreshold) continue;
 
     // Calculate ETA at this point
@@ -1549,8 +1553,6 @@ function buildRunningTotalSection(rt) {
   return makeSection('running', 'Trip so far &middot; '+rt.legCount+' drives', rt.totalKm+'km &middot; £'+(rt.fuelCost||'—'), '', body);
 }
 
-cyclingGPX = gpx;
-    console.log('GPX parsed — maxEle:', gpx.maxEle, 'totalKm:', gpx.totalKm, 'points:', gpx.points.length);
 var cyclingSegments = null; // detected segments
 var cyclingResults  = null; // weather analysis results
  
