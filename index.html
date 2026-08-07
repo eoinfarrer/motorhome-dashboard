@@ -1526,10 +1526,7 @@ function generateAlertGPX(routeName, segments) {
   // Risk waypoints — prominent alerts
   wpts.forEach(function(s) {
     var riskType = s.risks && s.risks.length ? s.risks[0].type : 'caution';
-    var sym = riskType === 'storm' ? 'Caution'
-            : riskType === 'wind'  ? 'Flag, Blue'
-            : riskType === 'heat'  ? 'Flag, Red'
-            : 'Caution';
+    var sym = 'Flag, Red';
 
     // Clean label — no emoji for Garmin compatibility
     var label = s.risks && s.risks.length
@@ -1551,7 +1548,6 @@ function generateAlertGPX(routeName, segments) {
         +  '    <name>' + sanitizeXML(name) + '</name>\n'
         +  '    <desc>' + sanitizeXML(desc) + '</desc>\n'
         +  '    <sym>' + sym + '</sym>\n'
-        +  '    <type>Alert</type>\n'
         +  '  </wpt>\n';
   });
 
@@ -1570,8 +1566,7 @@ function generateAlertGPX(routeName, segments) {
         +  '    <ele>' + s.ele + '</ele>\n'
         +  '    <name>' + sanitizeXML(name) + '</name>\n'
         +  '    <desc>' + sanitizeXML(desc) + '</desc>\n'
-        +  '    <sym>Summit</sym>\n'
-        +  '    <type>Summit</type>\n'
+        +  '    <sym>Flag, Blue</sym>\n'
         +  '  </wpt>\n';
   });
 
