@@ -1954,13 +1954,7 @@ async function enrichSegmentNames(segments) {
 
     var name = seg._overpassName || null;
 
-    // TomTom fallback for non-Alpine or if Overpass found nothing
-    if (!name) {
-      try {
-        name = await fetchTomTomReverse_(seg.lat, seg.lon);
-        await new Promise(function(r){ setTimeout(r, 300); });
-      } catch(e) {}
-    }
+    
 
     if (name) {
       var el = document.querySelector('[data-seg-idx="' + i + '"] .cycling-seg-name');
@@ -1972,23 +1966,7 @@ async function enrichSegmentNames(segments) {
   }
 }
 
-async function fetchTomTomReverse_(lat, lon) {
-  // TomTom reverse geocode from browser — uses your TomTom API key
-  var key = 'YOUR_TOMTOM_KEY'; // move to a config or fetch from API
-  var r = await fetch('https://api.tomtom.com/search/2/reverseGeocode/'
-    + lat + ',' + lon + '.json?key=' + key + '&radius=500');
-  var data = await r.json();
-  var addr = data.addresses && data.addresses[0] && data.addresses[0].address;
-  if (!addr) return null;
-  return addr.road || addr.localName || addr.municipality || null;
-}
-function toggleCyclingSeg(id) {
-  var body = document.getElementById(id);
-  if (!body) return;
-  var open = body.classList.contains('open');
-  document.querySelectorAll('.cycling-seg-body').forEach(function(b){ b.classList.remove('open'); });
-  if (!open) body.classList.add('open');
-}
+
  
 function downloadAlertGPX() {
   if (!cyclingResults || !cyclingSegments) return;
