@@ -1825,7 +1825,7 @@ function renderCyclingResults(data) {
  
     var segName = seg.type === 'start'  ? 'Start'
                 : seg.type === 'finish' ? 'Finish'
-                : seg.ele + 'm col';
+                : seg.segName || (seg.ele + 'm col');
  
     html += '<div class="cycling-seg" onclick="toggleCyclingSeg(\'cs' + idx + '\')">'
       + '<div class="cycling-seg-head">'
