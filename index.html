@@ -1892,66 +1892,95 @@ function renderCyclingResults(data) {
  
 
 async function enrichSegmentNames(segments) {
+  // Batch all Alpine segments into one Overpass query
+  var alpineSegs = segments.filter(function(s, i) {
+    return s.type !== 'start' && s.type !== 'finish' && s.ele > 1000;
+  });
+
+  // Build single batch query for all segments
+  if (alpineSegs.length) {
+    try {
+      var unionParts = alpineSegs.map(function(s) {
+        return 'node["mountain_pass"](around:1500,' + s.lat + ',' + s.lon + ');'
+             + 'node["natural"="saddle"](around:1500,' + s.lat + ',' + s.lon + ');';
+      }).join('');
+
+      var query = '[out:json][timeout:25];(' + unionParts + ');out;';
+
+      var r = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query),
+        signal: AbortSignal.timeout(30000)
+      });
+
+      if (r.ok) {
+        var text = await r.text();
+        if (text.startsWith('{')) {
+          var data = JSON.parse(text);
+          // Match each result to nearest segment
+          (data.elements || []).forEach(function(el) {
+            if (!el.tags || !el.tags.name) return;
+            var tags = el.tags;
+            var name = tags['name:it'] || tags['name:en'] || tags.name;
+            if (name && name.includes(' - ')) {
+              var parts = name.split(' - ');
+              var italian = parts.find(function(p){ return p.match(/^[Pp]asso/); });
+              name = italian || parts[0];
+            }
+            // Find closest segment
+            var closest = null;
+            var minDist = 2; // max 2km
+            alpineSegs.forEach(function(s, idx) {
+              var dist = Math.sqrt(
+                Math.pow(el.lat - s.lat, 2) + Math.pow(el.lon - s.lon, 2)
+              ) * 111; // rough km
+              if (dist < minDist) { minDist = dist; closest = s; }
+            });
+            if (closest) {
+              closest._overpassName = name;
+            }
+          });
+        }
+      }
+    } catch(e) {
+      console.warn('Overpass batch failed: ' + e.message);
+    }
+  }
+
+  // Now update DOM — Overpass names + TomTom fallback for local
   for (var i = 0; i < segments.length; i++) {
     var seg = segments[i];
     if (seg.type === 'start' || seg.type === 'finish') continue;
 
-    try {
-      var name = null;
+    var name = seg._overpassName || null;
 
-      // Try Overpass for high elevation — Alpine passes
-      if (seg.ele > 1000) {
-        var query = '[out:json];('
-          + 'node["mountain_pass"](around:1500,' + seg.lat + ',' + seg.lon + ');'
-          + 'node["natural"="saddle"](around:1500,' + seg.lat + ',' + seg.lon + ');'
-          + 'node["name"~"[Pp]asso|[Cc]ol |[Jj]och"](around:1500,' + seg.lat + ',' + seg.lon + ');'
-          + ');out;';
-        var r = await fetch('https://overpass-api.de/api/interpreter', {
-          method: 'POST',
-          body: 'data=' + encodeURIComponent(query)
-        });
-        var data = await r.json();
-        if (data.elements && data.elements.length) {
-          var tags = data.elements[0].tags || {};
-          // Prefer shorter Italian/English name over multilingual compound
-          name = tags['name:it'] || tags['name:en'] || tags.name;
-          // If name has multiple variants separated by ' - ', take the Italian one
-          if (name && name.includes(' - ')) {
-            var parts = name.split(' - ');
-            var italian = parts.find(function(p){ return p.match(/^[Pp]asso/); });
-            name = italian || parts[0];
-          }
-        }
-        await new Promise(function(r){ setTimeout(r, 1100); });
+    // TomTom fallback for non-Alpine or if Overpass found nothing
+    if (!name) {
+      try {
+        name = await fetchTomTomReverse_(seg.lat, seg.lon);
+        await new Promise(function(r){ setTimeout(r, 300); });
+      } catch(e) {}
+    }
+
+    if (name) {
+      var el = document.querySelector('[data-seg-idx="' + i + '"] .cycling-seg-name');
+      if (el) el.textContent = name;
+      if (cyclingResults && cyclingResults.segments[i]) {
+        cyclingResults.segments[i].segName = name;
       }
-
-      // Fall back to Nominatim for lower elevation or if Overpass found nothing
-      if (!name) {
-        var nr = await fetch('https://nominatim.openstreetmap.org/reverse'
-          + '?lat=' + seg.lat + '&lon=' + seg.lon
-          + '&format=json&zoom=15', {
-          headers: { 'User-Agent': 'AudreyMissionControl/1.0' }
-        });
-        var nd = await nr.json();
-        var addr = nd.address || {};
-        name = addr.road || addr.hamlet || addr.village || null;
-        await new Promise(function(r){ setTimeout(r, 1100); });
-      }
-
-      if (name) {
-        // Update DOM
-        var el = document.querySelector('[data-seg-idx="' + i + '"] .cycling-seg-name');
-        if (el) el.textContent = name;
-        // Update results for GPX download
-        if (cyclingResults && cyclingResults.segments[i]) {
-          cyclingResults.segments[i].segName = name;
-        }
-      }
-
-    } catch(e) {
-      console.warn('Name enrichment failed for segment ' + i + ': ' + e.message);
     }
   }
+}
+
+async function fetchTomTomReverse_(lat, lon) {
+  // TomTom reverse geocode from browser — uses your TomTom API key
+  var key = 'YOUR_TOMTOM_KEY'; // move to a config or fetch from API
+  var r = await fetch('https://api.tomtom.com/search/2/reverseGeocode/'
+    + lat + ',' + lon + '.json?key=' + key + '&radius=500');
+  var data = await r.json();
+  var addr = data.addresses && data.addresses[0] && data.addresses[0].address;
+  if (!addr) return null;
+  return addr.road || addr.localName || addr.municipality || null;
 }
 function toggleCyclingSeg(id) {
   var body = document.getElementById(id);
