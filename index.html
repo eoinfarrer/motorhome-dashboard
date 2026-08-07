@@ -1773,6 +1773,7 @@ async function runGPXAnalysis() {
  
     cyclingResults = data;
     renderCyclingResults(data);
+    enrichSegmentNames(cyclingSegments); // async name enrichment
  
   } catch(err) {
     document.getElementById('cyclingModalBody').innerHTML =
@@ -1822,7 +1823,7 @@ function renderCyclingResults(data) {
                 : seg.type === 'finish' ? 'Finish'
                 : seg.segName || (seg.ele + 'm col');
  
-    html += '<div class="cycling-seg" onclick="toggleCyclingSeg(\'cs' + idx + '\')">'
+    html += '<div class="cycling-seg" data-seg-idx="' + idx + '" onclick="toggleCyclingSeg(\'cs' + idx + '\')">'
       + '<div class="cycling-seg-head">'
       + '<div class="cycling-seg-km">km ' + seg.distanceKm + '</div>'
       + '<div class="cycling-seg-left">'
@@ -1901,8 +1902,9 @@ async function enrichSegmentNames(segments) {
       // Try Overpass for high elevation — Alpine passes
       if (seg.ele > 1000) {
         var query = '[out:json];('
-          + 'node["mountain_pass"](around:500,' + seg.lat + ',' + seg.lon + ');'
-          + 'node["natural"="saddle"](around:500,' + seg.lat + ',' + seg.lon + ');'
+          + 'node["mountain_pass"](around:1500,' + seg.lat + ',' + seg.lon + ');'
+          + 'node["natural"="saddle"](around:1500,' + seg.lat + ',' + seg.lon + ');'
+          + 'node["name"~"[Pp]asso|[Cc]ol |[Jj]och"](around:1500,' + seg.lat + ',' + seg.lon + ');'
           + ');out;';
         var r = await fetch('https://overpass-api.de/api/interpreter', {
           method: 'POST',
@@ -1910,7 +1912,15 @@ async function enrichSegmentNames(segments) {
         });
         var data = await r.json();
         if (data.elements && data.elements.length) {
-          name = data.elements[0].tags && (data.elements[0].tags.name || data.elements[0].tags['name:en']);
+          var tags = data.elements[0].tags || {};
+          // Prefer shorter Italian/English name over multilingual compound
+          name = tags['name:it'] || tags['name:en'] || tags.name;
+          // If name has multiple variants separated by ' - ', take the Italian one
+          if (name && name.includes(' - ')) {
+            var parts = name.split(' - ');
+            var italian = parts.find(function(p){ return p.match(/^[Pp]asso/); });
+            name = italian || parts[0];
+          }
         }
         await new Promise(function(r){ setTimeout(r, 1100); });
       }
