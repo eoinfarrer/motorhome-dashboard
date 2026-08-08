@@ -1890,7 +1890,13 @@ function renderCyclingResults(data) {
   document.getElementById('cyclingModalBody').innerHTML = html;
 }
  
-
+function toggleCyclingSeg(id) {
+  var body = document.getElementById(id);
+  if (!body) return;
+  var open = body.classList.contains('open');
+  document.querySelectorAll('.cycling-seg-body').forEach(function(b){ b.classList.remove('open'); });
+  if (!open) body.classList.add('open');
+}
 async function enrichSegmentNames(segments) {
   // Batch all Alpine segments into one Overpass query
   var alpineSegs = segments.filter(function(s, i) {
