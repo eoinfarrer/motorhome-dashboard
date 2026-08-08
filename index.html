@@ -1952,7 +1952,14 @@ async function enrichSegmentNames(segments) {
     var seg = segments[i];
     if (seg.type === 'start' || seg.type === 'finish') continue;
 
+    // Start with TomTom name from API, overwrite with Overpass if Alpine pass found
     var name = seg._overpassName || null;
+    // If no Overpass name, keep the TomTom segName already in the results
+    if (!name && cyclingResults && cyclingResults.segments[i] && 
+        cyclingResults.segments[i].segName && 
+        !cyclingResults.segments[i].segName.includes('m col')) {
+      name = cyclingResults.segments[i].segName;
+    }
 
     
 
