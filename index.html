@@ -1504,6 +1504,10 @@ function formatTime_(date) {
 
 // ── Generate alert GPX for Garmin ────────────────────────────
 function generateAlertGPX(routeName, segments) {
+  var NAME_OPEN  = '<' + 'name>';
+  var NAME_CLOSE = '<' + '/name>';
+  var DESC_OPEN  = '<' + 'desc>';
+  var DESC_CLOSE = '<' + '/desc>';
   var wpts = segments.filter(function(s) {
     return s.overallRisk && s.overallRisk !== 'ok' && s.type !== 'start';
   });
