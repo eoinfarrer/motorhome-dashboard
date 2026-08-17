@@ -533,7 +533,7 @@ function buildNextDrive(meta,fc){
   return'<div class="drive-card">'
     +'<div class="card-label" style="color:var(--frost);margin-bottom:10px">Next drive &middot; '+fmtDate(nd.date)+'</div>'
     +'<div class="drive-route">'
-    +'<span class="drive-origin" style="color:var(--text-dim)">'+(meta.currentLocation||'&mdash;')+'</span>'
+    +'<span class="drive-origin" style="color:var(--text-dim)">'+(nd.origin||meta.currentLocation||'&mdash;')+'</span>'
     +'<span class="drive-arrow">&rarr;</span>'
     +'<span class="drive-dest">'+nd.destination+'</span>'
     +'</div>'
