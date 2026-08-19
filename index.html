@@ -178,12 +178,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 
 
 .act-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);}
-.act-tab-btn{padding:10px 6px;text-align:center;cursor:pointer;background:var(--bg2);border:none;font-family:var(--mono);width:100%;border-top:3px solid transparent;transition:all 0.15s;}
+.act-tab-btn{padding:7px 4px;text-align:center;cursor:pointer;background:var(--bg2);border:none;font-family:var(--mono);width:100%;border-top:3px solid transparent;transition:all 0.15s;}
 .act-tab-btn.active{background:var(--bg);}
 .act-tab-btn.active.trail-tab{border-top-color:#4a7c3f;}
 .act-tab-btn.active.cycle-tab{border-top-color:var(--frost);}
 .act-tab-btn.active.ski-tab{border-top-color:#6a3d9a;}
-.act-tab-icon{font-size:17px;display:block;margin-bottom:2px;}
+.act-tab-icon{font-size:15px;display:block;margin-bottom:2px;}
 .act-tab-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
 .act-tab-btn.active .act-tab-lbl{color:var(--text);}
 .act-screen{display:none;padding:0;}
@@ -431,15 +431,16 @@ function getSmartDefaults(meta) {
   var isStay   = dayType === 'STAY';
 
   // Base defaults — most things collapsed
-  var d = {
-    vehicle:   true,
-    lpg:       true,
-    running: true,
-    weather:   false,
-    snow:      true,
-    budget:    true,
-    itinerary: true,
-    prices:    true
+    var d = {
+    vehicle:    true,
+    lpg:        true,
+    running:    true,
+    weather:    false,
+    snow:       true,
+    budget:     true,
+    itinerary:  true,
+    prices:     true,
+    activities: true
   };
 
   if (status === 'PRE_TRIP') {
@@ -455,13 +456,14 @@ function getSmartDefaults(meta) {
       d.itinerary = true;  // don't need full itinerary while driving
       d.snow      = isWinter ? false : true; // snow open on winter drive days
     }
-    if (isStay) {
-      d.lpg       = false; // heating tonight
-      d.weather   = false; // conditions today
-      d.snow      = isWinter ? false : true; // snow open on stay days in winter
-      d.vehicle   = true;  // less critical on stay days
-      d.itinerary = true;  // don't need itinerary on stay days
-    }
+       if (isStay) {
+      d.lpg        = false; // heating tonight
+      d.weather    = false; // conditions today
+      d.snow       = isWinter ? false : true; // snow open on stay days in winter
+      d.vehicle    = true;  // less critical on stay days
+      d.itinerary  = true;  // don't need itinerary on stay days
+      d.activities = false; // open activities on stay days — plan what to do
+    } 
   }
 
   if (status === 'POST_TRIP') {
