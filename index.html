@@ -2596,13 +2596,28 @@ function renderActAnalysis(type, data, segments) {
   });
   html += '</div>';
  
-  // Hiking intelligence
+    // Hiking intelligence
   if (type === 'trail') {
+    // Exposed time — time above 600m
+    var exposedMins = 0;
+    if (segs.length > 1) {
+      for (var ei = 0; ei < segs.length - 1; ei++) {
+        if (segs[ei].ele > 600) {
+          var etaA = new Date(actSelectedRoute.segments[ei].etaISO);
+          var etaB = new Date(actSelectedRoute.segments[ei+1].etaISO);
+          exposedMins += (etaB - etaA) / 60000;
+        }
+      }
+    }
+    var exposedStr = exposedMins > 0
+      ? Math.floor(exposedMins/60) + 'h ' + Math.round(exposedMins%60) + 'm'
+      : '—';
+
     html += '<div class="act-intel-grid">'
-      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Sunrise</div></div>'
-      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Sunset</div></div>'
+    + '<div class="act-intel-cell"><div class="act-intel-val">' + (segs[0]&&segs[0].sunrise||'—') + '</div><div class="act-intel-lbl">Sunrise</div></div>'
+    + '<div class="act-intel-cell"><div class="act-intel-val">' + (segs[0]&&segs[0].sunset||'—') + '</div><div class="act-intel-lbl">Sunset</div></div>'
       + '<div class="act-intel-cell"><div class="act-intel-val act-intel-val" style="color:var(--go)">Low</div><div class="act-intel-lbl">Lightning</div></div>'
-      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Exposed time</div></div>'
+      + '<div class="act-intel-cell"><div class="act-intel-val">' + exposedStr + '</div><div class="act-intel-lbl">Exposed time</div></div>'
       + '</div>';
   }
  
