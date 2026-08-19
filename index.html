@@ -503,10 +503,12 @@ function render(d){
 
   // Load activity routes after render
   if (d.meta && d.meta.currentLocation) {
-    setTimeout(function() {
+     setTimeout(function() {
       loadActRoutes(d.meta.currentLocation, 'trail');
-      loadActRoutes(d.meta.currentLocation, 'cycle');
     }, 500);
+    setTimeout(function() {
+      loadActRoutes(d.meta.currentLocation, 'cycle');
+    }, 3000);
   }
 }
 
@@ -2220,11 +2222,15 @@ async function loadActRoutes(location, type) {
                 : currentData && currentData.meta && currentData.meta.currentLocationCoords
                 ? currentData.meta.currentLocationCoords.lon : null;
 
-    if (ovLat) {
+        if (ovLat) {
+      console.log('Discovering routes at:', ovLat, ovLon);
       overpass = await discoverOverpassRoutes(
         ovLat, ovLon,
         type === 'cycle' ? 'bicycle' : 'hiking'
       );
+      console.log('Overpass routes found:', overpass.length);
+    } else {
+      console.log('No coordinates available for discovery');
     }
  
     // Render combined list
@@ -2296,9 +2302,9 @@ function renderActRouteList(container, curated, overpass, type) {
 // ── Discover routes via Overpass ──────────────────────────
 async function discoverOverpassRoutes(lat, lon, osmType) {
   try {
-    var query = '[out:json][timeout:20];'
-      + 'relation["route"="' + osmType + '"](around:25000,' + lat + ',' + lon + ');'
-      + 'out body;';
+        var query = osmType === 'hiking'
+      ? '[out:json][timeout:20];(relation["route"="hiking"](around:25000,' + lat + ',' + lon + ');relation["route"="foot"](around:25000,' + lat + ',' + lon + '););out body;'
+      : '[out:json][timeout:20];relation["route"="' + osmType + '"](around:25000,' + lat + ',' + lon + ');out body;';
         // Try twice — Overpass occasionally times out
     var r;
     try {
