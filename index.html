@@ -2200,9 +2200,9 @@ async function loadActRoutes(location, type) {
  
   try {
     // 1. Fetch curated routes from sheet
-    var params = new URLSearchParams({
+        var params = new URLSearchParams({
       action: 'get_routes',
-      area:   location || '',
+      area:   '',  // fetch all routes — filter client side
       type:   type === 'cycle' ? 'cycling' : type === 'trail' ? 'hiking' : '',
       _:      Date.now()
     });
@@ -2212,10 +2212,18 @@ async function loadActRoutes(location, type) {
  
     // 2. Discover Overpass routes
     var overpass = [];
-    if (currentData && currentData.vehicle && currentData.vehicle.lat) {
+        var ovLat = currentData && currentData.vehicle && currentData.vehicle.lat
+                ? currentData.vehicle.lat
+                : currentData && currentData.meta && currentData.meta.currentLocationCoords
+                ? currentData.meta.currentLocationCoords.lat : null;
+    var ovLon = currentData && currentData.vehicle && currentData.vehicle.lon
+                ? currentData.vehicle.lon
+                : currentData && currentData.meta && currentData.meta.currentLocationCoords
+                ? currentData.meta.currentLocationCoords.lon : null;
+
+    if (ovLat) {
       overpass = await discoverOverpassRoutes(
-        currentData.vehicle.lat,
-        currentData.vehicle.lon,
+        ovLat, ovLon,
         type === 'cycle' ? 'bicycle' : 'hiking'
       );
     }
