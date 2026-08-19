@@ -2290,10 +2290,23 @@ async function discoverOverpassRoutes(lat, lon, osmType) {
     var query = '[out:json][timeout:20];'
       + 'relation["route"="' + osmType + '"](around:25000,' + lat + ',' + lon + ');'
       + 'out body;';
-    var r = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query)
-    });
+        // Try twice — Overpass occasionally times out
+    var r;
+    try {
+      r = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query),
+        signal: AbortSignal.timeout(15000)
+      });
+    } catch(e) {
+      // Retry once after 2 seconds
+      await new Promise(function(res){ setTimeout(res, 2000); });
+      r = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query),
+        signal: AbortSignal.timeout(15000)
+      });
+    }
     if (!r.ok) return [];
     var data = await r.json();
     return (data.elements || [])
