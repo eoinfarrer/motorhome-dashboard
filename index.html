@@ -175,6 +175,80 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   .section-body,.section-chevron{transition:none;}
 }
 
+
+
+.act-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);}
+.act-tab-btn{padding:10px 6px;text-align:center;cursor:pointer;background:var(--bg2);border:none;font-family:var(--mono);width:100%;border-top:3px solid transparent;transition:all 0.15s;}
+.act-tab-btn.active{background:var(--bg);}
+.act-tab-btn.active.trail-tab{border-top-color:#4a7c3f;}
+.act-tab-btn.active.cycle-tab{border-top-color:var(--frost);}
+.act-tab-btn.active.ski-tab{border-top-color:#6a3d9a;}
+.act-tab-icon{font-size:17px;display:block;margin-bottom:2px;}
+.act-tab-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+.act-tab-btn.active .act-tab-lbl{color:var(--text);}
+.act-screen{display:none;padding:0;}
+.act-screen.active{display:block;}
+.act-loc-bar{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.act-loc-name{font-size:11px;font-weight:600;}
+.act-loc-meta{font-size:10px;color:var(--text-muted);}
+.act-filter-bar{display:flex;gap:5px;padding:8px 14px;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.act-chip{font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid var(--border2);cursor:pointer;white-space:nowrap;background:var(--bg);color:var(--text-dim);font-family:var(--mono);flex-shrink:0;}
+.act-chip.active{background:#1a1a18;color:#fff;border-color:#1a1a18;}
+.act-route-card{border-bottom:1px solid var(--border);cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.act-route-card:hover{background:var(--bg3);}
+.act-route-card:last-child{border-bottom:none;}
+.act-route-icon{font-size:18px;flex-shrink:0;}
+.act-route-left{flex:1;min-width:0;}
+.act-route-name{font-family:var(--display);font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.act-route-meta{font-size:10px;color:var(--text-muted);}
+.act-route-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+.act-route-dist{font-size:13px;font-weight:700;font-family:var(--display);}
+.act-diff{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:600;}
+.act-diff-easy{background:#dff0d8;color:#1a8a4a;}
+.act-diff-mod{background:#fdf8ee;color:#c07800;}
+.act-diff-hard{background:#fdf0f0;color:#c0392b;}
+.act-upload-row{padding:12px 14px;border-top:1px solid var(--border);text-align:center;cursor:pointer;color:var(--text-muted);font-size:11px;}
+.act-upload-row:hover{background:var(--bg2);}
+.act-analysis-back{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;cursor:pointer;background:var(--bg2);}
+.act-analysis-back-lbl{font-size:11px;color:var(--frost);}
+.act-loading{padding:24px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
+.act-seg{border-bottom:1px solid var(--border);cursor:pointer;}
+.act-seg:last-child{border-bottom:none;}
+.act-seg:hover{background:var(--bg3);}
+.act-seg-head{display:flex;align-items:center;padding:9px 14px;gap:8px;}
+.act-seg-km{font-size:10px;color:var(--text-muted);min-width:36px;}
+.act-seg-left{flex:1;}
+.act-seg-name{font-size:12px;font-weight:700;font-family:var(--display);}
+.act-seg-alt{font-size:10px;color:var(--text-muted);}
+.act-seg-right{display:flex;align-items:center;gap:6px;}
+.act-seg-body{padding:10px 14px;background:var(--bg2);border-top:1px solid var(--border);display:none;}
+.act-seg-body.open{display:block;}
+.act-wx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;}
+.act-wx-item{text-align:center;}
+.act-wx-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;}
+.act-wx-val{font-size:14px;font-weight:700;font-family:var(--display);}
+.act-alert{padding:6px 9px;border-radius:4px;font-size:11px;margin-bottom:5px;line-height:1.4;}
+.act-alert:last-child{margin-bottom:0;}
+.act-a-ok{background:#f0f8f2;color:#1a8a4a;border-left:3px solid #1a8a4a;}
+.act-a-warn{background:#fdf8ee;color:#c07800;border-left:3px solid #c07800;}
+.act-a-danger{background:#fdf0f0;color:#c0392b;border-left:3px solid #c0392b;}
+.act-intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:10px 14px;}
+.act-intel-cell{padding:7px;background:var(--bg2);border-radius:4px;text-align:center;}
+.act-intel-val{font-size:14px;font-weight:700;font-family:var(--display);}
+.act-intel-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-top:2px;}
+.act-gpx-card{margin:10px 14px;background:var(--bg);border:2px solid var(--go);border-radius:6px;padding:12px;}
+.act-gpx-title{font-family:var(--display);font-size:12px;font-weight:700;color:var(--go);margin-bottom:4px;}
+.act-gpx-wpts{background:var(--bg2);border-radius:4px;padding:7px 9px;margin-bottom:8px;font-size:11px;color:var(--text-dim);}
+.act-btn{width:100%;padding:11px;border:none;border-radius:5px;font-family:var(--display);font-size:12px;font-weight:700;cursor:pointer;margin-bottom:6px;}
+.act-btn-trail{background:#4a7c3f;color:#fff;}
+.act-btn-cycle{background:var(--frost);color:#fff;}
+.act-btn-outline{background:none;border:1px solid var(--border2);color:var(--text-muted);font-family:var(--mono);font-size:11px;}
+.act-settings-row{padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg2);display:flex;gap:8px;}
+.act-setting{display:flex;flex-direction:column;gap:2px;flex:1;}
+.act-setting-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
+.act-setting-input{background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 7px;border-radius:4px;width:100%;}
+
+
 .cycling-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;}
 .cycling-modal-overlay.open{display:flex;}
 .cycling-modal{background:var(--bg);width:100%;max-height:92vh;border-radius:12px 12px 0 0;overflow-y:auto;}
@@ -424,7 +498,15 @@ function render(d){
   var ts = new Date(d.timestamp);
   document.getElementById('lastUpdated').textContent =
     'Last updated ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  applyCollapsed();
+    applyCollapsed();
+
+  // Load activity routes after render
+  if (d.meta && d.meta.currentLocation) {
+    setTimeout(function() {
+      loadActRoutes(d.meta.currentLocation, 'trail');
+      loadActRoutes(d.meta.currentLocation, 'cycle');
+    }, 500);
+  }
 }
 
 function renderError(msg){
@@ -453,6 +535,7 @@ function buildMain(d){
   if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
   if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
   if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
+    parts.push(buildActivitiesSection(d));
   if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
   if(d.budget)parts.push(buildBudgetSection(d.budget));
   return parts.join('');
@@ -2009,8 +2092,678 @@ function downloadAlertGPX() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+var actCurrentTab      = 'trail';
+var actCurrentFilter   = 'all';
+var actRoutes          = [];        // curated routes from sheet
+var actOverpassRoutes  = [];        // discovered from Overpass
+var actSelectedRoute   = null;      // route being analysed
+var actAnalysisResults = null;      // weather results
+ 
+// ── Build section ─────────────────────────────────────────
+function buildActivitiesSection(d) {
+  var meta     = d && d.meta     ? d.meta     : {};
+  var snow     = d && d.snowStatus ? d.snowStatus : null;
+  var location = meta.currentLocation || '';
+  var season   = meta.season || 'summer';
+ 
+  // Default tab — ski in winter if snow data, else trail
+  var defaultTab = (season === 'winter' && snow && snow.resorts && snow.resorts.length)
+    ? 'ski' : 'trail';
+ 
+  var body = '<div class="act-tabs">'
+    + '<button class="act-tab-btn trail-tab' + (defaultTab==='trail'?' active':'') + '" onclick="switchActTab(\'trail\')">'
+    + '<span class="act-tab-icon">🥾</span><span class="act-tab-lbl">Trails</span></button>'
+    + '<button class="act-tab-btn cycle-tab' + (defaultTab==='cycle'?' active':'') + '" onclick="switchActTab(\'cycle\')">'
+    + '<span class="act-tab-icon">🚴</span><span class="act-tab-lbl">Cycling</span></button>'
+    + '<button class="act-tab-btn ski-tab' + (defaultTab==='ski'?' active':'') + '" onclick="switchActTab(\'ski\')">'
+    + '<span class="act-tab-icon">⛷️</span><span class="act-tab-lbl">Skiing</span></button>'
+    + '</div>'
+ 
+    // Trail screen
+    + '<div class="act-screen' + (defaultTab==='trail'?' active':'') + '" id="act-screen-trail">'
+    + buildActDiscovery('trail', location, d)
+    + '</div>'
+ 
+    // Cycle screen
+    + '<div class="act-screen' + (defaultTab==='cycle'?' active':'') + '" id="act-screen-cycle">'
+    + buildActDiscovery('cycle', location, d)
+    + '</div>'
+ 
+    // Ski screen
+    + '<div class="act-screen' + (defaultTab==='ski'?' active':'') + '" id="act-screen-ski">'
+    + buildSkiScreen(snow, meta)
+    + '</div>';
+ 
+  return makeSection('activities', 'Activities', '', '', body);
 }
  
+// ── Tab switcher ──────────────────────────────────────────
+function switchActTab(tab) {
+  actCurrentTab = tab;
+  document.querySelectorAll('.act-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.act-screen').forEach(function(s){ s.classList.remove('active'); });
+  var tabBtn = document.querySelector('.act-tab-btn.' + tab + '-tab');
+  var screen = document.getElementById('act-screen-' + tab);
+  if (tabBtn) tabBtn.classList.add('active');
+  if (screen) screen.classList.add('active');
+}
+ 
+// ── Discovery view ────────────────────────────────────────
+function buildActDiscovery(type, location, d) {
+  var typeIcon = type === 'cycle' ? '🚴' : '🥾';
+  var typeLabel = type === 'cycle' ? 'cycling' : 'hiking';
+ 
+  // Location bar
+  var html = '<div class="act-loc-bar">'
+    + '<div><div class="act-loc-name">📍 ' + (location || 'Current location') + '</div>'
+    + '<div class="act-loc-meta">Curated routes + named trails</div></div>'
+    + '</div>';
+ 
+  // Filter chips
+  if (type === 'trail') {
+    html += '<div class="act-filter-bar">'
+      + '<span class="act-chip active" onclick="filterAct(this,\'all\',\'trail\')">All</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'hiking\',\'trail\')">🥾 Walking</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'mtb\',\'trail\')">🚵 MTB</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'easy\',\'trail\')">Easy</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'moderate\',\'trail\')">Moderate</span>'
+      + '</div>';
+  } else {
+    html += '<div class="act-filter-bar">'
+      + '<span class="act-chip active" onclick="filterAct(this,\'all\',\'cycle\')">All</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'cycling\',\'cycle\')">🚴 Road</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'gravel\',\'cycle\')">🚵 Gravel</span>'
+      + '</div>';
+  }
+ 
+  // Route list placeholder — populated by loadActRoutes()
+  html += '<div id="act-routes-' + type + '">'
+    + '<div class="act-loading">Loading routes near ' + (location || 'you') + '...</div>'
+    + '</div>';
+ 
+  // Upload own GPX
+  html += '<div class="act-upload-row" onclick="actUploadGPX(\'' + type + '\')">'
+    + '📁 Upload your own GPX file'
+    + '</div>';
+ 
+  return html;
+}
+ 
+// ── Load routes from API + Overpass ──────────────────────
+async function loadActRoutes(location, type) {
+  var container = document.getElementById('act-routes-' + type);
+  if (!container) return;
+ 
+  try {
+    // 1. Fetch curated routes from sheet
+    var params = new URLSearchParams({
+      action: 'get_routes',
+      area:   location || '',
+      type:   type === 'cycle' ? 'cycling' : type === 'trail' ? 'hiking' : '',
+      _:      Date.now()
+    });
+    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
+    var data = await r.json();
+    var curated = data.routes || [];
+ 
+    // 2. Discover Overpass routes
+    var overpass = [];
+    if (currentData && currentData.vehicle && currentData.vehicle.lat) {
+      overpass = await discoverOverpassRoutes(
+        currentData.vehicle.lat,
+        currentData.vehicle.lon,
+        type === 'cycle' ? 'bicycle' : 'hiking'
+      );
+    }
+ 
+    // Render combined list
+    renderActRouteList(container, curated, overpass, type);
+ 
+  } catch(err) {
+    container.innerHTML = '<div class="act-loading">Could not load routes — tap to upload your own GPX</div>';
+  }
+}
+ 
+// ── Render route list ─────────────────────────────────────
+function renderActRouteList(container, curated, overpass, type) {
+  var html = '';
+ 
+  // Curated routes first
+  if (curated.length) {
+    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Saved routes</div>';
+    curated.forEach(function(r, i) {
+      var icon = r.type === 'cycling' ? '🚴' : r.type === 'mtb' ? '🚵' : r.type === 'gravel' ? '🚵' : '🥾';
+      var diffCls = r.difficulty.toLowerCase() === 'easy' ? 'act-diff-easy'
+                  : r.difficulty.toLowerCase() === 'hard' ? 'act-diff-hard'
+                  : 'act-diff-mod';
+      html += '<div class="act-route-card" onclick="actSelectCurated(' + i + ',\'' + type + '\')">'
+        + '<div class="act-route-icon">' + icon + '</div>'
+        + '<div class="act-route-left">'
+        + '<div class="act-route-name">' + r.name + '</div>'
+        + '<div class="act-route-meta">' + r.notes + '</div>'
+        + '</div>'
+        + '<div class="act-route-right">'
+        + '<div class="act-route-dist" style="color:' + (type==='cycle'?'var(--frost)':'#4a7c3f') + '">' + r.distanceKm + 'km</div>'
+        + '<span class="act-diff ' + diffCls + '">' + r.difficulty + '</span>'
+        + '</div></div>';
+    });
+  }
+ 
+  // Overpass routes
+  if (overpass.length) {
+    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named trails nearby</div>';
+    overpass.forEach(function(r, i) {
+      var icon = type === 'cycle' ? '🚴' : '🥾';
+      html += '<div class="act-route-card" onclick="actSelectOverpass(' + i + ',\'' + type + '\')">'
+        + '<div class="act-route-icon">' + icon + '</div>'
+        + '<div class="act-route-left">'
+        + '<div class="act-route-name">' + r.name + '</div>'
+        + '<div class="act-route-meta">' + (r.network ? r.network.toUpperCase() + ' · ' : '') + 'OpenStreetMap</div>'
+        + '</div>'
+        + '<div class="act-route-right">'
+        + '<div class="act-route-dist" style="color:var(--text-muted)">' + (r.distanceKm ? r.distanceKm + 'km' : '—') + '</div>'
+        + '</div></div>';
+    });
+  }
+ 
+  if (!html) {
+    html = '<div class="act-loading">No routes found nearby — upload your own GPX below</div>';
+  }
+ 
+  container.innerHTML = html;
+ 
+  // Store for reference
+  if (type === 'trail' || type === 'hiking') {
+    window._actCuratedTrail   = curated;
+    window._actOverpassTrail  = overpass;
+  } else {
+    window._actCuratedCycle   = curated;
+    window._actOverpassCycle  = overpass;
+  }
+}
+ 
+// ── Discover routes via Overpass ──────────────────────────
+async function discoverOverpassRoutes(lat, lon, osmType) {
+  try {
+    var query = '[out:json][timeout:20];'
+      + 'relation["route"="' + osmType + '"](around:25000,' + lat + ',' + lon + ');'
+      + 'out body;';
+    var r = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query)
+    });
+    if (!r.ok) return [];
+    var data = await r.json();
+    return (data.elements || [])
+      .filter(function(el){ return el.tags && (el.tags.name || el.tags.ref); })
+      .map(function(el){
+        return {
+          id:         el.id,
+          name:       el.tags.name || ('Route ' + el.tags.ref),
+          network:    el.tags.network || '',
+          distanceKm: el.tags.distance ? Math.round(parseFloat(el.tags.distance)) : null,
+          source:     'overpass'
+        };
+      })
+      .slice(0, 8);
+  } catch(e) {
+    return [];
+  }
+}
+ 
+// ── Select curated route ──────────────────────────────────
+async function actSelectCurated(idx, type) {
+  var routes = type === 'cycle' ? window._actCuratedCycle : window._actCuratedTrail;
+  if (!routes || !routes[idx]) return;
+  var route = routes[idx];
+ 
+  showActLoading(type, 'Fetching GPX for ' + route.name + '...');
+ 
+  try {
+    var params = new URLSearchParams({
+      action: 'get_route_gpx',
+      fileId: route.fileId,
+      _:      Date.now()
+    });
+    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
+    var data = await r.json();
+    if (!data.success || !data.gpx) throw new Error(data.error || 'No GPX data');
+ 
+    actAnalyseGPXContent(data.gpx, route.name || data.name, type);
+ 
+  } catch(err) {
+    showActError(type, 'Could not fetch route: ' + err.message);
+  }
+}
+ 
+// ── Select Overpass route ─────────────────────────────────
+async function actSelectOverpass(idx, type) {
+  var routes = type === 'cycle' ? window._actOverpassCycle : window._actOverpassTrail;
+  if (!routes || !routes[idx]) return;
+  var route = routes[idx];
+ 
+  showActLoading(type, 'Fetching trail data for ' + route.name + '...');
+ 
+  try {
+    var gpxContent = await fetchOverpassGPX(route.id);
+    if (!gpxContent) throw new Error('No geometry returned');
+    actAnalyseGPXContent(gpxContent, route.name, type);
+  } catch(err) {
+    showActError(type, 'Could not fetch trail: ' + err.message);
+  }
+}
+ 
+// ── Fetch + reconstruct GPX from Overpass ─────────────────
+async function fetchOverpassGPX(osmId) {
+  var r = await fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent('[out:json];relation(' + osmId + ');out geom;')
+  });
+  var data = await r.json();
+  var el   = data.elements && data.elements[0];
+  if (!el) return null;
+ 
+  var members = (el.members || []).filter(function(m){
+    return m.geometry && m.geometry.length > 0 && m.role !== 'guideposts';
+  });
+ 
+  var ordered = chainOrderWays(members);
+ 
+  var seen = new Set();
+  var points = [];
+  ordered.forEach(function(p){
+    var key = p.lat.toFixed(5) + ',' + p.lon.toFixed(5);
+    if (!seen.has(key)){ seen.add(key); points.push(p); }
+  });
+ 
+  var name = el.tags && el.tags.name ? el.tags.name : 'Route ' + osmId;
+  var gpx  = '<?xml version="1.0" encoding="UTF-8"?>'
+    + '<gpx version="1.1" creator="Audrey" xmlns="http://www.topografix.com/GPX/1/1">'
+    + '<trk><name>' + name + '</name><trkseg>';
+  points.forEach(function(p){ gpx += '<trkpt lat="' + p.lat + '" lon="' + p.lon + '"></trkpt>'; });
+  gpx += '</trkseg></trk></gpx>';
+  return gpx;
+}
+ 
+// ── Chain-order Overpass ways into continuous track ───────
+function chainOrderWays(members) {
+  if (!members.length) return [];
+  var remaining = members.slice();
+  var ordered   = remaining.shift().geometry.slice();
+  var max       = remaining.length * 2;
+  var iter      = 0;
+  while (remaining.length > 0 && iter < max) {
+    iter++;
+    var endPt   = ordered[ordered.length-1];
+    var startPt = ordered[0];
+    var found   = false;
+    for (var i = 0; i < remaining.length; i++) {
+      var way    = remaining[i];
+      var wStart = way.geometry[0];
+      var wEnd   = way.geometry[way.geometry.length-1];
+      if (ptDist(endPt,wStart) < 0.001){ ordered = ordered.concat(way.geometry.slice(1)); remaining.splice(i,1); found=true; break; }
+      if (ptDist(endPt,wEnd)   < 0.001){ ordered = ordered.concat(way.geometry.slice(0,-1).reverse()); remaining.splice(i,1); found=true; break; }
+      if (ptDist(startPt,wEnd) < 0.001){ ordered = way.geometry.concat(ordered.slice(1)); remaining.splice(i,1); found=true; break; }
+      if (ptDist(startPt,wStart) < 0.001){ ordered = way.geometry.slice().reverse().concat(ordered.slice(1)); remaining.splice(i,1); found=true; break; }
+    }
+    if (!found) ordered = ordered.concat(remaining.shift().geometry);
+  }
+  return ordered;
+}
+function ptDist(a,b){ return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2)); }
+ 
+// ── Analyse GPX content ───────────────────────────────────
+async function actAnalyseGPXContent(gpxText, routeName, type) {
+  var gpx = parseGPX(gpxText);
+  if (!gpx) { showActError(type, 'Could not parse GPX'); return; }
+ 
+  // Use defaults for pace
+  var flatSpeed  = type === 'cycle' ? 30 : type === 'mtb' ? 15 : 4;
+  var climbSpeed = type === 'cycle' ? 10 : type === 'mtb' ?  8 : 2;
+ 
+  var now      = new Date();
+  var startDt  = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0);
+  if (startDt <= now) startDt.setDate(startDt.getDate() + 1);
+ 
+  var segments = detectSegments(gpx, startDt, flatSpeed, climbSpeed);
+  if (segments.length > 10) {
+    var s = segments[0];
+    var f = segments[segments.length-1];
+    var m = segments.slice(1,-1).sort(function(a,b){ return b.ele-a.ele; }).slice(0,8);
+    m.sort(function(a,b){ return a.distanceKm-b.distanceKm; });
+    segments = [s].concat(m).concat([f]);
+  }
+ 
+  showActLoading(type, 'Fetching weather for ' + segments.length + ' segments...');
+ 
+  try {
+    var trimmed = segments.map(function(s){
+      return { lat:s.lat, lon:s.lon, ele:s.ele, distanceKm:s.distanceKm,
+               etaISO:s.etaISO, etaStr:s.etaStr, type:s.type, bearing:s.bearing||0 };
+    });
+    var params = new URLSearchParams({
+      action:    'analyse_gpx',
+      segments:  JSON.stringify(trimmed),
+      routeName: routeName || gpx.name,
+      totalKm:   gpx.totalKm,
+      totalEleM: gpx.totalEleM,
+      _:         Date.now()
+    });
+    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
+    var data = await r.json();
+    if (!data.success) throw new Error(data.error || 'Analysis failed');
+ 
+    actAnalysisResults = data;
+    actSelectedRoute   = { name: routeName || gpx.name, type: type, gpx: gpx, segments: segments };
+    renderActAnalysis(type, data, segments);
+ 
+    // Async name enrichment
+    enrichSegmentNames(segments);
+ 
+  } catch(err) {
+    showActError(type, 'Analysis failed: ' + err.message);
+  }
+}
+ 
+// ── Render analysis results ───────────────────────────────
+function renderActAnalysis(type, data, segments) {
+  var screen = document.getElementById('act-screen-' + type);
+  if (!screen) return;
+ 
+  var segs      = data.segments || [];
+  var riskColor = data.routeRisk === 'danger'  ? 'var(--danger)'
+                : data.routeRisk === 'caution' ? 'var(--caution)'
+                : 'var(--go)';
+  var riskLabel = data.routeRisk === 'danger'  ? '🔴 High risk'
+                : data.routeRisk === 'caution' ? '🟡 Caution'
+                : '🟢 All clear';
+  var accentColor = type === 'cycle' ? 'var(--frost)' : '#4a7c3f';
+  var analyseBtn  = type === 'cycle' ? 'act-btn-cycle' : 'act-btn-trail';
+ 
+  var html = '<div class="act-analysis-back" onclick="actBackToDiscovery(\'' + type + '\')">'
+    + '<span style="color:var(--frost)">←</span>'
+    + '<span class="act-analysis-back-lbl">Back to routes</span>'
+    + '</div>'
+    // Route header
+    + '<div style="padding:12px 14px;border-bottom:1px solid var(--border)">'
+    + '<div style="font-family:var(--display);font-size:15px;font-weight:800;margin-bottom:3px">' + data.routeName + '</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">'
+    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + data.totalKm + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">km</div></div>'
+    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + (data.totalEleM||0).toLocaleString() + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">metres</div></div>'
+    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + segs.length + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">segments</div></div>'
+    + '</div></div>'
+    // Risk banner
+    + '<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">'
+    + '<span style="font-family:var(--display);font-size:12px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</span>'
+    + '</div>';
+ 
+  // Settings row
+  if (type === 'cycle') {
+    html += '<div class="act-settings-row">'
+      + '<div class="act-setting"><span class="act-setting-lbl">Flat speed (km/h)</span>'
+      + '<input class="act-setting-input" type="number" id="act-flat-speed" value="30" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<div class="act-setting"><span class="act-setting-lbl">Climb speed (km/h)</span>'
+      + '<input class="act-setting-input" type="number" id="act-climb-speed" value="10" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '</div>';
+  } else {
+    html += '<div class="act-settings-row">'
+      + '<div class="act-setting"><span class="act-setting-lbl">Walking pace (km/h)</span>'
+      + '<input class="act-setting-input" type="number" id="act-walk-speed" value="4" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<div class="act-setting"><span class="act-setting-lbl">Start time</span>'
+      + '<input class="act-setting-input" type="time" id="act-start-time" value="07:00"></div>'
+      + '</div>';
+  }
+ 
+  // Segments
+  html += '<div>';
+  segs.forEach(function(seg, idx) {
+    var riskIcon = seg.overallRisk === 'danger'  ? '🔴'
+                 : seg.overallRisk === 'caution' ? '⚠️'
+                 : seg.type === 'finish'         ? '🏁'
+                 : seg.type === 'start'          ? (type==='cycle'?'🚴':'🥾')
+                 : '✅';
+    var segName  = seg.segName || (seg.type === 'start' ? 'Start' : seg.type === 'finish' ? 'Finish' : seg.ele + 'm');
+ 
+    html += '<div class="act-seg" onclick="toggleActSeg(\'as' + idx + '\')">'
+      + '<div class="act-seg-head">'
+      + '<div class="act-seg-km">km ' + seg.distanceKm + '</div>'
+      + '<div class="act-seg-left">'
+      + '<div class="act-seg-name" data-seg-idx="' + idx + '">' + segName + '</div>'
+      + '<div class="act-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr
+      + (seg.crosswindAngle > 45 && seg.crosswindAngle < 135 && seg.windKmh > 25 ? ' · ⚠️ Crosswind' : '')
+      + '</div>'
+      + '</div>'
+      + '<div class="act-seg-right">'
+      + '<span style="font-size:11px;color:var(--text-dim)">' + (seg.tempC !== null ? seg.tempC + '°' : '') + '</span>'
+      + '<span style="font-size:17px">' + riskIcon + '</span>'
+      + '</div></div>'
+      + '<div class="act-seg-body" id="as' + idx + '">';
+ 
+    if (seg.error) {
+      html += '<div class="act-alert act-a-warn">⚠️ Could not fetch weather</div>';
+    } else {
+      html += '<div class="act-wx-grid">'
+        + '<div class="act-wx-item"><div class="act-wx-lbl">Temp</div>'
+        + '<div class="act-wx-val" style="color:' + (seg.tempC > 28 ? 'var(--caution)' : seg.tempC < 5 ? 'var(--frost)' : 'var(--text)') + '">'
+        + (seg.tempC !== null ? seg.tempC + '°C' : '—') + '</div></div>'
+        + '<div class="act-wx-item"><div class="act-wx-lbl">Wind</div>'
+        + '<div class="act-wx-val" style="color:' + (seg.windKmh > 35 ? 'var(--danger)' : seg.windKmh > 20 ? 'var(--caution)' : 'var(--go)') + '">'
+        + seg.windKmh + 'km/h</div>'
+        + '<div style="font-size:9px;color:var(--text-muted)">' + windDegToArrow(seg.windDeg) + ' ' + (seg.windDeg||0) + '°</div></div>'
+        + '<div class="act-wx-item"><div class="act-wx-lbl">Rain</div>'
+        + '<div class="act-wx-val" style="color:' + (seg.precipProb > 60 ? 'var(--danger)' : seg.precipProb > 30 ? 'var(--caution)' : 'var(--go)') + '">'
+        + seg.precipProb + '%</div></div>'
+        + '</div>'
+        + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:7px">' + (seg.condition||'') + '</div>';
+ 
+      if (seg.risks && seg.risks.length) {
+        seg.risks.forEach(function(r){
+          var cls = r.type === 'storm' ? 'act-a-danger'
+                  : r.type === 'wind'  ? 'act-a-warn'
+                  : r.type === 'heat'  ? 'act-a-warn'
+                  : 'act-a-warn';
+          html += '<div class="act-alert ' + cls + '">' + r.label + '</div>';
+        });
+      } else {
+        html += '<div class="act-alert act-a-ok">✅ Clear conditions</div>';
+      }
+    }
+    html += '</div></div>';
+  });
+  html += '</div>';
+ 
+  // Hiking intelligence
+  if (type === 'trail') {
+    html += '<div class="act-intel-grid">'
+      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Sunrise</div></div>'
+      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Sunset</div></div>'
+      + '<div class="act-intel-cell"><div class="act-intel-val act-intel-val" style="color:var(--go)">Low</div><div class="act-intel-lbl">Lightning</div></div>'
+      + '<div class="act-intel-cell"><div class="act-intel-val">—</div><div class="act-intel-lbl">Exposed time</div></div>'
+      + '</div>';
+  }
+ 
+  // Alert GPX
+  var hasAlerts = segs.some(function(s){ return s.overallRisk && s.overallRisk !== 'ok'; });
+  if (hasAlerts) {
+    html += '<div class="act-gpx-card">'
+      + '<div class="act-gpx-title">📎 Alert GPX ready for Garmin</div>'
+      + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Waypoint alerts at risk segments — sync overnight.</div>'
+      + '<button class="act-btn ' + analyseBtn + '" onclick="actDownloadGPX()">⬇️ Download alert GPX</button>'
+      + '</div>';
+  } else {
+    html += '<div style="padding:10px 14px;font-size:11px;color:var(--go)">✅ No alerts — conditions clear throughout</div>';
+  }
+ 
+  screen.innerHTML = html;
+}
+ 
+// ── Helpers ───────────────────────────────────────────────
+function toggleActSeg(id) {
+  var body = document.getElementById(id);
+  if (!body) return;
+  var open = body.classList.contains('open');
+  document.querySelectorAll('.act-seg-body').forEach(function(b){ b.classList.remove('open'); });
+  if (!open) body.classList.add('open');
+}
+ 
+function actBackToDiscovery(type) {
+  var screen = document.getElementById('act-screen-' + type);
+  if (!screen) return;
+  screen.innerHTML = buildActDiscovery(type, currentData&&currentData.meta ? currentData.meta.currentLocation : '', currentData);
+  loadActRoutes(currentData&&currentData.meta ? currentData.meta.currentLocation : '', type);
+}
+ 
+function showActLoading(type, msg) {
+  var screen = document.getElementById('act-screen-' + type);
+  if (screen) screen.innerHTML = '<div class="act-loading">⏳ ' + msg + '</div>';
+}
+ 
+function showActError(type, msg) {
+  var screen = document.getElementById('act-screen-' + type);
+  if (screen) screen.innerHTML = '<div class="act-loading" style="color:var(--danger)">❌ ' + msg + '</div>'
+    + '<div class="act-upload-row" onclick="actBackToDiscovery(\'' + type + '\')">← Back to routes</div>';
+}
+ 
+function actUploadGPX(type) {
+  // Trigger file input — reuse existing cycling file input
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.gpx';
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      actAnalyseGPXContent(ev.target.result, file.name.replace('.gpx',''), type);
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+ 
+function actDownloadGPX() {
+  if (!actAnalysisResults || !actSelectedRoute) return;
+  var enriched = actSelectedRoute.segments.map(function(seg, i) {
+    return Object.assign({}, seg, actAnalysisResults.segments[i] || {});
+  });
+  var gpxContent = generateAlertGPX(actAnalysisResults.routeName, enriched);
+  if (!gpxContent) { alert('No risk alerts — no GPX needed'); return; }
+  var blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href   = url;
+  a.download = (actAnalysisResults.routeName||'route').replace(/\s+/g,'-') + '-alerts.gpx';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+ 
+function filterAct(el, filter, type) {
+  document.querySelectorAll('.act-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  actCurrentFilter = filter;
+}
+ 
+function actReanalyse(type) {
+  if (actSelectedRoute) {
+    actAnalyseGPXContent(actSelectedRoute.gpx ? actSelectedRoute.gpx._raw : '', actSelectedRoute.name, type);
+  }
+}
+ 
+// ── Ski screen ────────────────────────────────────────────
+function buildSkiScreen(snow, meta) {
+  if (!snow || !snow.resorts || !snow.resorts.length) {
+    return '<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted)">'
+      + '<div style="font-size:28px;margin-bottom:8px">⛷️</div>'
+      + '<div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:6px">Ski conditions</div>'
+      + '<div>Snow data appears here from November when the season opens.<br>Resorts configured in Settings.</div>'
+      + '</div>';
+  }
+ 
+  // Resort selector tabs
+  var html = '<div style="display:flex;gap:5px;padding:8px 14px;border-bottom:1px solid var(--border);overflow-x:auto">';
+  snow.resorts.forEach(function(r, i) {
+    html += '<span class="act-chip' + (i===0?' active':'') + '" onclick="switchSkiResort(' + i + ',this)">' + r.name + '</span>';
+  });
+  html += '</div>';
+ 
+  // Resort detail — first resort by default
+  html += '<div id="act-ski-detail">' + buildSkiResortDetail(snow.resorts[0], meta) + '</div>';
+ 
+  return html;
+}
+ 
+function switchSkiResort(idx, el) {
+  if (!currentData || !currentData.snowStatus) return;
+  document.querySelectorAll('#act-screen-ski .act-chip').forEach(function(c){ c.classList.remove('active'); });
+  el.classList.add('active');
+  var detail = document.getElementById('act-ski-detail');
+  if (detail) detail.innerHTML = buildSkiResortDetail(currentData.snowStatus.resorts[idx], currentData.meta);
+}
+ 
+function buildSkiResortDetail(r, meta) {
+  if (!r) return '';
+  var scoreColor = r.ssScore >= 80 ? 'var(--go)' : r.ssScore >= 60 ? 'var(--caution)' : 'var(--danger)';
+ 
+  var html = '<div style="padding:12px 14px;border-bottom:1px solid var(--border)">'
+    + '<div style="font-family:var(--display);font-size:15px;font-weight:800;margin-bottom:2px">' + r.name + '</div>'
+    + '<div style="font-size:10px;color:var(--text-muted)">' + (r.elevationM ? r.elevationM + 'm' : '') + '</div>'
+    + '</div>'
+    // Snow strip
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
+    + '<div style="padding:10px 8px;text-align:center;border-right:1px solid var(--border)">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Base depth</div>'
+    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:#6a3d9a">' + (r.snowDepthCm||r.snowCm||0) + 'cm</div>'
+    + '</div>'
+    + '<div style="padding:10px 8px;text-align:center;border-right:1px solid var(--border)">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Score</div>'
+    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:' + scoreColor + '">' + (r.ssScore||'—') + '</div>'
+    + '</div>'
+    + '<div style="padding:10px 8px;text-align:center">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Lifts</div>'
+    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.liftsOpen||'—') + '/' + (r.liftsTotal||'—') + '</div>'
+    + '</div></div>'
+    // Elevation temps
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
+    + '<div style="padding:8px;text-align:center;border-right:1px solid var(--border)">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Valley</div>'
+    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.botTempC !== undefined ? r.botTempC + '°' : '—') + '</div>'
+    + '</div>'
+    + '<div style="padding:8px;text-align:center;border-right:1px solid var(--border)">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Piste</div>'
+    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.midTempC !== undefined ? r.midTempC + '°' : '—') + '</div>'
+    + '</div>'
+    + '<div style="padding:8px;text-align:center">'
+    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Summit</div>'
+    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.topTempC !== undefined ? r.topTempC + '°' : '—') + '</div>'
+    + '</div></div>'
+    // Tagline
+    + (r.ssTagline ? '<div style="padding:8px 14px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">' + r.ssTagline + '</div>' : '')
+    // 3 day forecast
+    + (r.forecast3d && r.forecast3d.length ? buildSkiForecast(r.forecast3d) : '')
+    // Van road status
+    + (r.fitment ? '<div style="padding:8px 14px;font-size:11px;border-top:1px solid var(--border)">'
+      + '🚐 Van road: <strong>' + r.fitment + '</strong></div>' : '');
+ 
+  return html;
+}
+ 
+function buildSkiForecast(fc) {
+  var html = '<div style="border-top:1px solid var(--border)">';
+  fc.slice(0,3).forEach(function(day, i) {
+    var label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : (new Date(day.date)).toLocaleDateString('en-GB',{weekday:'short'});
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid var(--border);font-size:12px">'
+      + '<span style="color:var(--text-muted);min-width:70px">' + label + '</span>'
+      + '<span>' + (day.desc||'') + '</span>'
+      + '<span style="font-weight:700;color:#6a3d9a">' + (day.snowfall ? day.snowfall.toFixed(1) + 'cm' : '0cm') + '</span>'
+      + '<span style="font-size:10px;color:var(--text-muted)">' + day.tempMin + '–' + day.tempMax + '°</span>'
+      + '</div>';
+  });
+  html += '</div>';
+  return html;
+}
+ 
+
+
 refresh();
 </script>
 </body>
