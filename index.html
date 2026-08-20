@@ -177,7 +177,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 
 
 
-.act-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);}
+.act-tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);}
 .act-tab-btn{padding:7px 4px;text-align:center;cursor:pointer;background:var(--bg2);border:none;font-family:var(--mono);width:100%;border-top:3px solid transparent;transition:all 0.15s;}
 .act-tab-btn.active{background:var(--bg);}
 .act-tab-btn.active.trail-tab{border-top-color:#4a7c3f;}
@@ -186,6 +186,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .act-tab-icon{font-size:15px;display:block;margin-bottom:2px;}
 .act-tab-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
 .act-tab-btn.active .act-tab-lbl{color:var(--text);}
+.act-tab-btn.active.water-tab{border-top-color:#0077b6;}
 .act-screen{display:none;padding:0;}
 .act-screen.active{display:block;}
 .act-loc-bar{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
@@ -298,6 +299,31 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .c-alert-ok{background:#f0f8f2;color:var(--go);border-left:3px solid var(--go);}
 .cycling-gpx-download{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg2);}
 .cycling-loading{padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
+
+.water-strip{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
+.water-cell{padding:10px 12px;border-right:1px solid var(--border);}
+.water-cell:last-child{border-right:none;}
+.water-cell:nth-child(3),.water-cell:nth-child(4){border-top:1px solid var(--border);}
+.water-val{font-size:18px;font-weight:700;font-family:var(--display);margin-bottom:2px;}
+.water-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
+.water-sub{font-size:10px;color:var(--text-muted);}
+.tide-strip{border-bottom:1px solid var(--border);}
+.tide-row{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid var(--border);font-size:12px;}
+.tide-row:last-child{border-bottom:none;}
+.tide-time{color:var(--text-muted);min-width:50px;}
+.tide-type{font-weight:600;}
+.tide-height{font-family:var(--display);font-weight:700;}
+.tide-now{background:var(--bg2);}
+.suit-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border);}
+.suit-cell{padding:10px 12px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;}
+.suit-activity{font-size:12px;font-weight:600;}
+.suit-status{font-size:10px;padding:2px 7px;border-radius:3px;font-weight:600;}
+.suit-good{background:#dff0d8;color:#1a8a4a;}
+.suit-caution{background:#fdf8ee;color:#c07800;}
+.suit-poor{background:#fdf0f0;color:#c0392b;}
+.water-loading{padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
+.water-inland{padding:16px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
+
 
 </style>
 </head>
@@ -509,6 +535,14 @@ function render(d){
     setTimeout(function() {
       loadActRoutes(d.meta.currentLocation, 'cycle');
     }, 3000);
+
+        setTimeout(function() {
+      var lat = d.vehicle && d.vehicle.lat ? d.vehicle.lat
+              : d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lat : null;
+      var lon = d.vehicle && d.vehicle.lon ? d.vehicle.lon
+              : d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lon : null;
+      loadMarineData(lat, lon, d.meta.currentLocation);
+    }, 1500);
   }
 }
 
@@ -2122,6 +2156,8 @@ function buildActivitiesSection(d) {
     + '<span class="act-tab-icon">🚴</span><span class="act-tab-lbl">Cycling</span></button>'
     + '<button class="act-tab-btn ski-tab' + (defaultTab==='ski'?' active':'') + '" onclick="switchActTab(\'ski\')">'
     + '<span class="act-tab-icon">⛷️</span><span class="act-tab-lbl">Skiing</span></button>'
+     + '<button class="act-tab-btn water-tab' + (defaultTab==='water'?' active':'') + '" onclick="switchActTab(\'water\')">'
+    + '<span class="act-tab-icon">🌊</span><span class="act-tab-lbl">Water</span></button>'
     + '</div>'
  
     // Trail screen
@@ -2138,7 +2174,12 @@ function buildActivitiesSection(d) {
     + '<div class="act-screen' + (defaultTab==='ski'?' active':'') + '" id="act-screen-ski">'
     + buildSkiScreen(snow, meta)
     + '</div>';
- 
+
+    // Water screen
+    + '<div class="act-screen' + (defaultTab==='water'?' active':'') + '" id="act-screen-water">'
+    + buildWaterScreen(location, d)
+    + '</div>';
+
   return makeSection('activities', 'Activities', '', '', body);
 }
  
@@ -2807,6 +2848,170 @@ function buildSkiForecast(fc) {
   return html;
 }
  
+function buildWaterScreen(d) {
+  var lat = d && d.vehicle && d.vehicle.lat ? d.vehicle.lat
+          : d && d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lat
+          : null;
+  var lon = d && d.vehicle && d.vehicle.lon ? d.vehicle.lon
+          : d && d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lon
+          : null;
+  var location = d && d.meta ? d.meta.currentLocation || '' : '';
+ 
+  // Check if near coast — rough check using weather data or just show loading
+  return '<div id="act-water-content">'
+    + '<div class="water-loading">🌊 Loading marine data for ' + location + '...</div>'
+    + '</div>';
+}
+ 
+// ── 5. Load marine data ───────────────────────────────────
+async function loadMarineData(lat, lon, location) {
+  var container = document.getElementById('act-water-content');
+  if (!container) return;
+ 
+  if (!lat || !lon) {
+    container.innerHTML = '<div class="water-inland">'
+      + '<div style="font-size:24px;margin-bottom:6px">🌊</div>'
+      + '<div style="font-weight:600;margin-bottom:4px">No coastal location</div>'
+      + '<div>Marine data is available at coastal locations.<br>Currently at ' + (location||'inland location') + '.</div>'
+      + '</div>';
+    return;
+  }
+ 
+  try {
+    var params = new URLSearchParams({
+      action: 'get_marine',
+      lat:    lat,
+      lon:    lon,
+      _:      Date.now()
+    });
+    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
+    var data = await r.json();
+ 
+    if (!data.success) throw new Error(data.error || 'Marine data unavailable');
+ 
+    renderMarineData(container, data, location);
+ 
+  } catch(err) {
+    container.innerHTML = '<div class="water-inland">⚠️ Could not load marine data: ' + err.message + '</div>';
+  }
+}
+ 
+// ── 6. Render marine data ─────────────────────────────────
+function renderMarineData(container, data, location) {
+  var cur      = data.current || {};
+  var extremes = data.extremes || [];
+  var suit     = data.suitability || {};
+ 
+  // Wave direction arrow
+  var waveArrow = windDegToArrow(cur.waveDir || 0);
+ 
+  // Tide state indicator
+  var tideIcon = data.tideState === 'Rising' ? '↑' : '↓';
+  var tideColor = data.tideState === 'Rising' ? 'var(--go)' : 'var(--caution)';
+ 
+  // Next extreme
+  var nextExt = data.nextExtreme;
+  var nextStr = '';
+  if (nextExt) {
+    var nextTime = new Date(nextExt.date).toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    nextStr = nextExt.type + ' ' + nextTime + ' (' + Math.abs(nextExt.height).toFixed(1) + 'm)';
+  }
+ 
+  var html = ''
+    // Location + station
+    + '<div style="padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    + '<div><div style="font-size:11px;font-weight:600">📍 ' + (location||'Current location') + '</div>'
+    + '<div style="font-size:10px;color:var(--text-muted)">Station: ' + (data.station||'Nearest port') + '</div></div>'
+    + '<div style="font-size:10px;color:var(--text-muted)">Open-Meteo · WorldTides</div>'
+    + '</div>'
+ 
+    // Tide state banner
+    + '<div style="padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
+    + '<div style="font-family:var(--display);font-size:14px;font-weight:700;color:' + tideColor + '">'
+    + tideIcon + ' Tide ' + (data.tideState||'—')
+    + '</div>'
+    + '<div style="font-size:11px;color:var(--text-muted)">Next: ' + nextStr + '</div>'
+    + '</div>'
+ 
+    // Tide times
+    + '<div class="tide-strip">';
+ 
+  // Show today's and tomorrow's extremes
+  var now = new Date();
+  extremes.slice(0, 6).forEach(function(ex) {
+    var exDate  = new Date(ex.date);
+    var exTime  = exDate.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+    var exDay   = exDate.toLocaleDateString('en-GB', {weekday:'short'});
+    var isNext  = data.nextExtreme && ex.dt === data.nextExtreme.dt;
+    var isHigh  = ex.type === 'High';
+    html += '<div class="tide-row' + (isNext?' tide-now':'') + '">'
+      + '<span class="tide-time">' + exTime + '</span>'
+      + '<span style="font-size:10px;color:var(--text-muted)">' + exDay + '</span>'
+      + '<span class="tide-type" style="color:' + (isHigh?'var(--frost)':'var(--text-muted)') + '">'
+      + (isHigh?'↑ High':'↓ Low') + '</span>'
+      + '<span class="tide-height" style="color:' + (isHigh?'var(--frost)':'var(--text-muted)') + '">'
+      + Math.abs(ex.height).toFixed(1) + 'm</span>'
+      + (isNext ? '<span style="font-size:9px;background:var(--bg3);padding:1px 5px;border-radius:3px">Next</span>' : '<span></span>')
+      + '</div>';
+  });
+ 
+  html += '</div>'
+ 
+    // Wave conditions
+    + '<div class="water-strip">'
+    + '<div class="water-cell">'
+    + '<div class="water-val" style="color:' + (cur.waveHeight > 1.5 ? 'var(--danger)' : cur.waveHeight > 0.5 ? 'var(--caution)' : 'var(--go)') + '">'
+    + (cur.waveHeight||'—') + 'm</div>'
+    + '<div class="water-label">Wave height</div>'
+    + '<div class="water-sub">' + waveArrow + ' ' + (cur.waveDir||'—') + '° · ' + (cur.wavePeriod||'—') + 's</div>'
+    + '</div>'
+    + '<div class="water-cell">'
+    + '<div class="water-val" style="color:var(--frost)">' + (cur.swellHeight||'—') + 'm</div>'
+    + '<div class="water-label">Swell</div>'
+    + '<div class="water-sub">' + windDegToArrow(cur.swellDir||0) + ' ' + (cur.swellDir||'—') + '°</div>'
+    + '</div>'
+    + '<div class="water-cell">'
+    + '<div class="water-val">' + (cur.currentKnots||'—') + ' kt</div>'
+    + '<div class="water-label">Current</div>'
+    + '<div class="water-sub">' + windDegToArrow(cur.currentDir||0) + ' ' + (cur.currentDir||'—') + '°</div>'
+    + '</div>'
+    + '<div class="water-cell">'
+    + '<div class="water-val" style="color:var(--frost)">' + (cur.waterTempC||'—') + '°C</div>'
+    + '<div class="water-label">Water temp</div>'
+    + '<div class="water-sub">&nbsp;</div>'
+    + '</div>'
+    + '</div>'
+ 
+    // Activity suitability
+    + '<div class="suit-grid">';
+ 
+  var activities = [
+    { key: 'swimming', icon: '🏊', label: 'Swimming' },
+    { key: 'kayaking', icon: '🚣', label: 'Kayaking' },
+    { key: 'sup',      icon: '🏄', label: 'SUP' },
+    { key: 'surfing',  icon: '🌊', label: 'Surfing' }
+  ];
+ 
+  activities.forEach(function(act) {
+    var status = suit[act.key] || 'caution';
+    var cls    = status === 'good' ? 'suit-good' : status === 'poor' ? 'suit-poor' : 'suit-caution';
+    var label  = status === 'good' ? '✅ Good' : status === 'poor' ? '🔴 Poor' : '⚠️ Caution';
+    html += '<div class="suit-cell">'
+      + '<span class="suit-activity">' + act.icon + ' ' + act.label + '</span>'
+      + '<span class="suit-status ' + cls + '">' + label + '</span>'
+      + '</div>';
+  });
+ 
+  html += '</div>'
+ 
+    // Max wave today
+    + (data.waveMaxToday ? '<div style="padding:8px 14px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border)">'
+      + 'Max wave today: <strong>' + data.waveMaxToday + 'm</strong>'
+      + (data.waveMaxToday > 2 ? ' · 🔴 Rough conditions' : data.waveMaxToday > 1 ? ' · ⚠️ Moderate' : ' · ✅ Calm')
+      + '</div>' : '');
+ 
+  container.innerHTML = html;
+}
 
 
 refresh();
