@@ -2342,8 +2342,11 @@ function renderActRouteList(container, curated, overpass, type, rwgps) {
         + '<div class="act-route-dist" style="color:var(--cycle)">' + r.distanceKm + 'km</div>'
         + '</div></div>';
     });
-    window._actRWGPS = rwgps;
+       window._actRWGPS = rwgps;
   }
+
+  if (overpass.length) {
+    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named routes nearby</div>';
     overpass.forEach(function(r, i) {
       var icon = type === 'cycle' ? '🚴' : '🥾';
       html += '<div class="act-route-card" onclick="actSelectOverpass(' + i + ',\'' + type + '\')">'
