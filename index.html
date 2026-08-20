@@ -2254,7 +2254,24 @@ async function loadActRoutes(location, type) {
     var data = await r.json();
     var curated = data.routes || [];
  
-    // 2. Discover Overpass routes
+        // 2. Fetch RideWithGPS routes (cycling tab only)
+    var rwgps = [];
+    if (type === 'cycle') {
+      try {
+        var rwParams = new URLSearchParams({
+          action: 'discover_ridewithgps',
+          limit:  20,
+          _:      Date.now()
+        });
+        var rwR    = await fetch(API_URL + '?' + rwParams.toString(), { redirect: 'follow' });
+        var rwData = await rwR.json();
+        rwgps = rwData.routes || [];
+      } catch(rwErr) {
+        console.warn('RideWithGPS fetch failed:', rwErr.message);
+      }
+    }
+
+    // 3. Discover Overpass routes
     var overpass = [];
         var ovLat = currentData && currentData.vehicle && currentData.vehicle.lat
                 ? currentData.vehicle.lat
@@ -2277,7 +2294,7 @@ async function loadActRoutes(location, type) {
     }
  
     // Render combined list
-    renderActRouteList(container, curated, overpass, type);
+    renderActRouteList(container, curated, overpass, type, rwgps);
  
   } catch(err) {
     container.innerHTML = '<div class="act-loading">Could not load routes — tap to upload your own GPX</div>';
@@ -2285,7 +2302,8 @@ async function loadActRoutes(location, type) {
 }
  
 // ── Render route list ─────────────────────────────────────
-function renderActRouteList(container, curated, overpass, type) {
+function renderActRouteList(container, curated, overpass, type, rwgps) {
+  rwgps = rwgps || [];
   var html = '';
  
   // Curated routes first
@@ -2310,8 +2328,22 @@ function renderActRouteList(container, curated, overpass, type) {
   }
  
   // Overpass routes
-  if (overpass.length) {
-    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named trails nearby</div>';
+    if (rwgps.length) {
+    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your RideWithGPS routes</div>';
+    rwgps.forEach(function(r, i) {
+      var icon = r.activityType === 'mountain_biking' ? '🚵' : '🚴';
+      html += '<div class="act-route-card" onclick="actSelectRWGPS(' + r.id + ',\'' + type + '\')">'
+        + '<div class="act-route-icon">' + icon + '</div>'
+        + '<div class="act-route-left">'
+        + '<div class="act-route-name">' + r.name + '</div>'
+        + '<div class="act-route-meta">' + r.distanceKm + 'km · ' + r.elevationM + 'm · RideWithGPS</div>'
+        + '</div>'
+        + '<div class="act-route-right">'
+        + '<div class="act-route-dist" style="color:var(--cycle)">' + r.distanceKm + 'km</div>'
+        + '</div></div>';
+    });
+    window._actRWGPS = rwgps;
+  }
     overpass.forEach(function(r, i) {
       var icon = type === 'cycle' ? '🚴' : '🥾';
       html += '<div class="act-route-card" onclick="actSelectOverpass(' + i + ',\'' + type + '\')">'
@@ -3017,6 +3049,23 @@ function renderMarineData(container, data, location) {
   container.innerHTML = html;
 }
 
+async function actSelectRWGPS(routeId, type) {
+  showActLoading(type, 'Fetching route from RideWithGPS...');
+  try {
+    var params = new URLSearchParams({
+      action:  'get_ridewithgps_gpx',
+      routeId: routeId,
+      _:       Date.now()
+    });
+    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
+    var data = await r.json();
+    if (!data.success || !data.gpx) throw new Error(data.error || 'No GPX');
+    var route = (window._actRWGPS || []).find(function(r){ return r.id === routeId; });
+    actAnalyseGPXContent(data.gpx, route ? route.name : 'RideWithGPS route', type);
+  } catch(err) {
+    showActError(type, 'Could not fetch route: ' + err.message);
+  }
+}
 
 refresh();
 </script>
