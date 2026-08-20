@@ -2865,7 +2865,9 @@ function buildWaterScreen(d) {
  
 // ── 5. Load marine data ───────────────────────────────────
 async function loadMarineData(lat, lon, location) {
+  console.log('loadMarineData called, lat:', lat, 'lon:', lon);
   var container = document.getElementById('act-water-content');
+  console.log('container found:', !!container);
   if (!container) return;
  
   if (!lat || !lon) {
