@@ -2177,7 +2177,7 @@ function buildActivitiesSection(d) {
 
     // Water screen
     + '<div class="act-screen' + (defaultTab==='water'?' active':'') + '" id="act-screen-water">'
-    + buildWaterScreen(location, d)
+        + buildWaterScreen(d)
     + '</div>';
 
   return makeSection('activities', 'Activities', '', '', body);
