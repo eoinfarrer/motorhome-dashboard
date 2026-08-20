@@ -2165,12 +2165,12 @@ function buildActivitiesSection(d) {
  
     // Ski screen
     + '<div class="act-screen' + (defaultTab==='ski'?' active':'') + '" id="act-screen-ski">'
-    + buildSkiScreen(snow, meta)
-    + '</div>';
+        + buildSkiScreen(snow, meta)
+    + '</div>'
 
     // Water screen
     + '<div class="act-screen' + (defaultTab==='water'?' active':'') + '" id="act-screen-water">'
-        + buildWaterScreen(d)
+    + buildWaterScreen(d)
     + '</div>';
 
   return makeSection('activities', 'Activities', '', '', body);
