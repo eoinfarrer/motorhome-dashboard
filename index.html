@@ -536,13 +536,6 @@ function render(d){
       loadActRoutes(d.meta.currentLocation, 'cycle');
     }, 3000);
 
-        setTimeout(function() {
-      var lat = d.vehicle && d.vehicle.lat ? d.vehicle.lat
-              : d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lat : null;
-      var lon = d.vehicle && d.vehicle.lon ? d.vehicle.lon
-              : d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lon : null;
-      loadMarineData(lat, lon, d.meta.currentLocation);
-    }, 1500);
   }
 }
 
@@ -2192,6 +2185,15 @@ function switchActTab(tab) {
   var screen = document.getElementById('act-screen-' + tab);
   if (tabBtn) tabBtn.classList.add('active');
   if (screen) screen.classList.add('active');
+
+  // Load marine data when water tab selected
+  if (tab === 'water' && currentData) {
+    var lat = currentData.vehicle && currentData.vehicle.lat ? currentData.vehicle.lat
+            : currentData.meta && currentData.meta.currentLocationCoords ? currentData.meta.currentLocationCoords.lat : null;
+    var lon = currentData.vehicle && currentData.vehicle.lon ? currentData.vehicle.lon
+            : currentData.meta && currentData.meta.currentLocationCoords ? currentData.meta.currentLocationCoords.lon : null;
+    loadMarineData(lat, lon, currentData.meta && currentData.meta.currentLocation);
+  }
 }
  
 // ── Discovery view ────────────────────────────────────────
