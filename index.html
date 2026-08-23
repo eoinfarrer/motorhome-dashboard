@@ -733,13 +733,25 @@ function buildLpgSection(lpg){
 function buildWeatherSection(weather){
   if(!weather||!weather.length)return'';
 
-  // Limit display to today + 3 days
+    // Limit display to today + 3 days, or trip start + 3 days if PRE_TRIP
   var now=new Date();now.setHours(0,0,0,0);
   var cutoff=new Date(now.getTime()+3*86400000);
-  weather=weather.filter(function(w){
+  var filtered=weather.filter(function(w){
     var d=new Date(w.date+'T00:00:00');
     return d<=cutoff;
   });
+  // If no weather in today+3 window, show from first available date
+  if(!filtered.length && weather.length) {
+    var firstDate=new Date(weather[0].date+'T00:00:00');firstDate.setHours(0,0,0,0);
+    var tripCutoff=new Date(firstDate.getTime()+3*86400000);
+    filtered=weather.filter(function(w){
+      var d=new Date(w.date+'T00:00:00');
+      return d>=firstDate && d<=tripCutoff;
+    });
+    // Adjust day labels to be relative to trip start
+    now=firstDate;
+  }
+  weather=filtered;
   if(!weather.length)return'';
 
   // Group by location preserving first-appearance order
