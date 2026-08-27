@@ -656,9 +656,58 @@ function buildNextDrive(meta,fc){
     +(fuel?'<div class="drive-stat"><span class="drive-stat-label">Fuel est</span><span class="drive-stat-value">~'+fuel.litres+'L &middot; &pound;'+fuel.cost+'</span></div>':'')
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
     +'</div>'
-    +passHtml
+        +passHtml
+    +buildEnRouteWeather_(nd)
     +'</div>';
 }
+
+function buildEnRouteWeather_(nd) {
+  if (!nd || !nd.enRoute || !nd.enRoute.length) return '';
+
+  var worst = nd.enRoute.some(function(w){ return w.overallRisk==='danger'; })  ? 'danger'
+            : nd.enRoute.some(function(w){ return w.overallRisk==='caution'; }) ? 'caution'
+            : 'ok';
+
+  var riskColor = worst==='danger'  ? 'var(--danger)'
+                : worst==='caution' ? 'var(--caution)'
+                : 'var(--go)';
+  var riskLabel = worst==='danger'  ? '🔴 Risk on route'
+                : worst==='caution' ? '🟡 Caution on route'
+                : '🟢 All clear';
+
+  var html = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    + '<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">En-route conditions</div>'
+    + '<div style="font-size:11px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</div>'
+    + '</div>';
+
+  nd.enRoute.forEach(function(w) {
+    var riskIcon = w.overallRisk==='danger'  ? '🔴'
+                 : w.overallRisk==='caution' ? '⚠️'
+                 : '✅';
+    var tempColor = w.tempC <= 2  ? 'var(--frost)'
+                  : w.tempC >= 28 ? 'var(--caution)'
+                  : 'var(--text-dim)';
+
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;'
+      + 'border-bottom:1px solid var(--border);font-size:11px">'
+      + '<div style="color:var(--text-muted);min-width:36px">km ' + w.distKm + '</div>'
+      + '<div style="flex:1;font-weight:600">' + w.label + '</div>'
+      + '<div style="color:var(--text-muted);min-width:36px">' + w.etaStr + '</div>'
+      + '<div style="color:' + tempColor + ';min-width:38px">' + w.tempC + '°</div>'
+      + '<div style="color:var(--text-muted);min-width:50px">' + w.windKmh + 'km/h</div>'
+      + '<div>' + riskIcon + '</div>'
+      + '</div>'
+      + (w.risks && w.risks.length ? '<div style="font-size:10px;color:var(--caution);padding:2px 0 4px 44px">'
+        + w.risks.filter(function(r){ return r.severity!=='info'; })
+               .map(function(r){ return r.label; }).join(' · ')
+        + '</div>' : '');
+  });
+
+  html += '</div>';
+  return html;
+}
+
  
 // helper — format date as yyyy-MM-dd for comparison
 function fmtDateISO(d){
