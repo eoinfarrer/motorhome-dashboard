@@ -1260,6 +1260,14 @@ function renderSettings(d){
   var resorts=d.snowStatus&&d.snowStatus.resorts?d.snowStatus.resorts:[];
   var html='';
 
+  // Manual trigger
+  html+='<div class="settings-group">'
+    +'<div class="settings-group-head"><span class="settings-group-title">Data refresh</span></div>'
+    +'<div style="padding:10px 14px">'
+    +'<button onclick="runAllModulesNow()" style="width:100%;padding:10px;background:#1a1a18;color:#fff;border:none;border-radius:5px;font-family:var(--display);font-size:13px;font-weight:700;cursor:pointer">⚙️ Run all modules now</button>'
+    +'<div id="runAllStatus" style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:center"></div>'
+    +'</div></div>';
+
   // Default trip
   html+='<div class="settings-group">'
     +'<div class="settings-group-head"><span class="settings-group-title">Default trip</span></div>'
@@ -3079,6 +3087,22 @@ async function actSelectRWGPS(routeId, type) {
     actAnalyseGPXContent(data.gpx, route ? route.name : 'RideWithGPS route', type);
   } catch(err) {
     showActError(type, 'Could not fetch route: ' + err.message);
+  }
+}
+
+async function runAllModulesNow() {
+  var btn    = document.querySelector('[onclick="runAllModulesNow()"]');
+  var status = document.getElementById('runAllStatus');
+  if (btn) btn.textContent = '⏳ Running...';
+  if (status) status.textContent = 'Running all modules — this may take 30-60 seconds...';
+  try {
+    var r = await fetch(API_URL + '?action=run_all_modules&_=' + Date.now(), { redirect: 'follow' });
+    var d = await r.json();
+    if (btn) btn.textContent = '⚙️ Run all modules now';
+    if (status) status.textContent = d.success ? '✅ Done — tap Refresh to see updates' : '❌ ' + (d.error || 'Failed');
+  } catch(err) {
+    if (btn) btn.textContent = '⚙️ Run all modules now';
+    if (status) status.textContent = '❌ ' + err.message;
   }
 }
 
