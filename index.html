@@ -675,11 +675,15 @@ function buildEnRouteWeather_(nd) {
                 : worst==='caution' ? '🟡 Caution on route'
                 : '🟢 All clear';
 
-  var html = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+  
+      var html = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleEnRoute()">'
     + '<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">En-route conditions</div>'
+    + '<div style="display:flex;align-items:center;gap:8px">'
     + '<div style="font-size:11px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</div>'
-    + '</div>';
+    + '<div id="enroute-chevron" style="font-size:11px;color:var(--text-muted)">›</div>'
+    + '</div></div>'
+    + '<div id="enroute-waypoints" style="display:none">';            
 
   nd.enRoute.forEach(function(w) {
     var riskIcon = w.overallRisk==='danger'  ? '🔴'
@@ -704,10 +708,17 @@ function buildEnRouteWeather_(nd) {
         + '</div>' : '');
   });
 
-  html += '</div>';
+  
+  html += '</div></div>'; // close waypoints + outer
+
+  // Auto-expand if there are risks
+  if (worst !== 'ok') {
+    html = html.replace('display:none', 'display:block');
+    html = html.replace('>›<', '>↓<');
+  }
+
   return html;
 }
-
  
 // helper — format date as yyyy-MM-dd for comparison
 function fmtDateISO(d){
@@ -3153,6 +3164,15 @@ async function runAllModulesNow() {
     if (btn) btn.textContent = '⚙️ Run all modules now';
     if (status) status.textContent = '❌ ' + err.message;
   }
+}
+
+function toggleEnRoute() {
+  var wp  = document.getElementById('enroute-waypoints');
+  var ch  = document.getElementById('enroute-chevron');
+  if (!wp) return;
+  var open = wp.style.display !== 'none';
+  wp.style.display = open ? 'none' : 'block';
+  if (ch) ch.textContent = open ? '›' : '↓';
 }
 
 refresh();
