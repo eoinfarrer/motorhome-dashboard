@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Audrey - Mission Control</title>
+<title>Audrey</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -16,21 +16,178 @@
   --text:#1a1a18;--text-dim:#555;--text-muted:#999;
   --go:#1a8a4a;--caution:#c07800;--danger:#c0392b;
   --frost:#2471a3;--gold:#9a7040;
-  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;--display:'Syne',sans-serif;--ui:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --safe-top:env(safe-area-inset-top,0px);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{background:var(--bg);}
 body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15px;line-height:1.5;min-height:100vh;padding-top:var(--safe-top);-webkit-font-smoothing:antialiased;}
 
+/* ── AUDREY 2.0 APP SHELL ────────────────────────────────────
+   The existing feature builders remain below. The shell only decides which
+   composed view is visible, allowing the app to grow without new page loads. */
+.app-shell{min-height:calc(100vh - var(--safe-top));}
+.app-main{min-height:calc(100vh - 74px);padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));}
+.app-main[data-active-view="home"]{background:#1b1d1a;}
+.app-view{display:none;animation:view-in .18s ease-out;}
+.app-view.is-active{display:block;}
+@keyframes view-in{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:none}}
+.primary-nav{position:fixed;left:0;right:0;bottom:0;z-index:150;display:grid;grid-template-columns:repeat(5,1fr);padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));background:rgba(18,20,18,.94);border-top:1px solid rgba(255,255,255,.1);box-shadow:0 -8px 24px rgba(20,20,18,.22);backdrop-filter:blur(18px);}
+.primary-nav-btn{appearance:none;border:0;background:transparent;color:#a9aaa3;min-height:52px;padding:5px 2px;border-radius:7px;font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;}
+.primary-nav-btn::before{display:block;margin-bottom:3px;font-size:16px;line-height:1;}
+.primary-nav-btn[data-view="home"]::before{content:'⌂';}
+.primary-nav-btn[data-view="journey"]::before{content:'↗';}
+.primary-nav-btn[data-view="do"]::before{content:'◌';}
+.primary-nav-btn[data-view="van"]::before{content:'▣';}
+.primary-nav-btn[data-view="more"]::before{content:'•••';letter-spacing:-1px;}
+.primary-nav-btn.is-active{background:rgba(255,255,255,.1);color:#f7f5ee;}
+/* ── AUDREY 2.0 HOME ─────────────────────────────────────────
+   Home is a context-aware briefing. Detailed feature builders stay in their
+   dedicated views, so this surface can stay calm and decision-focused. */
+.home-experience{--home-scene-image:none;--home-scene-position:center;--home-scene-position-tablet:center;--home-scene-position-wide:center;--home-scene-glow:rgba(178,143,88,.18);--home-scene-horizon:rgba(86,112,102,.16);--home-scene-base:#1b1e1b;--home-glass-primary:rgba(23,27,25,.78);--home-glass-secondary:rgba(31,35,32,.68);--home-glass-inset:rgba(255,255,255,.075);--home-glass-border:rgba(255,255,255,.1);--home-glass-text:#f4f3ed;--home-glass-muted:#b7b9b0;--home-glass-shadow:0 12px 28px rgba(0,0,0,.22);min-height:calc(100vh - 74px);padding:14px;background-image:linear-gradient(180deg,rgba(11,13,12,.1),rgba(11,13,12,.56)),var(--home-scene-image),radial-gradient(ellipse 85% 55% at 15% -10%,var(--home-scene-glow),transparent 70%),radial-gradient(ellipse 60% 45% at 100% 25%,var(--home-scene-horizon),transparent 72%),linear-gradient(155deg,#171917 0%,#252720 52%,var(--home-scene-base) 100%);background-size:cover,cover,auto,auto,cover;background-position:center,var(--home-scene-position),center,center,center;}
+.home-experience[data-scene="home"]{--home-scene-glow:rgba(187,151,91,.2);--home-scene-horizon:rgba(92,119,99,.13);}
+.home-experience[data-scene="mountains"]{--home-scene-glow:rgba(151,177,185,.18);--home-scene-horizon:rgba(77,111,103,.22);--home-scene-base:#18201f;}
+.home-experience[data-scene="alpine"]{--home-scene-glow:rgba(185,205,220,.22);--home-scene-horizon:rgba(80,124,139,.2);--home-scene-base:#172023;}
+.home-experience[data-scene="coast"]{--home-scene-glow:rgba(122,171,188,.2);--home-scene-horizon:rgba(38,101,120,.24);--home-scene-base:#152126;}
+.home-experience[data-scene="highlands"]{--home-scene-glow:rgba(166,149,98,.18);--home-scene-horizon:rgba(85,118,86,.23);--home-scene-base:#1c211a;}
+.home-experience[data-scene="travelling"]{--home-scene-glow:rgba(159,191,194,.17);--home-scene-horizon:rgba(84,117,98,.2);--home-scene-base:#18221f;}
+.home-experience[data-scene-time="evening"]{--home-scene-glow:rgba(196,128,73,.23);--home-scene-horizon:rgba(86,69,89,.16);}
+.home-experience[data-scene-time="night"]{--home-scene-glow:rgba(84,105,135,.16);--home-scene-horizon:rgba(32,56,68,.18);--home-scene-base:#111513;}
+.home-canvas{width:min(100%,1120px);margin:0 auto;}
+.home-hero{position:relative;overflow:hidden;padding:27px 22px 25px;border-radius:22px;color:#f8f6ef;background:linear-gradient(118deg,rgba(44,47,40,.96),rgba(35,37,32,.82));box-shadow:0 18px 38px rgba(0,0,0,.2);backdrop-filter:blur(14px);}
+.home-hero::after{content:'';position:absolute;width:230px;height:230px;right:-102px;top:-140px;border:1px solid rgba(220,191,135,.18);border-radius:50%;box-shadow:0 0 0 32px rgba(220,191,135,.04),0 0 0 70px rgba(220,191,135,.025);pointer-events:none;}
+.home-hero.home-tone-attention{background:linear-gradient(135deg,#382824,#27231f);}
+.home-hero.home-tone-drive{background:linear-gradient(135deg,#172a32,#29312b);}
+.home-eyebrow{position:relative;z-index:1;margin-bottom:8px;color:#cbb88f;font-size:9px;font-weight:500;letter-spacing:2.3px;text-transform:uppercase;}
+.home-trip-name{position:relative;z-index:1;max-width:88%;font-family:var(--ui);font-size:clamp(24px,5.8vw,32px);font-weight:700;letter-spacing:-.7px;line-height:1.12;}
+.home-state-line{position:relative;z-index:1;display:flex;align-items:center;gap:8px;margin:13px 0 9px;font-family:var(--ui);font-size:13px;font-weight:500;color:#deddd4;}
+.home-state-dot{width:7px;height:7px;border-radius:50%;background:#77b78b;box-shadow:0 0 0 4px rgba(119,183,139,.12);}
+.home-tone-attention .home-state-dot{background:#e59980;box-shadow:0 0 0 4px rgba(229,153,128,.12);}
+.home-tone-drive .home-state-dot{background:#8bc6d6;box-shadow:0 0 0 4px rgba(139,198,214,.12);}
+.home-message{position:relative;z-index:1;max-width:440px;color:#f7f5ee;font-family:var(--ui);font-size:15px;font-weight:500;line-height:1.45;}
+.home-hero-meta{position:relative;z-index:1;margin-top:16px;color:#bdbdb3;font-size:10px;}
+.home-stack{display:grid;gap:12px;margin-top:14px;}
+.home-attention{padding:15px 16px;border:1px solid rgba(224,120,99,.23);border-radius:14px;background:rgba(58,35,31,.8);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
+.home-attention-label{color:var(--danger);font-size:9px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;}
+.home-attention-copy{margin-top:5px;color:#f5dfd8;font-family:var(--ui);font-size:14px;font-weight:650;line-height:1.4;}
+/* Reusable Home glass system: primary panel, secondary panel, inset metrics. */
+.home-decision,.home-vehicle-surface{padding:18px;border:1px solid var(--home-glass-border);border-radius:16px;background:var(--home-glass-primary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
+.home-opportunity,.home-condition{border:1px solid var(--home-glass-border);background:var(--home-glass-secondary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
+.home-decision-kicker,.home-section-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--home-glass-muted);}
+.home-drive-route{display:flex;align-items:center;gap:9px;margin:8px 0 14px;color:var(--home-glass-text);font-family:var(--ui);font-size:clamp(19px,4.8vw,25px);font-weight:700;letter-spacing:-.45px;line-height:1.18;}
+.home-drive-route span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.home-drive-arrow{flex:0 0 auto;color:#8ec4d5;}
+.home-drive-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.home-drive-stat{padding:10px 11px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:var(--home-glass-inset);}
+.home-drive-stat-label{font-size:8px;letter-spacing:1.4px;text-transform:uppercase;color:var(--home-glass-muted);}
+.home-drive-stat-value{margin-top:3px;font-family:var(--ui);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--home-glass-text);}
+.home-risk-row{display:flex;align-items:flex-start;gap:9px;margin-top:13px;padding-top:13px;border-top:1px solid rgba(255,255,255,.11);}
+.home-risk-badge{flex:0 0 auto;padding:3px 7px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;}
+.home-risk-go{background:#e4f3e8;color:#187444;}.home-risk-caution{background:#fff0d9;color:#9b6000;}.home-risk-danger{background:#fbe5df;color:#ac3329;}
+.home-risk-copy{font-size:11px;line-height:1.45;color:var(--home-glass-muted);}
+.home-conditions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.home-condition{min-width:0;padding:13px;border-radius:13px;}
+.home-condition-label{font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--home-glass-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-condition-main{margin-top:6px;font-family:var(--ui);font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-condition-meta{margin-top:3px;font-size:10px;color:var(--home-glass-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-vehicle-surface{padding:16px;}
+.home-vehicle-button{width:100%;color:inherit;text-align:left;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;}
+.home-vehicle-button:hover{transform:translateY(-1px);box-shadow:0 15px 30px rgba(0,0,0,.28);}
+.home-vehicle-button:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+.home-vehicle-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.home-vehicle-status-meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+.home-vehicle-health{font-size:9px;font-weight:600;color:#8ac59b;}
+.home-telemetry-freshness{font-size:9px;color:var(--home-glass-muted);white-space:nowrap;}
+.home-vehicle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.home-van-item{min-width:0;padding:10px 6px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:var(--home-glass-inset);text-align:center;}
+.home-van-value{font-family:var(--ui);font-size:clamp(15px,4.2vw,19px);font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--home-glass-text);}
+.home-van-label{margin-top:4px;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--home-glass-muted);}
+.home-opportunity{padding:16px 17px;border-radius:16px;}
+.home-opportunity-title{margin-top:4px;color:var(--home-glass-text);font-family:var(--ui);font-size:16px;font-weight:700;letter-spacing:-.2px;line-height:1.25;}
+.home-opportunity-copy{margin-top:5px;color:var(--home-glass-muted);font-size:11px;line-height:1.5;}
+.home-opportunity-action{display:inline-block;margin-top:10px;padding:0;border:0;background:none;color:#8ac59b;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;cursor:pointer;}
+.home-opportunity-action:hover{text-decoration:underline;}
+.home-calm-status{display:flex;align-items:center;gap:9px;padding:16px 17px;border:1px solid var(--home-glass-border);border-radius:16px;background:var(--home-glass-secondary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);color:var(--home-glass-text);}
+.home-calm-status::before{content:'✓';display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(80,159,103,.2);color:#8ac59b;font-family:var(--display);font-weight:800;}
+.home-calm-status-title{font-family:var(--ui);font-size:14px;font-weight:700;}
+.home-calm-status-copy{margin-top:1px;font-size:10px;color:var(--home-glass-muted);}
+
+/* ── AUDREY 2.0 JOURNEY ────────────────────────────────────── */
+.journey-experience{--journey-scene-image:none;--journey-scene-position:center;--journey-scene-position-tablet:center;--journey-scene-position-wide:center;min-height:calc(100vh - 74px);padding:14px;background-image:linear-gradient(180deg,rgba(8,10,9,.44),rgba(8,10,9,.78)),var(--journey-scene-image),radial-gradient(ellipse 80% 45% at 15% -10%,rgba(164,143,94,.16),transparent 72%),radial-gradient(ellipse 60% 45% at 100% 25%,rgba(75,112,105,.16),transparent 70%),linear-gradient(155deg,#171917,#22251f 55%,#191c19);background-size:cover,cover,auto,auto,cover;background-position:center,var(--journey-scene-position),center,center,center;}
+.journey-canvas{width:min(100%,1120px);margin:0 auto;}
+.journey-head{padding:19px 6px 15px;color:#f4f3ed;}
+.journey-eyebrow{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}
+.journey-title{margin-top:5px;font-family:var(--ui);font-size:clamp(25px,6vw,34px);font-weight:700;letter-spacing:-.7px;line-height:1.12;}
+.journey-subtitle{margin-top:6px;font-family:var(--ui);font-size:13px;color:#b7b9b0;}
+.journey-mode-switch{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:17px;padding:3px;border-radius:10px;background:rgba(255,255,255,.08);}
+.journey-mode-btn{min-width:86px;padding:8px 12px;border:0;border-radius:7px;background:transparent;color:#b9bbb2;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.2px;cursor:pointer;}
+.journey-mode-btn.is-active{background:rgba(255,255,255,.13);color:#f6f4ed;}
+.journey-mode-btn:disabled{opacity:.45;cursor:default;}
+.journey-mode{display:none;}
+.journey-mode.is-active{display:block;}
+.journey-drive-brief,.journey-overview{padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:17px;background:rgba(23,27,25,.78);box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);}
+.journey-overview{padding:12px 14px;border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.16);}
+.journey-kicker{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#b7b9b0;}
+.journey-route{display:flex;align-items:center;gap:9px;margin:8px 0 16px;color:#f4f3ed;font-family:var(--ui);font-size:clamp(19px,4.8vw,25px);font-weight:700;letter-spacing:-.45px;line-height:1.18;}
+.journey-route span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.journey-route-arrow{flex:0 0 auto;color:#8ec4d5;}
+.journey-decision{margin:0 0 16px;padding:13px 14px;border:1px solid rgba(255,255,255,.09);border-left:3px solid #77b78b;border-radius:12px;background:rgba(255,255,255,.065);box-shadow:0 7px 18px rgba(0,0,0,.12);}
+.journey-decision.journey-caution{border-left-color:#d49a45;}.journey-decision.journey-danger{border-left-color:#d87969;}
+.journey-decision-status{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#88c99a;}.journey-caution .journey-decision-status{color:#e2b161;}.journey-danger .journey-decision-status{color:#e18d80;}
+.journey-decision-heading{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:15px;font-weight:700;line-height:1.25;}
+.journey-decision-copy{margin-top:4px;font-size:11px;line-height:1.45;color:#b7b9b0;}
+.journey-facts{display:flex;flex-wrap:wrap;gap:10px 19px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);}
+.journey-fact{min-width:72px;}.journey-fact-label{font-size:8px;letter-spacing:1.35px;text-transform:uppercase;color:#b7b9b0;}.journey-fact-value{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.journey-section-title{margin:23px 6px 10px;color:#d7d8d0;font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;}
+.journey-timeline{position:relative;padding-left:25px;}
+.journey-timeline::before{content:'';position:absolute;top:11px;bottom:12px;left:8px;width:2px;background:linear-gradient(#c6a66d,rgba(255,255,255,.23) 11%,rgba(255,255,255,.14));}
+.journey-point{position:relative;padding:0 0 17px 13px;}
+.journey-point:last-child{padding-bottom:0;}
+.journey-point::before{content:'';position:absolute;z-index:1;left:-21px;top:5px;width:10px;height:10px;border:2px solid #a8aaa0;border-radius:50%;background:#20231f;}
+.journey-point.route-risk::before{border-color:#d49a45;background:#d49a45;}.journey-point.route-danger::before{border-color:#d87969;background:#d87969;}.journey-point.route-ok::before{border-color:#77b78b;background:#77b78b;}
+.journey-point-card{padding:12px 13px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(31,35,32,.68);box-shadow:0 8px 20px rgba(0,0,0,.15);backdrop-filter:blur(10px);}
+.journey-point-type{font-size:9px;letter-spacing:1.3px;text-transform:uppercase;color:#b7b9b0;}
+.journey-point-title{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;line-height:1.3;}
+.journey-point-meta{margin-top:3px;font-size:10px;color:#b7b9b0;line-height:1.45;}
+.journey-details{margin:14px 0 0 25px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(22,25,23,.62);color:#d7d8d0;}
+.journey-details summary{padding:10px 12px;cursor:pointer;font-size:10px;color:#b7b9b0;}
+.journey-detail-row{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-top:1px solid rgba(255,255,255,.08);font-size:10px;}
+.journey-detail-row span:last-child{text-align:right;color:#f4f3ed;}
+.journey-overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.journey-overview-value{color:#f4f3ed;font-family:var(--ui);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}
+.journey-overview-label{margin-top:1px;font-size:7px;letter-spacing:1px;text-transform:uppercase;color:#b7b9b0;}
+.journey-trip-point{padding-bottom:13px;}
+.journey-trip-point::before{border-color:#8d9086;background:#20231f;}.journey-trip-point.is-current::before{border-color:#c6a66d;background:#c6a66d;}.journey-trip-point.is-complete::before{border-color:#77b78b;background:#77b78b;}
+.journey-trip-card{display:grid;grid-template-columns:50px 1fr auto;gap:9px;align-items:start;padding:9px 10px;border-radius:11px;background:rgba(27,31,28,.42);}
+.journey-trip-card.journey-place-card{border:1px solid rgba(255,255,255,.075);box-shadow:0 6px 17px rgba(0,0,0,.1);backdrop-filter:blur(8px);}
+.journey-trip-card.journey-leg-card{padding-top:6px;padding-bottom:6px;background:transparent;}
+.journey-trip-card.journey-leg-card .journey-type{background:rgba(142,196,213,.13);color:#a9d3df;}
+.journey-date{padding-top:2px;font-size:9px;color:#9fa198;line-height:1.3;}.journey-date strong{display:block;color:#dedfd8;font-size:11px;font-weight:600;}
+.journey-stop{color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;line-height:1.25;}.journey-stop-meta{margin-top:2px;font-size:9px;color:#a8aaa1;line-height:1.4;}.journey-type{padding:3px 5px;border-radius:5px;background:rgba(255,255,255,.08);color:#b9bbb2;font-size:7px;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;}
+.journey-trip-details{grid-column:2/-1;margin-top:1px;padding-top:2px;border-top:1px solid rgba(255,255,255,.055);}.journey-trip-details summary{font-size:9px;color:#83b9c7;cursor:pointer;}.journey-trip-detail{margin-top:5px;font-size:9px;color:#a8aaa1;line-height:1.45;}.journey-trip-detail a{color:#83b9c7;text-decoration:none;}
+.more-intro{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim);}
+
+/* ── AUDREY 2.0 MORE ─────────────────────────────────────────
+   A quiet secondary control centre. Legacy detail builders inherit these
+   scoped dark tokens without changing their data or behaviour elsewhere. */
+.more-experience{--bg:#171a17;--bg2:#20251f;--bg3:#2a3029;--text:#f4f3ed;--text-dim:#c4c7be;--text-muted:#a4a9a0;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.17);min-height:calc(100vh - 74px);padding:14px;color:#f4f3ed;background:linear-gradient(155deg,#171917,#22251f 55%,#191c19);}.more-canvas{width:min(100%,820px);margin:0 auto;}.more-head{padding:19px 6px 16px;}.more-eyebrow,.more-group-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}.more-title{margin-top:5px;font-family:var(--ui);font-size:clamp(24px,5.5vw,31px);font-weight:700;letter-spacing:-.65px;line-height:1.12;}.more-subtitle{margin-top:6px;color:#b9bcb3;font-family:var(--ui);font-size:13px;}.more-group{margin-top:22px;}.more-group:first-of-type{margin-top:0;}.more-group-label{margin:0 6px 9px;color:#b7b9b0;}.more-trip-content,.more-config-panel,.more-system-panel{display:grid;gap:10px;}.more-experience .section{overflow:hidden;margin:0;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(23,27,25,.76);box-shadow:0 10px 24px rgba(0,0,0,.18);backdrop-filter:blur(12px);}.more-experience .section-head{padding:12px 14px;background:rgba(255,255,255,.055);}.more-experience .section-head:hover{background:rgba(255,255,255,.09);}.more-experience .section-title{color:#e4e5de;}.more-experience .section-meta{color:#aeb2a9;}.more-experience .section-chevron{color:#cbb88f;}.more-experience .weather-loc-head{background:rgba(8,11,9,.28);border-color:rgba(255,255,255,.08);color:#d7d8d0;}.more-experience .weather-row{border-color:rgba(255,255,255,.08);}.more-experience .weather-row.today{background:rgba(203,184,143,.09);}.more-experience .weather-date,.more-experience .weather-condition,.more-experience .weather-nums{color:#c4c7be;}.more-experience .weather-date strong{color:#f4f3ed;}.more-experience .settings-group{margin:0;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(23,27,25,.76);}.more-experience .settings-group-head{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.08);}.more-experience .settings-group-title{color:#b7b9b0;}.more-experience .settings-row,.more-experience .resort-row{border-color:rgba(255,255,255,.08);}.more-experience .settings-row-label,.more-experience .resort-name-s{color:#e8e8e1;}.more-experience .settings-row-value{color:#f4f3ed;}.more-experience .settings-row-unit,.more-experience .resort-sub-s,.more-experience .settings-note{color:#aeb2a9;}.more-experience .settings-note{background:rgba(8,11,9,.25);border-color:rgba(255,255,255,.08);}.more-experience .trip-select,.more-experience .add-resort-input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:#f4f3ed;}.more-experience .s-edit-btn,.more-experience .add-resort-btn{border-color:rgba(255,255,255,.18);color:#a9d3df;}.more-experience .toggle{border-color:rgba(255,255,255,.2);}.more-system{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.7);box-shadow:0 8px 20px rgba(0,0,0,.15);}.more-system-summary{padding:13px 14px;color:#a9d3df;font-family:var(--mono);font-size:10px;cursor:pointer;}.more-system-body{padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.08);}.more-system-copy{margin:11px 0;color:#b7b9b0;font-size:11px;line-height:1.45;}.more-system-btn{width:100%;padding:10px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(255,255,255,.06);color:#d9dad3;font-family:var(--ui);font-size:12px;font-weight:700;cursor:pointer;}.more-system-btn:hover{border-color:#cbb88f;color:#f4f3ed;}.more-system-status{min-height:16px;margin-top:7px;color:#aeb2a9;font-size:10px;text-align:center;}.more-data-note{padding:15px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.65);color:#b7b9b0;font-size:11px;line-height:1.5;}.more-system-meta{padding:13px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.65);color:#b7b9b0;font-size:11px;line-height:1.5;}.more-system-meta strong{color:#f4f3ed;font-weight:600;}
+.more-experience details.settings-group>.settings-group-head{display:block;padding:9px 14px;cursor:pointer;list-style:none;}.more-experience details.settings-group>.settings-group-head::-webkit-details-marker{display:none;}
+.more-experience .weather-empty{padding:15px 14px;color:#b7b9b0;font-size:11px;line-height:1.5;}.more-experience .weather-empty strong{display:block;margin-bottom:3px;color:#e4e5de;font-family:var(--ui);font-size:13px;}
+@media(min-width:800px){.more-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);}.more-head{padding:6px 0 18px;}.more-trip-content{gap:12px;}}
+
+/* ── AUDREY 2.0 VAN ──────────────────────────────────────────
+   VAN is an evidence surface: it only interprets existing telemetry and
+   planner data, and keeps the existing LPG/fuel actions intact. */
+.van-experience{--van-scene-image:none;--van-scene-position:center;--van-scene-position-tablet:center;--van-scene-position-wide:center;--van-text:#f4f3ed;--van-secondary:#c4c7be;--van-muted:#a4a9a0;--van-glass:rgba(22,26,23,.76);--van-glass-soft:rgba(31,35,32,.64);--van-border:rgba(255,255,255,.1);min-height:calc(100vh - 74px);padding:14px;color:var(--van-text);background-image:linear-gradient(180deg,rgba(8,10,9,.38),rgba(8,10,9,.75)),var(--van-scene-image),radial-gradient(ellipse 75% 50% at 14% -8%,rgba(164,143,94,.16),transparent 72%),linear-gradient(155deg,#171917,#22251f 55%,#191c19);background-size:cover,cover,auto,cover;background-position:center,var(--van-scene-position),center,center;}.van-canvas{width:min(100%,1020px);margin:0 auto;}.van-head{padding:19px 6px 15px;}.van-eyebrow,.van-section-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}.van-title{margin-top:5px;font-family:var(--ui);font-size:clamp(25px,6vw,34px);font-weight:700;letter-spacing:-.7px;line-height:1.12;}.van-subtitle{margin-top:6px;color:var(--van-secondary);font-family:var(--ui);font-size:13px;}.van-health,.van-surface{border:1px solid var(--van-border);border-radius:17px;background:var(--van-glass);box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);}.van-health{padding:17px;border-left:3px solid #77b78b;}.van-health.van-caution{border-left-color:#d49a45;}.van-health.van-danger{border-left-color:#d87969;}.van-health-state{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#8ac59b;}.van-caution .van-health-state{color:#e2b161;}.van-danger .van-health-state{color:#e18d80;}.van-health-title{margin-top:4px;font-family:var(--ui);font-size:18px;font-weight:700;}.van-health-copy{margin-top:4px;color:var(--van-secondary);font-size:12px;line-height:1.5;}.van-alert-list{display:grid;gap:6px;margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);}.van-alert{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);color:#e5e5dd;font-size:11px;line-height:1.45;}.van-alert.van-alert-danger{border-left:2px solid #dc8271;}.van-alert.van-alert-caution{border-left:2px solid #d7a453;}.van-layout{display:grid;gap:12px;margin-top:13px;}.van-support{display:grid;gap:12px;}.van-surface{padding:16px;}.van-surface-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}.van-surface-title{margin-top:3px;font-family:var(--ui);font-size:17px;font-weight:700;}.van-surface-meta{color:var(--van-muted);font-size:10px;text-align:right;}.van-power-value{margin-top:14px;font-family:var(--ui);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;color:#f4f3ed;}.van-power-status{margin-top:5px;color:var(--van-secondary);font-size:11px;}.van-metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px;}.van-metric{padding:11px;border:1px solid rgba(255,255,255,.06);border-radius:11px;background:rgba(255,255,255,.06);}.van-metric-value{color:#f4f3ed;font-family:var(--ui);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;}.van-metric-label{margin-top:4px;color:var(--van-muted);font-size:8px;letter-spacing:1.1px;text-transform:uppercase;}.van-metric-status{margin-top:3px;color:var(--van-secondary);font-size:10px;}.van-lpg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-top:13px;}.van-lpg-value{font-family:var(--ui);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1;}.van-lpg-status{margin-top:4px;color:var(--van-secondary);font-size:11px;}.van-refill-btn,.van-edit-btn{border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(255,255,255,.06);color:#a9d3df;font-family:var(--mono);font-size:10px;cursor:pointer;}.van-refill-btn{min-height:34px;padding:0 11px;white-space:nowrap;}.van-refill-btn:hover,.van-edit-btn:hover{border-color:#a9d3df;background:rgba(169,211,223,.12);}.van-lpg-bar{height:8px;margin-top:13px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1);}.van-lpg-fill{height:100%;border-radius:inherit;background:#77b78b;}.van-lpg-fill.van-caution{background:#d49a45;}.van-lpg-fill.van-danger{background:#d87969;}.van-runway{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px;}.van-runway-item{padding:10px;border-radius:10px;background:rgba(255,255,255,.045);}.van-runway-label{color:var(--van-muted);font-size:8px;letter-spacing:1.1px;text-transform:uppercase;}.van-runway-value{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:12px;font-weight:700;line-height:1.35;}.van-runway-meta{margin-top:3px;color:var(--van-secondary);font-size:10px;line-height:1.4;}.van-detail-list{display:grid;gap:9px;margin-top:13px;}.van-detail-row{display:flex;justify-content:space-between;gap:14px;color:var(--van-secondary);font-size:11px;line-height:1.4;}.van-detail-row strong{color:#f4f3ed;font-weight:600;text-align:right;}.van-map-link{color:#a9d3df;text-decoration:none;}.van-fuel-facts{display:flex;flex-wrap:wrap;gap:10px 19px;margin-top:13px;}.van-fuel-fact{min-width:76px;}.van-fuel-label{color:var(--van-muted);font-size:8px;letter-spacing:1.1px;text-transform:uppercase;}.van-fuel-value{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;}.van-details{margin-top:14px;border-top:1px solid rgba(255,255,255,.1);}.van-details summary{padding:12px 0 2px;color:#a9d3df;font-family:var(--mono);font-size:10px;cursor:pointer;}.van-price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(255,255,255,.07);color:var(--van-secondary);font-size:11px;}.van-price-row strong{color:#f4f3ed;font-family:var(--ui);font-size:14px;}.van-edit-btn{padding:4px 8px;}
+@media(min-width:800px){.van-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);background-position:center,var(--van-scene-position-wide),center,center;}.van-head{padding:6px 0 18px;}.van-support{grid-template-columns:repeat(2,minmax(0,1fr));}.van-surface.van-wide{grid-column:span 2;}.van-runway{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
 /* HEADER */
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 8px rgba(0,0,0,0.06);}
-.header-left{display:flex;align-items:baseline;gap:10px;flex-shrink:0;}
-.wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:var(--text);}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(20,22,20,.97);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 12px rgba(0,0,0,.16);backdrop-filter:blur(18px);}
+.header-left{display:flex;align-items:center;flex-shrink:0;}
+.wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#f7f5ee;}
 .wordmark span{color:var(--gold);}
-.header-tag{font-size:9px;letter-spacing:3px;color:var(--text-muted);text-transform:uppercase;}
-.trip-selector{background:white;border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:4px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
-.refresh-btn{background:none;border:1px solid var(--border2);color:var(--text-dim);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
+.trip-selector{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#f7f5ee;font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
+.refresh-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#dcddd7;font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
 .refresh-btn.loading{opacity:0.5;pointer-events:none;}
 
@@ -170,12 +327,77 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
   .header{padding:12px 14px 10px;}
   .weather-row{grid-template-columns:70px 1fr auto;}
 }
+@media(max-width:420px){
+  .header{padding:11px 12px 10px;gap:8px;}
+  .header-left{min-width:0;}
+  .trip-selector{max-width:calc(100vw - 150px);padding:6px 8px;font-size:11px;}
+  .refresh-btn{width:34px;height:32px;padding:0;font-size:0;}
+  .refresh-btn::after{content:'↻';font-size:17px;line-height:1;}
+}
+@media(min-width:800px){
+  /* Desktop is one edge-to-edge application surface. The explicit header
+     height matches the rail and viewport calculations below, avoiding the
+     sub-pixel/body-background seam Safari exposed at the shell boundary. */
+  html,body{background:#171918;}
+  .app-shell{display:grid;grid-template-columns:208px minmax(0,880px) minmax(24px,1fr);grid-template-rows:63px minmax(0,1fr);align-items:stretch;background:#171918;}
+  .header{grid-column:1/-1;grid-row:1;min-height:63px;background:#171918;border-bottom:0;box-shadow:none;color:#f7f5ee;padding:14px 20px;}
+  .wordmark{color:#f7f5ee;}
+  .trip-selector{background:#242624;border-color:#43463f;color:#f7f5ee;}
+  .refresh-btn{border-color:#4b4e47;color:#dcddd7;}
+  .app-main{grid-column:2;grid-row:2;align-self:stretch;min-height:calc(100vh - 63px);padding:0;border-right:1px solid var(--border);border-radius:0;background:var(--bg);}
+  /* Every Audrey view owns the full workspace beside the rail. This keeps the
+     environmental canvas continuous rather than exposing the page background. */
+  .app-main[data-active-view="home"],.app-main[data-active-view="journey"],.app-main[data-active-view="do"],.app-main[data-active-view="van"],.app-main[data-active-view="more"]{grid-column:2/-1;border-right:0;background:#1b1d1a;}
+  .primary-nav{position:sticky;top:63px;left:auto;right:auto;bottom:auto;grid-column:1;grid-row:2;display:flex;flex-direction:column;align-self:stretch;height:calc(100vh - 63px);padding:18px 12px;background:#171918;border:0;border-radius:0;box-shadow:none;}
+  .primary-nav-btn{display:flex;align-items:center;gap:10px;min-height:44px;padding:9px 12px;text-align:left;font-size:10px;}
+  .primary-nav-btn::before{display:inline;margin:0;width:18px;text-align:center;font-size:17px;}
+  .footer{padding-bottom:28px;}
+  .home-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);}
+  .home-experience{background-position:center,var(--home-scene-position-wide),center,center,center;}
+  .home-canvas{max-width:1120px;}
+  .home-stack{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px;}
+  .home-stack>.home-attention,.home-stack>.home-decision{grid-column:span 2;}
+  .home-hero{padding:clamp(32px,5vw,54px) clamp(30px,5vw,58px) clamp(30px,4vw,44px);}
+  .home-trip-name{font-size:clamp(32px,3.4vw,42px);}
+  .home-message{font-size:16px;}
+  .journey-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);}
+  .journey-experience{background-position:center,var(--journey-scene-position-wide),center,center,center;}
+  .journey-head{padding:6px 0 18px;}
+  .journey-mode-switch{margin-top:19px;}
+  /* Desktop/tablet briefing: one compact decision-and-facts surface. */
+  .journey-drive-brief{display:grid;grid-template-columns:minmax(215px,1fr) minmax(0,2.25fr);column-gap:22px;align-items:center;padding:16px 18px;}
+  .journey-drive-brief>.journey-kicker,.journey-drive-brief>.journey-route{grid-column:1/-1;}
+  .journey-drive-brief>.journey-route{margin-bottom:13px;}
+  .journey-drive-brief>.journey-decision{margin:0;}
+  .journey-drive-brief>.journey-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:0;border:0;}
+  .journey-drive-brief>.journey-fact{min-width:0;padding:2px 12px;border-left:1px solid rgba(255,255,255,.1);}
+  .journey-drive-brief>.journey-fact:first-child{border-left:0;}
+  .journey-drive-brief>.journey-fact-value{font-size:13px;white-space:nowrap;}
+  .journey-overview{display:flex;align-items:center;gap:22px;padding:10px 14px;}
+  .journey-overview-grid{flex:1;margin-top:0;}
+  .journey-trip-point{padding-bottom:10px;}
+  .journey-trip-card{grid-template-columns:48px 1fr auto;padding:8px 10px;}
+  .journey-trip-card.journey-leg-card{padding-top:4px;padding-bottom:4px;}
+  .journey-trip-details{padding-top:1px;}
+  .journey-timeline{max-width:820px;}
+}
 @media(prefers-reduced-motion:reduce){
   .status-dot{animation:none;}
   .section-body,.section-chevron{transition:none;}
 }
 
+/* ── AUDREY 2.0 DO ─────────────────────────────────────────── */
+/* The original activity engines live inside the secondary tools area below. */
+.do-experience{--do-scene-image:none;--do-scene-position:center;--do-scene-position-tablet:center;--do-scene-position-wide:center;--bg:#171a17;--bg2:#20251f;--bg3:#2a3029;--text:#f4f3ed;--text-dim:#c1c3bb;--text-muted:#9da198;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.16);min-height:calc(100vh - 74px);padding:14px;background-image:linear-gradient(180deg,rgba(8,10,9,.4),rgba(8,10,9,.74)),var(--do-scene-image),radial-gradient(ellipse 75% 50% at 12% -8%,rgba(164,143,94,.15),transparent 72%),linear-gradient(155deg,#171917,#22251f 55%,#191c19);background-size:cover,cover,auto,cover;background-position:center,var(--do-scene-position),center,center;}
+.do-canvas{width:min(100%,1120px);margin:0 auto;}.do-head{padding:19px 6px 15px;color:#f4f3ed;}.do-eyebrow,.do-section-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}.do-title{margin-top:5px;font-family:var(--ui);font-size:clamp(25px,6vw,34px);font-weight:700;letter-spacing:-.7px;line-height:1.12;}.do-subtitle{margin-top:6px;color:#b7b9b0;font-family:var(--ui);font-size:13px;}
+.do-layout{display:grid;gap:14px;}.do-briefing,.do-my-activities,.do-tools{border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(23,27,25,.78);box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);}.do-briefing{padding:16px;}.do-ski-heading{margin-top:4px;color:#f4f3ed;font-family:var(--ui);font-size:17px;font-weight:700;}.do-opportunities{display:grid;gap:9px;margin-top:11px;}.do-opportunity{padding:12px 13px;border:1px solid rgba(255,255,255,.08);border-left:3px solid #7f8580;border-radius:12px;background:rgba(255,255,255,.05);color:inherit;text-align:left;cursor:pointer;}.do-opportunity.do-go{border-left-color:#77b78b;}.do-opportunity.do-possible{border-left-color:#d49a45;}.do-opportunity.do-not-today{border-left-color:#d87969;}.do-opportunity.do-check{border-left-color:#c6a66d;}.do-opportunity-status{font-size:9px;font-weight:700;letter-spacing:1.4px;color:#b7b9b0;}.do-go .do-opportunity-status{color:#8ac59b;}.do-possible .do-opportunity-status{color:#e2b161;}.do-not-today .do-opportunity-status{color:#e18d80;}.do-check .do-opportunity-status{color:#d4ba85;}.do-opportunity-title{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:15px;font-weight:700;}.do-opportunity-copy,.do-opportunity-when{margin-top:3px;color:#b7b9b0;font-size:11px;line-height:1.45;}.do-opportunity-when{color:#d0d1ca;}.do-data-note{margin-top:11px;color:#aeb0a8;font-size:11px;line-height:1.45;}
+.do-my-activities{padding:16px;}.do-section-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}.do-section-title{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:17px;font-weight:700;}.do-section-action{border:0;background:none;color:#8ec4d5;font-family:var(--mono);font-size:10px;cursor:pointer;}.do-activity-list{display:grid;gap:7px;margin-top:11px;}.do-activity-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.045);color:inherit;text-align:left;cursor:pointer;}.do-activity-item:hover{background:rgba(255,255,255,.08);}.do-activity-item>span:first-child{min-width:0;}.do-activity-name,.do-activity-meta{display:block;}.do-activity-name{overflow:hidden;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.do-activity-meta{margin-top:3px;overflow:hidden;color:#afb1aa;font-size:10px;line-height:1.4;text-overflow:ellipsis;white-space:nowrap;}.do-activity-distance{color:#d9d9d1;font-family:var(--ui);font-size:13px;font-weight:700;white-space:nowrap;}.do-empty{margin-top:10px;color:#aeb0a8;font-size:11px;line-height:1.45;}
+.do-launcher{width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(23,27,25,.78);box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);color:#d8d9d1;text-align:left;cursor:pointer;}.do-launcher-title{font-family:var(--ui);font-size:13px;font-weight:700;}.do-launcher-copy{margin-top:3px;color:#aeb0a8;font-size:10px;}.do-subview{display:none;}.do-subview.is-active{display:block;}.do-browse-back{display:inline-flex;align-items:center;min-height:42px;padding:0;border:0;background:none;color:#a9d3df;font-family:var(--mono);font-size:11px;cursor:pointer;}.do-browse-shell{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(23,27,25,.78);box-shadow:0 12px 28px rgba(0,0,0,.22);backdrop-filter:blur(12px);}.do-experience .act-tabs{background:rgba(255,255,255,.08);}.do-experience .act-tab-btn{background:rgba(22,26,23,.85);color:#c5c7bf;}.do-experience .act-tab-btn.active{background:rgba(255,255,255,.1);}.do-experience .act-tab-btn.active .act-tab-lbl{color:#f4f3ed;}.do-experience .act-route-card:hover,.do-experience .act-upload-row:hover{background:rgba(255,255,255,.06);}.do-experience .act-chip{background:rgba(255,255,255,.05);color:#c5c7bf;border-color:rgba(255,255,255,.14);}.do-experience .act-chip.active{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.2);color:#f4f3ed;}
+@media(min-width:800px){.do-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);background-position:center,var(--do-scene-position-wide),center,center;}.do-head{padding:6px 0 18px;}.do-home .do-layout{max-width:760px;}.do-opportunities{grid-template-columns:repeat(2,minmax(0,1fr));}.do-opportunity:first-child{grid-column:span 2;}}
+/* Audrey Cycling: portable saved-route flow above the specialist tools. */
+.do-route-panel{width:min(100%,760px);margin:0 auto;}.do-route-card{padding:17px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(18,22,20,.72);box-shadow:0 16px 36px rgba(0,0,0,.27);backdrop-filter:blur(14px);}.do-route-name{margin-top:5px;color:#f4f3ed;font-family:var(--ui);font-size:clamp(21px,5.2vw,28px);font-weight:700;letter-spacing:-.45px;line-height:1.12;}.do-route-meta{margin-top:5px;color:#b9bcb4;font-size:12px;line-height:1.45;}.do-route-setup{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.1);}.do-route-setup::before{grid-column:1/-1;content:'Analyse this ride';color:#cbb88f;font-size:9px;font-weight:600;letter-spacing:1.7px;text-transform:uppercase;}.do-route-field{display:grid;gap:4px;min-width:0;}.do-route-field label{color:#aeb1a9;font-size:9px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;}.do-route-field input{width:100%;min-width:0;box-sizing:border-box;padding:9px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:rgba(255,255,255,.07);color:#f4f3ed;font:inherit;font-size:12px;color-scheme:dark;}.do-route-action{grid-column:1/-1;min-height:43px;margin-top:3px;border:0;border-radius:10px;background:#cbb88f;color:#1b1d1a;font-family:var(--ui);font-size:12px;font-weight:700;cursor:pointer;}.do-route-conclusion{padding:14px;border-left:3px solid #7c847d;border-radius:12px;background:rgba(255,255,255,.055);}.do-route-conclusion.go{border-left-color:#76b88b;}.do-route-conclusion.caution{border-left-color:#d7a453;}.do-route-conclusion.danger{border-left-color:#dc8271;}.do-route-status{font-family:var(--ui);font-size:17px;font-weight:700;letter-spacing:.2px;}.do-route-conclusion.go .do-route-status{color:#90cda0;}.do-route-conclusion.caution .do-route-status{color:#e5b86c;}.do-route-conclusion.danger .do-route-status{color:#e79588;}.do-route-copy{margin-top:4px;color:#d0d2ca;font-size:12px;line-height:1.5;}.do-route-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:12px;overflow:hidden;border:1px solid rgba(255,255,255,.08);border-radius:11px;background:rgba(255,255,255,.08);}.do-route-facts span{display:grid;gap:2px;padding:10px;background:rgba(15,18,16,.43);color:#aeb1a9;font-size:9px;letter-spacing:.8px;text-transform:uppercase;}.do-route-facts strong{overflow:hidden;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;letter-spacing:0;text-overflow:ellipsis;text-transform:none;white-space:nowrap;}.do-route-progress{display:grid;gap:0;margin-top:16px;border-left:1px solid rgba(203,184,143,.45);}.do-route-point{position:relative;padding:0 0 15px 15px;}.do-route-point::before{position:absolute;top:4px;left:-4px;width:7px;height:7px;border:1px solid #cbb88f;border-radius:50%;background:#20251f;content:'';}.do-route-point:last-child{padding-bottom:0;}.do-route-point-type{color:#cbb88f;font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;}.do-route-point-title{margin-top:2px;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;}.do-route-point-meta{margin-top:2px;color:#b7b9b1;font-size:11px;line-height:1.4;}.do-route-details{margin-top:17px;border-top:1px solid rgba(255,255,255,.1);color:#bdc0b7;}.do-route-details summary{padding:13px 0 2px;color:#a9d3df;font-family:var(--mono);font-size:11px;cursor:pointer;}.do-route-details[open]>summary{margin-bottom:8px;}
 
+@media(min-width:800px){.do-route-card{padding:21px;}.do-route-setup{grid-template-columns:repeat(4,minmax(0,1fr));}.do-route-action{grid-column:span 2;justify-self:end;width:100%;}.do-route-facts{grid-template-columns:repeat(4,minmax(0,1fr));}.do-route-facts span{padding:11px;}.do-route-progress{grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:13px;border-left:0;}.do-route-point{padding:0 0 0 14px;border-left:1px solid rgba(203,184,143,.45);}.do-route-point::before{left:-4px;}}
 
 .act-tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border);}
 .act-tab-btn{padding:7px 4px;text-align:center;cursor:pointer;background:var(--bg2);border:none;font-family:var(--mono);width:100%;border-top:3px solid transparent;transition:all 0.15s;}
@@ -249,6 +471,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .act-setting-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
 .act-setting-input{background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 7px;border-radius:4px;width:100%;}
 
+/* The legacy Activities builder originally inherited dark text from the light
+   dashboard body. Keep its rules contained, but give every DO surface an
+   explicit Audrey dark-theme text scale instead of relying on inheritance. */
+.do-experience{--do-text-primary:#f4f3ed;--do-text-secondary:#c7c9c1;--do-text-muted:#a8ada4;--do-accent:#a9d3df;--text:var(--do-text-primary);--text-dim:var(--do-text-secondary);--text-muted:var(--do-text-muted);color:var(--do-text-primary);}
+.do-experience .act-tabs{border:1px solid rgba(255,255,255,.1);border-radius:13px 13px 0 0;}.do-experience .act-tab-btn{color:var(--do-text-secondary);}.do-experience .act-tab-btn:hover{background:rgba(255,255,255,.1);color:var(--do-text-primary);}.do-experience .act-tab-btn.active{background:rgba(255,255,255,.13);color:var(--do-text-primary);}.do-experience .act-tab-btn.active.cycle-tab{border-top-color:var(--do-accent);}.do-experience .act-tab-btn:focus-visible,.do-experience .act-route-card:focus-visible,.do-experience .act-chip:focus-visible{outline:2px solid var(--do-accent);outline-offset:-2px;}
+.do-experience .act-loc-bar,.do-experience .act-filter-bar{background:rgba(10,13,11,.38);border-color:rgba(255,255,255,.09);}.do-experience .act-loc-name{color:var(--do-text-primary);}.do-experience .act-loc-meta,.do-experience .act-loading,.do-experience .act-upload-row{color:var(--do-text-muted);}.do-experience .act-chip{color:var(--do-text-secondary);}.do-experience .act-chip:hover{border-color:rgba(255,255,255,.28);color:var(--do-text-primary);}.do-experience .act-chip.active{background:rgba(169,211,223,.16);border-color:rgba(169,211,223,.46);color:#f4f3ed;}
+.do-experience .act-route-card{border-color:rgba(255,255,255,.075);background:rgba(255,255,255,.025);color:var(--do-text-primary);}.do-experience .act-route-card:hover{background:rgba(255,255,255,.08);}.do-experience .act-route-name,.do-experience .act-route-dist,.do-experience .act-seg-name,.do-experience .act-wx-val,.do-experience .act-intel-val{color:var(--do-text-primary);}.do-experience .act-route-meta,.do-experience .act-seg-alt,.do-experience .act-seg-km,.do-experience .act-wx-lbl,.do-experience .act-intel-lbl{color:var(--do-text-secondary);}.do-experience .act-diff{border:1px solid currentColor;border-radius:999px;background:rgba(255,255,255,.06);}.do-experience .act-diff-easy{color:#9bd5a8;}.do-experience .act-diff-mod{color:#e7bd78;}.do-experience .act-diff-hard{color:#eca093;}
+.do-experience .act-settings-row,.do-experience .act-seg-body,.do-experience .act-intel-cell{background:rgba(10,13,11,.36);border-color:rgba(255,255,255,.09);}.do-experience .act-setting-lbl{color:var(--do-text-secondary);}.do-experience .act-setting-input,.do-experience .do-route-field input{border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.09);color:var(--do-text-primary);}.do-experience .act-setting-input:focus,.do-experience .do-route-field input:focus{outline:2px solid rgba(169,211,223,.7);outline-offset:1px;border-color:var(--do-accent);}.do-experience .act-upload-row:hover{background:rgba(255,255,255,.08);color:var(--do-text-primary);}.do-experience .act-btn-outline{border-color:rgba(255,255,255,.2);color:var(--do-text-secondary);}.do-experience .act-gpx-wpts{background:rgba(255,255,255,.06);color:var(--do-text-secondary);}
+.do-experience .do-route-action:hover{background:#d8c79e;}.do-experience .do-route-action:focus-visible{outline:2px solid #f4f3ed;outline-offset:3px;}.do-experience .do-route-details{padding:0 12px 12px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(8,11,9,.28);}.do-experience .do-route-details summary{color:var(--do-accent);}
+
+/* Final DO polish: the activity engines below stay intact; these rules only
+   bring their visible legacy output into the Audrey surface and type system. */
+.do-experience .act-tab-lbl,.do-experience .act-chip,.do-experience .act-setting-lbl,.do-experience .act-wx-lbl,.do-experience .act-intel-lbl{font-size:10px;letter-spacing:1px;}
+.do-experience .act-route-card{margin:7px 9px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(10,13,11,.3);transition:background .15s ease,border-color .15s ease,transform .15s ease;}.do-experience .act-route-card:last-child{margin-bottom:9px;border-bottom:1px solid rgba(255,255,255,.09);}.do-experience .act-route-card:hover{border-color:rgba(255,255,255,.19);transform:translateY(-1px);}.do-experience .act-route-card:focus-visible{outline-offset:2px;}.do-experience .act-route-name,.do-experience .act-route-dist,.do-experience .act-seg-name,.do-experience .act-wx-val,.do-experience .act-intel-val{font-family:var(--ui);font-variant-numeric:tabular-nums;}.do-experience .act-route-name{font-size:14px;white-space:normal;line-height:1.3;}.do-experience .act-route-meta,.do-experience .act-seg-alt{font-size:11px;line-height:1.4;}.do-experience .act-route-dist{font-size:14px;}.do-experience .act-analysis-header{padding:14px;border-bottom:1px solid rgba(255,255,255,.09);}.do-experience .act-analysis-title{font-family:var(--ui);font-size:16px;font-weight:700;line-height:1.3;}.do-experience .act-analysis-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px;}.do-experience .act-analysis-fact{text-align:center;color:var(--do-text-secondary);font-size:10px;letter-spacing:.7px;text-transform:uppercase;}.do-experience .act-analysis-fact strong{display:block;color:var(--do-text-primary);font-family:var(--ui);font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:0;text-transform:none;}.do-experience .act-analysis-decision{display:flex;align-items:center;min-height:42px;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.09);font-family:var(--ui);font-size:12px;font-weight:700;letter-spacing:.5px;}.do-experience .act-analysis-decision.go{color:#90cda0;}.do-experience .act-analysis-decision.caution{color:#e5b86c;}.do-experience .act-analysis-decision.danger{color:#e79588;}.do-experience .act-seg-head{padding:11px 14px;}.do-experience .act-seg-body{padding:12px 14px;}.do-experience .act-alert{border-radius:8px;background:rgba(255,255,255,.055);color:var(--do-text-secondary);}.do-experience .act-a-ok{border-left-color:#79ba8a;color:#b4ddbd;}.do-experience .act-a-warn{border-left-color:#d7a453;color:#ead09e;}.do-experience .act-a-danger{border-left-color:#dc8271;color:#efafa5;}.do-experience .act-gpx-card{margin:12px 14px;padding:13px;border:1px solid rgba(119,183,139,.48);border-radius:12px;background:rgba(30,58,40,.28);}.do-experience .act-gpx-title{font-family:var(--ui);font-size:13px;color:#b4ddbd;}.do-experience .act-btn{min-height:42px;border-radius:9px;font-family:var(--ui);}.do-experience .act-btn:focus-visible,.do-experience .act-upload-row:focus-visible{outline:2px solid var(--do-accent);outline-offset:2px;}
+.do-experience .do-ski-detail{color:var(--do-text-primary);}.do-experience .do-ski-detail-head{padding:14px;border-bottom:1px solid rgba(255,255,255,.09);}.do-experience .do-ski-detail-name{font-family:var(--ui);font-size:16px;font-weight:700;line-height:1.3;}.do-experience .do-ski-detail-alt{margin-top:2px;color:var(--do-text-muted);font-size:11px;}.do-experience .do-ski-metric-grid,.do-experience .do-ski-temperature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid rgba(255,255,255,.09);}.do-experience .do-ski-metric{min-width:0;padding:10px 7px;border-right:1px solid rgba(255,255,255,.08);text-align:center;}.do-experience .do-ski-metric:last-child{border-right:0;}.do-experience .do-ski-metric-label{display:block;color:var(--do-text-muted);font-size:9px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;}.do-experience .do-ski-metric-value{display:block;margin-top:3px;color:var(--do-text-primary);font-family:var(--ui);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}.do-experience .do-ski-operational .do-ski-metric-value{color:#b4ddbd;}.do-experience .do-ski-score .do-ski-metric-value{color:var(--do-score-color);}.do-experience .do-ski-tagline,.do-experience .do-ski-road{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.09);color:var(--do-text-secondary);font-size:12px;line-height:1.45;}.do-experience .do-ski-road strong{color:var(--do-text-primary);}.do-experience .do-ski-forecast{border-bottom:1px solid rgba(255,255,255,.09);}.do-experience .do-ski-forecast-row{display:grid;grid-template-columns:68px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:9px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;}.do-experience .do-ski-forecast-day,.do-experience .do-ski-forecast-temp{color:var(--do-text-muted);}.do-experience .do-ski-forecast-desc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.do-experience .do-ski-forecast-snow{color:#d9e8ee;font-family:var(--ui);font-weight:700;font-variant-numeric:tabular-nums;}
+.do-experience .water-loading,.do-experience .water-inland{color:var(--do-text-secondary);}.do-experience .water-val,.do-experience .tide-height{font-family:var(--ui);font-variant-numeric:tabular-nums;}.do-experience .water-label,.do-experience .water-sub{font-size:10px;}.do-experience .suit-status{font-family:var(--ui);}
+@media(max-width:420px){.do-experience .act-route-card{margin-inline:7px;}.do-experience .do-ski-forecast-row{grid-template-columns:58px minmax(0,1fr) auto;}.do-experience .do-ski-forecast-temp{grid-column:2/-1;}.do-experience .do-ski-forecast-desc{white-space:normal;}.do-experience .act-analysis-facts{gap:3px;}.do-experience .act-analysis-fact strong{font-size:14px;}}
+
 
 .cycling-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;}
 .cycling-modal-overlay.open{display:flex;}
@@ -300,6 +540,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .cycling-gpx-download{padding:14px 16px;border-top:1px solid var(--border);background:var(--bg2);}
 .cycling-loading{padding:40px 16px;text-align:center;color:var(--text-muted);font-size:13px;}
 
+/* The standalone GPX modal is opened only from DO; keep the legacy tool in
+   the same restrained dark system as its embedded route detail. */
+.cycling-modal{--bg:#171a17;--bg2:#20251f;--bg3:#2a3029;--text:#f4f3ed;--text-dim:#c7c9c1;--text-muted:#a8ada4;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.18);color:var(--text);box-shadow:0 -18px 40px rgba(0,0,0,.35);}.cycling-modal-title,.cycling-route-name,.cycling-stat-val,.cycling-seg-name,.cycling-wx-val{font-family:var(--ui);font-variant-numeric:tabular-nums;}.cycling-modal-title{font-size:15px;}.cycling-analyse-btn{font-family:var(--ui);border-radius:9px;}.cycling-upload-area,.cycling-input{border-radius:9px;}.cycling-alert{border-radius:8px;background:rgba(255,255,255,.055);}.cycling-alert.c-alert-storm{color:#efafa5;border-left-color:#dc8271;}.cycling-alert.c-alert-wind,.cycling-alert.c-alert-heat,.cycling-alert.c-alert-cold{color:#ead09e;border-left-color:#d7a453;}.cycling-alert.c-alert-ok{color:#b4ddbd;border-left-color:#79ba8a;}.cycling-gpx-download{background:rgba(10,13,11,.38);}.cycling-seg-head{padding-block:11px;}.cycling-seg-alt{font-size:11px;}.cycling-input-label,.cycling-stat-label,.cycling-wx-label{font-size:10px;letter-spacing:1px;}
+
 .water-strip{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border);}
 .water-cell{padding:10px 12px;border-right:1px solid var(--border);}
 .water-cell:last-child{border-right:none;}
@@ -324,36 +568,55 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .water-loading{padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
 .water-inland{padding:16px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
 
+/* Scene viewport safety: svh tracks Safari's smallest visible viewport, so
+   browser chrome cannot crop the canvas or cause it to resize while scrolling.
+   The preceding vh declarations remain the fallback for older browsers. */
+@media (min-width:641px) and (max-width:799px){
+  .home-experience{background-position:center,var(--home-scene-position-tablet),center,center,center;}
+  .journey-experience{background-position:center,var(--journey-scene-position-tablet),center,center,center;}
+  .do-experience{background-position:center,var(--do-scene-position-tablet),center,center;}
+  .van-experience{background-position:center,var(--van-scene-position-tablet),center,center;}
+}
+@supports (height:100svh){
+  body{min-height:100svh;}
+  .app-shell{min-height:calc(100svh - var(--safe-top));}
+  .app-main,.home-experience,.journey-experience,.do-experience,.more-experience,.van-experience{min-height:calc(100svh - 74px);}
+  @media(min-width:800px){
+    .app-main,.home-experience,.journey-experience,.do-experience,.more-experience,.van-experience{min-height:calc(100svh - 63px);}
+    .primary-nav{height:calc(100svh - 63px);}
+  }
+}
 
 </style>
 </head>
 <body>
-
+<div class="app-shell">
 <header class="header">
   <div class="header-left">
     <div class="wordmark">Au<span>drey</span></div>
-    <div class="header-tag">Mission Control</div>
   </div>
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
   </select>
-  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#8635; Refresh</button>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()" aria-label="Refresh dashboard">&#8635; Refresh</button>
 </header>
 
-<main id="main">
+<main id="main" class="app-main">
   <div class="state-message">
     <span class="icon">&#128656;</span>
     Connecting to Audrey...
   </div>
 </main>
 
-<footer class="footer">
-  <div class="footer-wordmark">Au<span style="color:var(--gold)">drey</span></div>
-  <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">8M BAILEY AUTOGRAPH</div>
-  <div class="last-updated" id="lastUpdated"></div>
-  <button class="settings-toggle" id="settingsBtn" onclick="toggleSettings()">⚙️ Settings</button>
-  <div class="settings-panel" id="settingsPanel"></div>
-</footer>
+<!-- Audrey 2.0 primary navigation: view switching is entirely client-side. -->
+<nav class="primary-nav" aria-label="Primary navigation">
+  <button class="primary-nav-btn is-active" type="button" data-view="home" onclick="switchAppView('home')">Home</button>
+  <button class="primary-nav-btn" type="button" data-view="journey" onclick="switchAppView('journey')">Journey</button>
+  <button class="primary-nav-btn" type="button" data-view="do" onclick="switchAppView('do')">Do</button>
+  <button class="primary-nav-btn" type="button" data-view="van" onclick="switchAppView('van')">Van</button>
+  <button class="primary-nav-btn" type="button" data-view="more" onclick="switchAppView('more')">More</button>
+</nav>
+</div>
 
 <!-- Cycling modal — outside footer -->
 <div class="cycling-modal-overlay" id="cyclingModalOverlay" onclick="closeCyclingModalIfOutside(event)">
@@ -371,6 +634,57 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
+
+// ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
+// This is intentionally separate from dashboard data state. Switching views
+// never fetches again: every view is composed from the current API payload.
+var currentAppView='home';
+var APP_VIEW_LABELS={home:'Home',journey:'Journey',do:'Do',van:'Van',more:'More'};
+var isSettingsPanelOpen=false;
+var currentJourneyMode='today';
+
+function switchAppView(view){
+  if(!APP_VIEW_LABELS[view])return;
+  currentAppView=view;
+  applyAppView();
+}
+
+function applyAppView(){
+  document.querySelectorAll('.app-view').forEach(function(el){
+    el.classList.toggle('is-active',el.dataset.view===currentAppView);
+  });
+  document.querySelectorAll('.primary-nav-btn').forEach(function(btn){
+    var active=btn.dataset.view===currentAppView;
+    btn.classList.toggle('is-active',active);
+    btn.setAttribute('aria-current',active?'page':'false');
+  });
+  var main=document.getElementById('main');
+  if(main)main.dataset.activeView=currentAppView;
+}
+
+// ── JOURNEY VIEW STATE ───────────────────────────────────────
+// TODAY/TRIP is local presentation state only; it never fetches dashboard data.
+function switchJourneyMode(mode){
+  if(mode!=='today'&&mode!=='trip')return;
+  if(mode==='today'&&!hasJourneyDrive(currentData))return;
+  currentJourneyMode=mode;
+  applyJourneyMode();
+}
+
+function hasJourneyDrive(data){
+  return !!(data&&data.meta&&data.meta.nextDrive&&data.meta.tripStatus!=='POST_TRIP');
+}
+
+function applyJourneyMode(){
+  document.querySelectorAll('.journey-mode').forEach(function(el){
+    el.classList.toggle('is-active',el.dataset.journeyMode===currentJourneyMode);
+  });
+  document.querySelectorAll('.journey-mode-btn').forEach(function(btn){
+    var active=btn.dataset.journeyMode===currentJourneyMode;
+    btn.classList.toggle('is-active',active);
+    btn.setAttribute('aria-current',active?'page':'false');
+  });
+}
 
 // ── COLLAPSIBLE STATE ─────────────────────────────────────────
 // Persisted in sessionStorage so state survives refresh but resets on new visit
@@ -437,7 +751,19 @@ async function fetchData(trip){
 
 async function loadTrip(name){currentTrip=name||null;await refresh();}
 
+// Route-detail DOM is intentionally ephemeral. A dashboard reload can replace
+// its backing lists, so return DO to its reliable decision surface first.
+function resetDoForDataReload(){
+  currentDoSubview='home';
+  doCyclingOverview=null;
+  actSelectedRoute=null;
+  actAnalysisResults=null;
+  actCurrentFilter='all';
+  actCurrentFilters={trail:'all',cycle:'all'};
+}
+
 async function refresh(){
+  resetDoForDataReload();
   var btn=document.getElementById('refreshBtn');
   btn.classList.add('loading');btn.textContent='Loading...';
   try{
@@ -521,22 +847,30 @@ function render(d){
     });
   }
 
+  // Completed/no-drive trips always open on the meaningful trip timeline.
+  if(!hasJourneyDrive(d))currentJourneyMode='trip';
+
   document.getElementById('main').innerHTML = buildMain(d);
   var ts = new Date(d.timestamp);
-  document.getElementById('lastUpdated').textContent =
+  var lastUpdated=document.getElementById('lastUpdated');
+  if(lastUpdated)lastUpdated.textContent=
     'Last updated ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    applyCollapsed();
-
-  // Load activity routes after render
-  if (d.meta && d.meta.currentLocation) {
-     setTimeout(function() {
-      loadActRoutes(d.meta.currentLocation, 'trail');
-    }, 500);
-    setTimeout(function() {
-      loadActRoutes(d.meta.currentLocation, 'cycle');
-    }, 3000);
-
+  applyCollapsed();
+  applyAppView();
+  applyJourneyMode();
+  if(isSettingsPanelOpen&&currentAppView==='more'){
+    var settingsPanel=document.getElementById('settingsPanel');
+    var settingsBtn=document.getElementById('settingsBtn');
+    if(settingsPanel)settingsPanel.classList.add('open');
+    if(settingsBtn)settingsBtn.textContent='✕ Close';
+    renderSettings(d);
   }
+
+  // Saved routes are portable Audrey objects. `loadActRoutes` keeps only
+  // coordinate-dependent nearby discovery behind its own location check.
+  var activityLocation=d.meta&&d.meta.currentLocation?d.meta.currentLocation:'';
+  setTimeout(function(){loadActRoutes(activityLocation,'trail');},500);
+  setTimeout(function(){loadActRoutes(activityLocation,'cycle');},3000);
 }
 
 function renderError(msg){
@@ -557,18 +891,645 @@ function populateTripSelector(trips,active){
 // ── MAIN BUILDER ──────────────────────────────────────────────
 function buildMain(d){
   var fc=d.fuelConfig||{pricePerLitre:1.182,mpg:27};
+  var home=[];
+  home.push(buildHomeView(d,fc));
+
+  var journey=[];
+  journey.push(buildJourneyView(d,fc));
+
+  var van=[];
+  van.push(buildVanView(d,fc));
+
+  var more=[];
+  more.push(buildMoreView(d,fc));
+
+  return buildAppView('home',home.join(''))
+    +buildAppView('journey',journey.join(''))
+    +buildAppView('do',buildDoView(d))
+    +buildAppView('van',van.join(''))
+    +buildAppView('more',more.join(''));
+}
+
+// View wrappers deliberately reuse existing builders; no feature engine or API
+// behaviour is moved into the navigation layer.
+function buildAppView(name,content){
+  return '<section class="app-view" data-view="'+name+'" aria-label="'+APP_VIEW_LABELS[name]+'">'+content+'</section>';
+}
+
+// ── AUDREY 2.0 MORE ─────────────────────────────────────────-
+// MORE owns deeper evidence, configuration and maintenance. Primary trip,
+// activity and vehicle conclusions stay in their dedicated app views.
+function buildMoreView(d,fc){
+  var meta=d.meta||{},trip=[];
+  // An array with no rows is an expected forecast-horizon absence, not a
+  // broken Weather screen. An omitted weather payload remains distinguishable.
+  if(Array.isArray(d.weather))trip.push(buildWeatherSection(d.weather,{allowUnavailable:true}));
+  if(d.snowStatus&&meta.season==='winter')trip.push(buildSnowSection(d.snowStatus,meta,d.itinerary));
+  if(d.budget)trip.push(buildBudgetSection(d.budget));
+  if(!trip.length)trip.push('<div class="more-data-note">Detailed trip information will appear here when forecast, snow or budget data is available.</div>');
+  var timestamp=d.timestamp&&!isNaN(new Date(d.timestamp).getTime())?new Date(d.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
+  return '<div class="more-experience"><div class="more-canvas">'
+    +'<header class="more-head"><div class="more-eyebrow">Audrey · More</div><div class="more-title">Details and settings</div><div class="more-subtitle">Deeper trip evidence, configuration and maintenance.</div></header>'
+    +'<section class="more-group"><div class="more-group-label">Trip detail</div><div class="more-trip-content">'+trip.join('')+'</div></section>'
+    +'<section class="more-group"><div class="more-group-label">Configuration</div><div class="more-config-panel" id="settingsPanel">'+buildMoreSettingsHtml(d,fc)+'</div></section>'
+    +'<section class="more-group"><div class="more-group-label">System</div><div class="more-system-meta"><strong>Data updated</strong><br>'+timestamp+' · Use the header Refresh for a normal update.</div><details class="more-system"><summary class="more-system-summary">Advanced system</summary><div class="more-system-body"><div class="more-system-copy">Run all backend modules only when you need a manual maintenance refresh.</div><button class="more-system-btn" type="button" onclick="runAllModulesNow()">Run all modules now</button><div class="more-system-status" id="runAllStatus"></div></div></details></section>'
+    +'</div></div>';
+}
+
+function buildMoreSettingsHtml(d,fc){
+  fc=fc||d.fuelConfig||{};
+  var trips=d.trips||[],allResorts=d.allResorts||(d.snowStatus&&d.snowStatus.resorts)||[];
+  var html='<div class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Trip selection</span></div><div style="padding:10px 14px"><select class="trip-select" onchange="updateDefaultTrip(this.value)"><option value="">Choose a trip…</option>'+trips.map(function(trip){var selected=trip.name===(d.meta&&d.meta.tripName)?' selected':'';return'<option value="'+trip.name+'"'+selected+'>'+trip.name+'</option>';}).join('')+'</select></div></div>';
+  html+='<div class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Fuel &amp; LPG</span></div>'
+    +settingsRow('Diesel',fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—','£/L','diesel')
+    +settingsRow('LPG',fc.lpgPrice?fc.lpgPrice.toFixed(2):'—','£/L','lpg')
+    +settingsRow('Motorhome MPG',fc.mpg?fc.mpg.toFixed(1):'—','mpg','mpg')
+    +settingsRow('LPG tank',fc.tankLitres||'—','L','tank')+'</div>';
+  if(allResorts.length){
+    html+='<details class="settings-group"><summary class="settings-group-head"><span class="settings-group-title">Snow resorts</span></summary><div id="resortList">';
+    allResorts.forEach(function(resort){var active=resort.active!==false;html+='<div class="resort-row" id="rr-'+resort.name.replace(/\s/g,'_')+'"><div><div class="resort-name-s'+(active?'':' inactive')+'">'+resort.name+'</div><div class="resort-sub-s">'+(resort.elevationM?resort.elevationM+'m':'')+'</div></div><div class="resort-row-right"><button class="toggle '+(active?'toggle-on':'toggle-off')+'" onclick="toggleResortActive(this,\''+resort.name+'\')" aria-label="Toggle '+resort.name+'"><div class="toggle-knob"></div></button><span class="toggle-lbl '+(active?'toggle-lbl-on':'toggle-lbl-off')+'">'+(active?'Active':'Off')+'</span><button class="remove-btn" onclick="removeResort(\''+resort.name+'\')" title="Remove resort">✕</button></div></div>';});
+    html+='</div><div class="add-resort-row"><input class="add-resort-input" id="resortInput" type="text" placeholder="Resort name or SnowSure slug…"><button class="add-resort-btn" onclick="addResort()">+ Add</button></div><div class="settings-note">Changes update the SnowStatus sheet and apply on the next refresh.</div></details>';
+  }
+  return html;
+}
+
+// ── AUDREY 2.0 VAN ───────────────────────────────────────────
+// This is deliberately a presentation layer over the existing vehicle, LPG
+// and fuel payload. It does not claim hardware control or add new thresholds.
+function getVanScene(d){
+  var meta=d.meta||{};
+  return getHomeScene(d,{mode:meta.tripStatus==='POST_TRIP'?'returned':meta.nextDrive?'drive':'unknown'});
+}
+
+function vanSceneStyle(scene){
+  var style='--van-scene-position:'+scene.position+';--van-scene-position-tablet:'+scene.tabletPosition+';--van-scene-position-wide:'+scene.widePosition+';';
+  if(scene.asset)style+='--van-scene-image:url(\''+scene.asset+'\');';
+  return style;
+}
+
+function vanTelemetryInfo(v){
+  var status=String(v.telStatus||'').toUpperCase();
+  var timestamp=v.locationTimestamp?new Date(v.locationTimestamp):null;
+  var age='Telemetry timestamp unavailable';
+  if(timestamp&&!isNaN(timestamp.getTime())){
+    var mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
+    age=mins<2?'Updated just now':mins<60?'Updated '+mins+'m ago':'Last telemetry '+Math.floor(mins/60)+'h ago';
+  }
+  if(status==='STALE')return{state:'STALE',age:age,level:'caution'};
+  if(status==='LIVE')return{state:'LIVE',age:age,level:'go'};
+  return{state:status||'TELEMETRY',age:age,level:timestamp?'go':'caution'};
+}
+
+function vanTemperatureState(value,type){
+  if(value===null||value===undefined)return{label:'No reading',color:'#a4a9a0',level:'caution'};
+  if(type==='cabin'){
+    if(value<15)return{label:'Cool',color:'#a9d3df',level:'context'};
+    if(value>26)return{label:'Warm',color:'#e2b161',level:'caution'};
+  }else{
+    if(value<=2)return{label:'Cold concern',color:'#e18d80',level:'danger'};
+    if(value<=5)return{label:'Cold',color:'#a9d3df',level:'caution'};
+  }
+  return{label:'Normal',color:'#8ac59b',level:'go'};
+}
+
+function getVanHealth(d){
+  var v=d.vehicle||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null,issues=[];
+  function add(level,message,key){issues.push({level:level,message:message,key:key});}
+  if(!Object.keys(v).length)add('caution','Vehicle telemetry is unavailable.','unavailable');
+  if(v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK'))add('danger',v.systemAlert,'system');
+  if(String(v.telStatus||'').toUpperCase()==='STALE')add('caution','Telemetry is stale; displayed readings may no longer be current.','telemetry');
+  if(v.batteryV!==null&&v.batteryV!==undefined&&v.batteryV<12.4)add('danger','Battery is at '+v.batteryV+'V. Check the charging situation.','battery');
+  var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
+  if(cabin.level==='caution'&&v.cabinTempC!==null&&v.cabinTempC!==undefined)add('caution','Cabin temperature is '+cabin.label.toLowerCase()+'.','cabin');
+  if(garage.level!=='go'&&v.garageTempC!==null&&v.garageTempC!==undefined)add(garage.level,'Garage temperature is '+garage.label.toLowerCase()+'.','garage');
+  if(lpg&&(lpg.alert==='CRITICAL'||lpg.alert==='LOW'))add(lpg.alert==='CRITICAL'?'danger':'caution',lpg.statusMsg||'LPG level is low. Consider a refill.','lpg');
+  var level=issues.some(function(issue){return issue.level==='danger';})?'danger':issues.length?'caution':'go';
+  var title='Van&rsquo;s happy',copy='Everything looks normal.';
+  if(issues.length===1){
+    var issue=issues[0];
+    if(issue.key==='telemetry'){title='Telemetry is stale';copy=issue.message;}
+    else if(issue.key==='unavailable'){title='Vehicle telemetry unavailable';copy=issue.message;}
+    else if(issue.key==='battery'){title='Battery needs attention';copy=issue.message;}
+    else if(issue.key==='lpg'){title='LPG needs attention';copy=issue.message;}
+    else {title='Van needs attention';copy=issue.message;}
+  }else if(issues.length>1){title=issues.length+' things need attention';copy='Review the items below before relying on the current vehicle state.';}
+  return{level:level,title:title,copy:copy,issues:issues};
+}
+
+function buildVanView(d,fc){
+  var v=d.vehicle||{},meta=d.meta||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null;
+  var health=getVanHealth(d),telemetry=vanTelemetryInfo(v),scene=getVanScene(d);
+  var battery=v.batteryV!==null&&v.batteryV!==undefined?v.batteryV+'V':'—';
+  var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
+  var tank=Number(fc&&fc.tankLitres),litres=lpg&&lpg.litres!==null&&lpg.litres!==undefined?Number(lpg.litres):null;
+  var hasTank=isFinite(tank)&&tank>0,pct=hasTank&&litres!==null?Math.max(0,Math.min(100,Math.round(litres/tank*100))):null;
+  var lpgLevel=lpg&&lpg.alert==='CRITICAL'?'danger':lpg&&lpg.alert==='LOW'?'caution':'go';
+  var forecast=d.lpg&&d.lpg.forecast?d.lpg.forecast.filter(function(item){return item&&item.isFuture;}):[];
+  var nextForecast=forecast[0],lastForecast=forecast[forecast.length-1];
+  var location=meta.currentLocation||'Vehicle location';
+  var map=v.lat&&v.lon?'https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey':'';
+  var timestamp=v.locationTimestamp&&!isNaN(new Date(v.locationTimestamp).getTime())?new Date(v.locationTimestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
+  var nextDrive=meta.nextDrive&&meta.nextDrive.distanceKm?calcFuel(meta.nextDrive.distanceKm,fc):null;
   var parts=[];
-  parts.push(buildMasterBar(d.master,d.vehicle));
-  parts.push(buildCountdown(d.meta,d.meta&&d.meta.nextDrive?buildNextDrive(d.meta,fc):''));
-  if(d.runningTotal)parts.push(buildRunningTotalSection(d.runningTotal));
-  parts.push(buildVehicleSection(d.vehicle));
-  if(d.lpg&&d.lpg.current)parts.push(buildLpgSection(d.lpg));
-  if(d.weather&&d.weather.length)parts.push(buildWeatherSection(d.weather));
-  if(d.snowStatus&&d.meta&&d.meta.season==='winter')parts.push(buildSnowSection(d.snowStatus,d.meta,d.itinerary));
-    parts.push(buildActivitiesSection(d));
-  if(d.itinerary&&d.itinerary.length)parts.push(buildItinerarySection(d.itinerary,fc));
-  if(d.budget)parts.push(buildBudgetSection(d.budget));
+  parts.push('<div class="van-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+vanSceneStyle(scene)+'"><div class="van-canvas">');
+  parts.push('<header class="van-head"><div class="van-eyebrow">Audrey · Van</div><div class="van-title">Is the van okay?</div><div class="van-subtitle">Current state, confidence and the detail behind it.</div></header>');
+  parts.push('<section class="van-health van-'+health.level+'"><div class="van-health-state">'+(health.level==='go'?'ALL GOOD':'NEEDS ATTENTION')+'</div><div class="van-health-title">'+health.title+'</div><div class="van-health-copy">'+health.copy+'</div>'
+    +'<div class="van-alert-list">'+health.issues.map(function(issue){return'<div class="van-alert van-alert-'+issue.level+'">'+issue.message+'</div>';}).join('')+'</div></section>');
+  parts.push('<div class="van-layout"><div class="van-support">');
+  parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Power</div><div class="van-surface-title">Battery</div></div><div class="van-surface-meta">'+telemetry.state+'<br>'+telemetry.age+'</div></div><div class="van-power-value">'+battery+'</div><div class="van-power-status">'+(v.batteryStatus||'Battery status unavailable')+'</div></section>');
+  parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Climate</div><div class="van-surface-title">Inside the van</div></div><div class="van-surface-meta">'+(lpg&&lpg.heatSource?lpg.heatSource:'Heating source unavailable')+'</div></div><div class="van-metric-grid">'
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+cabin.color+'">'+(v.cabinTempC!==null&&v.cabinTempC!==undefined?v.cabinTempC+'&deg;':'—')+'</div><div class="van-metric-label">Cabin</div><div class="van-metric-status">'+cabin.label+'</div></div>'
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+garage.color+'">'+(v.garageTempC!==null&&v.garageTempC!==undefined?v.garageTempC+'&deg;':'—')+'</div><div class="van-metric-label">Garage</div><div class="van-metric-status">'+garage.label+'</div></div></div></section>');
+  if(lpg)parts.push('<section class="van-surface van-wide"><div class="van-surface-head"><div><div class="van-section-label">LPG &amp; heating</div><div class="van-surface-title">Heating runway</div></div><div class="van-surface-meta">'+(lpg.statusMsg||'')+'</div></div><div class="van-lpg-top"><div><div class="van-lpg-value" style="color:'+(lpgLevel==='danger'?'#e18d80':lpgLevel==='caution'?'#e2b161':'#8ac59b')+'">'+(litres!==null?litres.toFixed(1)+'L':'—')+'</div><div class="van-lpg-status">'+(hasTank&&pct!==null?pct+'% of '+tank+'L tank':'Tank capacity unavailable')+'</div></div><button class="van-refill-btn" id="refillBtn" type="button" onclick="lpgRefill()">Refill</button></div><div class="van-lpg-bar"><div class="van-lpg-fill van-'+lpgLevel+'" style="width:'+(pct===null?0:pct)+'%"></div></div>'
+    +(forecast.length?'<div class="van-runway"><div class="van-runway-item"><div class="van-runway-label">Next planned use</div><div class="van-runway-value">'+(nextForecast.location||'Planned stop')+'</div><div class="van-runway-meta">'+(fmtDate(nextForecast.date)||'')+(nextForecast.minTempC!==null?' · '+nextForecast.minTempC+'&deg;':'')+(nextForecast.litresUsed!==null?' · '+nextForecast.litresUsed+'L':'')+'</div></div><div class="van-runway-item"><div class="van-runway-label">End of available plan</div><div class="van-runway-value">'+(lastForecast.tankRemL!==null?lastForecast.tankRemL+'L remaining':'—')+'</div><div class="van-runway-meta">'+(fmtDate(lastForecast.date)||'')+(lastForecast.heatSource?' · '+lastForecast.heatSource:'')+'</div></div></div>':'')
+    +'</section>');
+  parts.push('<section class="van-surface"><div class="van-section-label">Fuel</div><div class="van-surface-title">Running costs</div><div class="van-fuel-facts"><div class="van-fuel-fact"><div class="van-fuel-label">Diesel</div><div class="van-fuel-value">'+(fc&&fc.pricePerLitre?'£'+fc.pricePerLitre.toFixed(2)+'/L':'—')+'</div></div><div class="van-fuel-fact"><div class="van-fuel-label">Motorhome MPG</div><div class="van-fuel-value">'+(fc&&fc.mpg?fc.mpg.toFixed(1):'—')+'</div></div>'+(nextDrive?'<div class="van-fuel-fact"><div class="van-fuel-label">Next drive</div><div class="van-fuel-value">£'+nextDrive.cost+'</div></div>':'')+'</div><details class="van-details"><summary>Fuel price settings</summary><div class="van-price-row"><span>Diesel <strong>£'+(fc&&fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'diesel\',\''+(fc&&fc.pricePerLitre||1.182)+'\')">Edit</button></div><div class="van-price-row"><span>LPG <strong>£'+(fc&&fc.lpgPrice?fc.lpgPrice.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'lpg\',\''+(fc&&fc.lpgPrice||0.95)+'\')">Edit</button></div></details></section>');
+  parts.push('<section class="van-surface"><div class="van-section-label">Vehicle</div><div class="van-surface-title">Vehicle detail</div><div class="van-detail-list"><div class="van-detail-row"><span>Location</span><strong>'+(map?'<a class="van-map-link" href="'+map+'" target="_blank">'+location+' ↗</a>':location)+'</strong></div><div class="van-detail-row"><span>Telemetry</span><strong>'+telemetry.state+' · '+telemetry.age+'</strong></div><div class="van-detail-row"><span>Timestamp</span><strong>'+timestamp+'</strong></div><div class="van-detail-row"><span>Odometer</span><strong>'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+(v.odometerSource?' · '+v.odometerSource:'')+'</strong></div><div class="van-detail-row"><span>Elevation</span><strong>'+(v.vanElevationM!==null&&v.vanElevationM!==undefined?v.vanElevationM.toLocaleString()+'m':'—')+'</strong></div></div></section>');
+  parts.push('</div></div></div></div>');
   return parts.join('');
+}
+
+// ── AUDREY 2.0 JOURNEY BRIEFING ──────────────────────────────
+// Composes existing nextDrive, itinerary and en-route data into two local
+// views. The original route/weather builders and API payload remain untouched.
+function buildJourneyView(d,fc){
+  var meta=d.meta||{},hasDrive=hasJourneyDrive(d);
+  var completed=meta.tripStatus==='POST_TRIP';
+  var scene=getJourneyScene(d);
+  var title=meta.tripName||'Journey';
+  var subtitle=completed?'Trip complete':hasDrive?'Your next move, clearly briefed':'Your trip, at a glance';
+  var todayClass=currentJourneyMode==='today'&&hasDrive?' is-active':'';
+  var tripClass=currentJourneyMode==='trip'||!hasDrive?' is-active':'';
+  return '<div class="journey-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+journeySceneStyle(scene)+'"><div class="journey-canvas">'
+    +'<header class="journey-head"><div class="journey-eyebrow">Audrey · Journey</div>'
+    +'<div class="journey-title">'+title+'</div><div class="journey-subtitle">'+subtitle+'</div>'
+    +'<div class="journey-mode-switch" role="tablist" aria-label="Journey view">'
+    +'<button class="journey-mode-btn'+todayClass+'" type="button" data-journey-mode="today" onclick="switchJourneyMode(\'today\')"'+(hasDrive?'':' disabled')+'>Today</button>'
+    +'<button class="journey-mode-btn'+tripClass+'" type="button" data-journey-mode="trip" onclick="switchJourneyMode(\'trip\')">Trip</button>'
+    +'</div></header>'
+    +'<section class="journey-mode'+todayClass+'" data-journey-mode="today">'+(hasDrive?buildJourneyToday(meta,d.master,fc):'')+'</section>'
+    +'<section class="journey-mode'+tripClass+'" data-journey-mode="trip">'+buildJourneyTrip(d,fc)+'</section>'
+    +'</div></div>';
+}
+
+// Journey reuses Home's central scene mapping. A drive is explicit evidence
+// for the travelling/mountains scene; otherwise this deliberately falls back
+// unless the existing payload identifies a supported scene with confidence.
+function getJourneyScene(d){
+  var meta=d.meta||{};
+  var mode=hasJourneyDrive(d)?'drive':meta.tripStatus==='POST_TRIP'?'returned':'unknown';
+  return getHomeScene(d,{mode:mode});
+}
+
+function journeySceneStyle(scene){
+  var style='--journey-scene-position:'+scene.position+';--journey-scene-position-tablet:'+scene.tabletPosition+';--journey-scene-position-wide:'+scene.widePosition+';';
+  if(scene.asset)style+='--journey-scene-image:url(\''+scene.asset+'\');';
+  return style;
+}
+
+function buildJourneyToday(meta,master,fc){
+  var nd=meta.nextDrive||{},risk=getHomeRouteRisk(nd,master);
+  var timing=journeyTimingFact(nd);
+  var fuel=nd.distanceKm&&fc?calcFuel(nd.distanceKm,fc):null;
+  return '<section class="journey-drive-brief">'
+    +'<div class="journey-kicker">Next drive</div>'
+    +'<div class="journey-route"><span>'+((nd.origin||meta.currentLocation)||'Here')+'</span><b class="journey-route-arrow">→</b><span>'+(nd.destination||'Next stop')+'</span></div>'
+    +buildJourneyDecision(risk)
+    +'<div class="journey-facts">'
+    +journeyFact(timing.label,timing.value)
+    +journeyFact('Distance',nd.distanceKm?nd.distanceKm+' km':'—')
+    +journeyFact('Drive time',nd.durationMin?fmtDuration(nd.durationMin):'—')
+    +(fuel?journeyFact('Fuel estimate','£'+fuel.cost):'')
+    +'</div>'
+    +'</section>'
+    +'<div class="journey-section-title">Route conditions</div>'
+    +buildJourneyRouteTimeline(nd);
+}
+
+function journeyTimingFact(nd){
+  var suppliedTime=nd.departureTime||(hasJourneyTime(nd.departure)?nd.departure:'');
+  if(suppliedTime)return{label:'Departure',value:suppliedTime};
+  var dateOnly=nd.date||nd.departure;
+  return{label:'Date',value:dateOnly?(nd.date?fmtDate(nd.date):dateOnly):'Scheduled'};
+}
+
+function hasJourneyTime(value){
+  return typeof value==='string'&&(/\b\d{1,2}:\d{2}\b/.test(value)||/T\d{2}:\d{2}/.test(value));
+}
+
+function journeyFact(label,value){
+  return '<div class="journey-fact"><div class="journey-fact-label">'+label+'</div><div class="journey-fact-value">'+value+'</div></div>';
+}
+
+function buildJourneyDecision(risk){
+  var heading=risk.level==='go'?'Conditions look good':risk.level==='caution'?'Conditions need a check':'Review before leaving';
+  return '<div class="journey-decision journey-'+risk.level+'"><div class="journey-decision-status">'+risk.label+'</div><div class="journey-decision-heading">'+heading+'</div><div class="journey-decision-copy">'+risk.copy+'</div></div>';
+}
+
+function buildJourneyRouteTimeline(nd){
+  var points=nd.enRoute||[];
+  var selected=getMeaningfulJourneyPoints(points);
+  var origin=nd.origin||'Origin',destination=nd.destination||'Destination';
+  var html='<div class="journey-timeline">';
+  var timing=journeyTimingFact(nd);
+  html+=journeyRoutePoint('Depart',origin,timing.label+' · '+timing.value, '');
+  selected.forEach(function(point){
+    var state=point.overallRisk==='danger'?'route-danger':point.overallRisk==='caution'?'route-risk':'route-ok';
+    var title=journeyPointTitle(point);
+    var meta=[];
+    if(point.label)meta.push(point.label);
+    if(point.etaStr)meta.push('Around '+point.etaStr);
+    if(point.tempC!==null&&point.tempC!==undefined)meta.push(point.tempC+'°');
+    if(point.windKmh)meta.push(point.windKmh+' km/h wind');
+    html+=journeyRoutePoint('Route condition',title,meta.join(' · '),state);
+  });
+  html+=journeyRoutePoint('Destination',destination,nd.durationMin?'After '+fmtDuration(nd.durationMin):'', '');
+  html+='</div>';
+  if(points.length)html+=buildJourneyRouteDetails(points);
+  return html;
+}
+
+function getMeaningfulJourneyPoints(points){
+  var selected=[],seen={};
+  points.forEach(function(point){
+    var hasRisk=point.overallRisk==='danger'||point.overallRisk==='caution'||(point.risks&&point.risks.some(function(r){return r.severity!=='info';}));
+    var notable=point.type==='summit'||point.type==='high'||point.type==='exposed';
+    if(!hasRisk&&!notable)return;
+    var key=(point.label||point.segName||point.distanceKm||'').toString();
+    if(!seen[key]&&selected.length<3){seen[key]=true;selected.push(point);}
+  });
+  return selected;
+}
+
+function journeyPointTitle(point){
+  var risk=point.risks&&point.risks.find(function(r){return r.severity!=='info';});
+  if(risk&&risk.label)return risk.label;
+  if(point.segName)return point.segName;
+  if(point.overallRisk==='danger')return 'Route risk';
+  if(point.overallRisk==='caution')return 'Route caution';
+  return point.label||'Route point';
+}
+
+function journeyRoutePoint(type,title,meta,state){
+  return '<div class="journey-point '+(state||'')+'"><div class="journey-point-card">'
+    +'<div class="journey-point-type">'+type+'</div><div class="journey-point-title">'+title+'</div>'
+    +(meta?'<div class="journey-point-meta">'+meta+'</div>':'')+'</div></div>';
+}
+
+function buildJourneyRouteDetails(points){
+  return '<details class="journey-details"><summary>All available route points ('+points.length+')</summary>'
+    +points.map(function(point){
+      var left=(point.label||point.segName||('km '+(point.distKm||point.distanceKm||'—')));
+      var right=[];
+      if(point.etaStr)right.push(point.etaStr);
+      if(point.tempC!==null&&point.tempC!==undefined)right.push(point.tempC+'°');
+      if(point.windKmh)right.push(point.windKmh+' km/h');
+      return '<div class="journey-detail-row"><span>'+left+'</span><span>'+right.join(' · ')+'</span></div>';
+    }).join('')+'</details>';
+}
+
+function buildJourneyTrip(d,fc){
+  var meta=d.meta||{},itin=d.itinerary||[],rt=d.runningTotal;
+  var completed=meta.tripStatus==='POST_TRIP';
+  var totalKm=rt&&rt.totalKm!==undefined?rt.totalKm:itin.reduce(function(sum,row){return sum+(Number(row.distanceKm)||0);},0);
+  var stopCount=itin.length;
+  var heading=completed?'Completed trip':'Trip timeline';
+  var html='<section class="journey-overview"><div class="journey-kicker">'+heading+'</div>'
+    +'<div class="journey-overview-grid">'
+    +journeyOverview(itin.length,'days')+journeyOverview(totalKm+' km','distance')+journeyOverview(stopCount,'stops')
+    +'</div></section><div class="journey-section-title">'+(completed?'Completed timeline':'Trip timeline')+'</div>';
+  if(!itin.length)return html+'<div class="journey-point-card"><div class="journey-point-title">No itinerary entries available</div></div>';
+  html+='<div class="journey-timeline">';
+  itin.forEach(function(row){html+=buildJourneyTripPoint(row,completed,fc);});
+  return html+'</div>';
+}
+
+function journeyOverview(value,label){
+  return '<div><div class="journey-overview-value">'+value+'</div><div class="journey-overview-label">'+label+'</div></div>';
+}
+
+function buildJourneyTripPoint(row,completed,fc){
+  var state=completed||row.isPast?'is-complete':row.isToday?'is-current':'';
+  var date=new Date(row.date+'T00:00:00');
+  var day=date.toLocaleDateString('en-GB',{weekday:'short'}),dateLabel=date.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  var type=(row.type||'Stop').toString(),kind=journeyTimelineKind(type);
+  var meta=[];
+  if(row.distanceKm)meta.push(row.distanceKm+' km');
+  if(row.durationMin)meta.push(fmtDuration(row.durationMin));
+  if(row.ehu)meta.push('EHU');
+  var forecastUnavailable=row.routeRisk&&isMissingJourneyForecast(row.routeRisk.snowRisk);
+  if(row.routeRisk&&row.routeRisk.snowRisk&&!forecastUnavailable)meta.push(row.routeRisk.snowRisk);
+  var details=[];
+  if(row.notes)details.push('<div class="journey-trip-detail">'+row.notes+'</div>');
+  if(forecastUnavailable)details.push('<div class="journey-trip-detail">Forecast not available yet</div>');
+  if(row.contact)details.push('<div class="journey-trip-detail">☎ '+row.contact+'</div>');
+  if(row.bookingRef)details.push('<div class="journey-trip-detail">Booking ref: '+row.bookingRef+'</div>');
+  if(row.address){details.push('<div class="journey-trip-detail"><a target="_blank" href="https://maps.apple.com/?address='+encodeURIComponent(row.address)+'">Open in Maps</a></div>');}
+  else if(row.location){details.push('<div class="journey-trip-detail"><a target="_blank" href="https://maps.apple.com/?q='+encodeURIComponent(row.location)+'">Open in Maps</a></div>');}
+  ['nightlyCost','cost','price'].forEach(function(key){if(row[key]!==undefined&&row[key]!==null)details.push('<div class="journey-trip-detail">Cost: '+row[key]+'</div>');});
+  return '<div class="journey-point journey-trip-point '+state+'"><div class="journey-trip-card journey-'+kind+'-card">'
+    +'<div class="journey-date"><strong>'+(row.isToday&&!completed?'Today':day)+'</strong>'+dateLabel+'</div>'
+    +'<div><div class="journey-stop">'+journeyTimelineTitle(row,kind)+'</div>'+(meta.length?'<div class="journey-stop-meta">'+meta.join(' · ')+'</div>':'')+'</div>'
+    +'<span class="journey-type">'+type+'</span>'
+    +(details.length?'<details class="journey-trip-details"><summary>Details</summary>'+details.join('')+'</details>':'')
+    +'</div></div>';
+}
+
+function journeyTimelineKind(type){
+  var normalized=type.toUpperCase();
+  return /DRIVE|DEPART|ARRIV|RETURN/.test(normalized)?'leg':'place';
+}
+
+function journeyTimelineTitle(row,kind){
+  var location=row.location||'Next stop',type=(row.type||'Stop').toString().toUpperCase();
+  if(kind==='leg'){
+    if(/DEPART/.test(type))return 'Depart · '+location;
+    if(/ARRIV/.test(type))return 'Arrive · '+location;
+    if(/RETURN/.test(type))return 'Return · '+location;
+    return 'Drive to '+location;
+  }
+  if(/STOPOVER|OVERNIGHT/.test(type))return 'Overnight · '+location;
+  return location;
+}
+
+function isMissingJourneyForecast(value){
+  return typeof value==='string'&&/no forecast|forecast not available|forecast unavailable/i.test(value);
+}
+
+// ── AUDREY 2.0 HOME SCENES ───────────────────────────────────
+// Scene assets are intentionally local-only. The layered CSS gradients remain
+// visible if a file is absent or fails to load, so no broken-image UI is shown.
+var HOME_SCENES={
+  // Positioning follows each local image's focal subject across portrait,
+  // tablet and wide canvases. `cover` keeps the photographs undistorted.
+  home:{asset:'assets/scenes/home.jpg',enabled:true,position:'82% center',tabletPosition:'66% center',widePosition:'center 45%'},
+  mountains:{asset:'assets/scenes/mountains.jpg',enabled:true,position:'52% center',tabletPosition:'48% center',widePosition:'center 48%'},
+  alpine:{asset:'assets/scenes/alpine.jpg',enabled:true,position:'78% center',tabletPosition:'64% center',widePosition:'center 46%'},
+  coast:{asset:'assets/scenes/coast.jpg',enabled:true,position:'72% center',tabletPosition:'61% center',widePosition:'center 48%'},
+  // No dedicated Highlands image yet: keep its explicit context atmospheric.
+  highlands:{asset:'',enabled:false,position:'center 42%',tabletPosition:'center 45%',widePosition:'center 48%'},
+  // Travelling uses the mountain asset only when the drive state is explicit.
+  travelling:{asset:'assets/scenes/mountains.jpg',enabled:true,position:'52% center',tabletPosition:'48% center',widePosition:'center 48%'},
+  generic:{asset:'',enabled:false,position:'center',tabletPosition:'center',widePosition:'center'}
+};
+
+function getHomeScene(d,context){
+  var meta=d.meta||{};
+  var explicit=[meta.scene,meta.locationType,meta.currentLocationType,meta.regionType,meta.currentLocationContext,meta.activity,meta.todayActivity]
+    .filter(function(value){return value!==undefined&&value!==null;}).join(' ').toLowerCase();
+  var key='generic';
+
+  if(context.mode==='returned')key='home';
+  else if(context.mode==='drive')key='travelling';
+  else if(context.mode==='ski')key='alpine';
+  // These matches are only against explicit payload labels, never place names.
+  else if(/coast|coastal|water|beach|sea/.test(explicit))key='coast';
+  else if(/highlands|rural/.test(explicit))key='highlands';
+  else if(/mountain|mountains|alpine/.test(explicit))key='mountains';
+
+  var hour=(new Date()).getHours();
+  var time=hour>=22||hour<6?'night':hour>=18?'evening':'day';
+  var config=HOME_SCENES[key]||HOME_SCENES.generic;
+  return {key:key,time:time,asset:config.enabled?config.asset:'',position:config.position,tabletPosition:config.tabletPosition||config.position,widePosition:config.widePosition||config.position};
+}
+
+function homeSceneStyle(scene){
+  var style='--home-scene-position:'+scene.position+';--home-scene-position-tablet:'+scene.tabletPosition+';--home-scene-position-wide:'+scene.widePosition+';';
+  if(scene.asset)style+='--home-scene-image:url(\''+scene.asset+'\');';
+  return style;
+}
+
+// ── AUDREY 2.0 HOME BRIEFING ─────────────────────────────────
+// This only interprets fields already present in the dashboard response. It
+// deliberately links to deeper views instead of duplicating their engines.
+function buildHomeView(d,fc){
+  var context=getHomeContext(d);
+  var scene=getHomeScene(d,context);
+  var meta=d.meta||{};
+  var parts=[];
+  parts.push('<div class="home-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+homeSceneStyle(scene)+'"><div class="home-canvas">');
+  parts.push('<section class="home-hero home-tone-'+context.tone+'">'
+    +'<div class="home-eyebrow">Audrey · '+context.eyebrow+'</div>'
+    +'<div class="home-trip-name">'+(meta.tripName||'Audrey')+'</div>'
+    +'<div class="home-state-line"><span class="home-state-dot"></span>'+context.stateLabel+'</div>'
+    +'<div class="home-message">'+context.message+'</div>'
+    +(context.meta?'<div class="home-hero-meta">'+context.meta+'</div>':'')
+    +'</section>');
+  parts.push('<div class="home-stack">');
+  if(context.attention)parts.push('<section class="home-attention">'
+    +'<div class="home-attention-label">Needs attention</div>'
+    +'<div class="home-attention-copy">'+context.attention+'</div></section>');
+  if(!context.attention){
+    if(context.mode==='drive')parts.push(buildHomeDriveDecision(meta,d.master,fc));
+    else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
+    else parts.push(buildHomeOpportunity(d,context));
+  }
+  var relevantWeather=getHomeRelevantWeather(d.weather,context);
+  if(relevantWeather.length)parts.push(buildHomeConditions(relevantWeather));
+  parts.push(buildHomeVehicleStatus(d.vehicle));
+  parts.push('</div></div></div>');
+  return parts.join('');
+}
+
+function getHomeContext(d){
+  var meta=d.meta||{},vehicle=d.vehicle||{},snow=d.snowStatus||{};
+  var attention=getHomeAttention(d);
+  var telemetry=homeTelemetryConfidence(vehicle);
+  var dayType=meta.todayType||'';
+  var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(dayType)>=0;
+  var hasSki=meta.season==='winter'&&snow.resorts&&snow.resorts.length;
+  var hour=(new Date()).getHours();
+  var evening=hour>=18||hour<6;
+  var result={tone:'calm',eyebrow:'Your motorhome co-pilot',stateLabel:'All good',message:'Here when you need a clear view of the road ahead.',meta:''};
+
+  if(attention){
+    result.tone='attention';result.mode='attention';result.eyebrow='Audrey needs your eye';
+    result.stateLabel='Attention required';result.message='One thing is worth checking before you settle in.';
+    result.attention=attention;return result;
+  }
+  if(meta.tripStatus==='POST_TRIP'){
+    result.mode='returned';result.eyebrow=telemetry.state==='stale'?'Latest check':telemetry.state==='unavailable'?'Status update':'All good';result.stateLabel='Trip complete';
+    result.message=telemetry.state==='stale'?"You're home. The van looked fine at the last check."
+      :telemetry.state==='unavailable'?"You're home. Current vehicle state hasn't been confirmed recently."
+      :"You're home. The van looks happy.";
+    result.meta=telemetry.copy;
+    return result;
+  }
+  if(isDrive&&meta.nextDrive){
+    result.tone='drive';result.mode='drive';result.eyebrow='Today\'s focus';result.stateLabel='Driving day';
+    result.message='Your next move is clear. Check the route brief, then go when it feels right.';
+    return result;
+  }
+  if(hasSki){
+    result.mode='ski';result.eyebrow='Today\'s opportunity';result.stateLabel='Winter day';
+    result.message='A quick look at the mountain conditions may help shape the day.';
+    return result;
+  }
+  if(evening){
+    result.mode='evening';result.eyebrow='Settle in';result.stateLabel='Evening & overnight';
+    result.message='A calm check of tonight and tomorrow, then switch off.';
+    return result;
+  }
+  if(meta.tripStatus==='PRE_TRIP'){
+    result.mode='pretrip';result.eyebrow='Looking ahead';result.stateLabel='Trip ahead';
+    result.message='The essentials are here when you are ready to plan the next move.';
+    return result;
+  }
+  result.mode='parked';result.eyebrow='Today\'s opportunity';result.stateLabel='Parked up';
+  result.message='A good moment to see what the area has to offer.';
+  if(telemetry.state==='stale')result.meta=telemetry.copy;
+  if(telemetry.state==='unavailable'){
+    result.eyebrow='Status update';result.stateLabel='Vehicle state unavailable';result.message='Current vehicle telemetry has not been confirmed recently.';result.meta=telemetry.copy;
+  }
+  return result;
+}
+
+// Home deliberately consumes VAN's existing telemetry semantics instead of
+// introducing a second freshness threshold or treating stale data as a fault.
+function homeTelemetryConfidence(vehicle){
+  var v=vehicle||{},telemetry=vanTelemetryInfo(v);
+  if(!Object.keys(v).length||!v.locationTimestamp)return{state:'unavailable',copy:'Vehicle telemetry is unavailable.'};
+  if(telemetry.state==='STALE')return{state:'stale',copy:'Latest telemetry is stale; current vehicle state is unconfirmed.'};
+  return{state:'current',copy:telemetry.age};
+}
+
+function getHomeAttention(d){
+  var vehicle=d.vehicle||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null;
+  if(vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK'))return vehicle.systemAlert;
+  if(vehicle.batteryV!==null&&vehicle.batteryV!==undefined&&vehicle.batteryV<12.4)return 'Battery is at '+vehicle.batteryV+'V. Check the charging situation.';
+  if(lpg&&(lpg.alert==='CRITICAL'||lpg.alert==='LOW'))return lpg.statusMsg||'LPG level is low. Consider a refill.';
+  return '';
+}
+
+function buildHomeDriveDecision(meta,master,fc){
+  var nd=meta.nextDrive||{},risk=getHomeRouteRisk(nd,master);
+  var when=nd.departureTime||nd.departure||fmtDate(nd.date)||'Scheduled';
+  return '<section class="home-decision">'
+    +'<div class="home-decision-kicker">Next drive</div>'
+    +'<div class="home-drive-route"><span>'+((nd.origin||meta.currentLocation)||'Here')+'</span><b class="home-drive-arrow">→</b><span>'+((nd.destination)||'Next stop')+'</span></div>'
+    +'<div class="home-drive-grid">'
+    +'<div class="home-drive-stat"><div class="home-drive-stat-label">Departure</div><div class="home-drive-stat-value">'+when+'</div></div>'
+    +'<div class="home-drive-stat"><div class="home-drive-stat-label">Distance</div><div class="home-drive-stat-value">'+(nd.distanceKm?nd.distanceKm+' km':'—')+'</div></div>'
+    +'<div class="home-drive-stat"><div class="home-drive-stat-label">Drive time</div><div class="home-drive-stat-value">'+(nd.durationMin?fmtDuration(nd.durationMin):'—')+'</div></div>'
+    +'<div class="home-drive-stat"><div class="home-drive-stat-label">Fuel estimate</div><div class="home-drive-stat-value">'+(nd.distanceKm&&fc?('£'+calcFuel(nd.distanceKm,fc).cost):'—')+'</div></div>'
+    +'</div>'
+    +'<div class="home-risk-row"><span class="home-risk-badge home-risk-'+risk.level+'">'+risk.label+'</span><span class="home-risk-copy">'+risk.copy+'</span></div>'
+    +'</section>';
+}
+
+function getHomeRouteRisk(nd,master){
+  var points=nd.enRoute||[];
+  var danger=points.some(function(w){return w.overallRisk==='danger';});
+  var caution=points.some(function(w){return w.overallRisk==='caution';});
+  var flagged=points.reduce(function(all,w){
+    return all.concat((w.risks||[]).filter(function(r){return r.severity!=='info';}).map(function(r){return r.label;}));
+  },[]);
+  if(danger)return{level:'danger',label:'NOT IDEAL',copy:flagged[0]||'There is a risk on this route. Review the route conditions before leaving.'};
+  if(caution)return{level:'caution',label:'CAUTION',copy:flagged[0]||'Some route conditions need a quick check before departure.'};
+  return{level:'go',label:'GO',copy:nd.notes||((master&&master.advice)||'Conditions are clear across the available route checks.')};
+}
+
+function buildHomeNextContext(meta,fc){
+  var nd=meta.nextDrive;
+  if(!nd)return '<section class="home-calm-status">'
+    +'<div><div class="home-calm-status-title">Nothing needs your attention</div>'
+    +'<div class="home-calm-status-copy">No next trip event is currently scheduled.</div></div>'
+    +'</section>';
+  var fuel=nd.distanceKm&&fc?calcFuel(nd.distanceKm,fc):null;
+  return '<section class="home-opportunity">'
+    +'<div class="home-section-label">What\'s next?</div>'
+    +'<div class="home-opportunity-title">'+(nd.destination||'Your next stop')+'</div>'
+    +'<div class="home-opportunity-copy">'+(fmtDate(nd.date)||'Upcoming')+(nd.distanceKm?' · '+nd.distanceKm+' km':'')+(fuel?' · about £'+fuel.cost+' fuel':'')+'</div>'
+    +'</section>';
+}
+
+function buildHomeOpportunity(d,context){
+  var meta=d.meta||{},snow=d.snowStatus||{},weather=getHomeWeather(d.weather);
+  if(context.mode==='ski'){
+    var resort=snow.resorts[0]||{};
+    return '<section class="home-opportunity">'
+      +'<div class="home-section-label">Ski conditions</div>'
+      +'<div class="home-opportunity-title">'+(resort.name||'Mountain conditions')+'</div>'
+      +'<div class="home-opportunity-copy">'+(resort.snowDepthCm?resort.snowDepthCm+'cm base · ':'')+(resort.ssScore?'Score '+resort.ssScore+' · ':'')+(resort.ssTagline||resort.fitment||'Open Activities for the full resort brief.')+'</div>'
+      +'<button class="home-opportunity-action" type="button" onclick="switchAppView(\'do\')">Open skiing conditions →</button>'
+      +'</section>';
+  }
+  var label=context.mode==='evening'?'Tonight & tomorrow':"What's good today?";
+  var copy=weather
+    ?(weather.condition||weather.risk||'Conditions are available')+(weather.maxTempC!==null?' · '+weather.maxTempC+'&deg;':'')+(weather.gustKmh?' · gusts '+weather.gustKmh+' km/h':'')
+    :'Activities and local conditions are available when you need them.';
+  return '<section class="home-opportunity">'
+    +'<div class="home-section-label">'+label+'</div>'
+    +'<div class="home-opportunity-title">'+(weather&&weather.location?weather.location:(meta.currentLocation||'Your current area'))+'</div>'
+    +'<div class="home-opportunity-copy">'+copy+'</div>'
+    +(context.mode!=='evening'?'<button class="home-opportunity-action" type="button" onclick="switchAppView(\'do\')">Explore activities →</button>':'')
+    +'</section>';
+}
+
+function getHomeWeather(weather){
+  if(!weather||!weather.length)return null;
+  return weather.find(function(w){return w.isToday;})||weather[0];
+}
+
+// Weather is a Home decision aid, not an automatic feed. Ski days only admit
+// weather explicitly identified by the payload as mountain/resort context.
+function getHomeRelevantWeather(weather,context){
+  if(!weather||!weather.length)return [];
+  if(context.mode==='returned'||context.mode==='attention'||context.mode==='pretrip')return [];
+  if(context.mode!=='ski')return weather;
+  return weather.filter(function(w){
+    var labels=[w.locationType,w.context,w.category,w.source].filter(Boolean).join(' ').toLowerCase();
+    return w.isMountain===true||w.isResort===true||w.isAlpine===true||/mountain|resort|alpine|ski/.test(labels);
+  });
+}
+
+function buildHomeConditions(weather){
+  if(!weather||!weather.length)return'';
+  var immediate=weather.filter(function(w){return w.isToday;});
+  if(!immediate.length)immediate=weather.slice(0,2);
+  immediate=immediate.slice(0,2);
+  return '<div class="home-conditions">'+immediate.map(function(w){
+    return '<div class="home-condition">'
+      +'<div class="home-condition-label">'+(w.location||'Conditions')+'</div>'
+      +'<div class="home-condition-main" style="color:'+riskColor(w.risk)+'">'+(w.risk||w.condition||'—')+'</div>'
+      +'<div class="home-condition-meta">'+(w.condition||'')+(w.maxTempC!==null?' · '+w.maxTempC+'&deg;':'')+'</div>'
+      +'</div>';
+  }).join('')+'</div>';
+}
+
+function buildHomeVehicleStatus(v){
+  if(!v)return'';
+  var battery=v.batteryV!==null&&v.batteryV!==undefined?v.batteryV+'V':'—';
+  var cabin=v.cabinTempC!==null&&v.cabinTempC!==undefined?v.cabinTempC+'&deg;':'—';
+  var garage=v.garageTempC!==null&&v.garageTempC!==undefined?v.garageTempC+'&deg;':'—';
+  var telemetry=homeTelemetryConfidence(v),freshness=homeTelemetryFreshness(v);
+  var health=telemetry.state==='current'&&v.systemAlert&&v.systemAlert.includes('VAN SYSTEMS OK')?'✓ Systems normal':'';
+  return '<button class="home-vehicle-surface home-vehicle-button" type="button" onclick="switchAppView(\'van\')" aria-label="Open detailed van status">'
+    +'<div class="home-vehicle-heading"><span class="home-section-label">Van now</span><span class="home-vehicle-status-meta">'
+    +(health?'<span class="home-vehicle-health">'+health+'</span>':'')
+    +'<span class="home-telemetry-freshness">'+freshness+'</span></span></div>'
+    +'<div class="home-vehicle-grid">'
+    +'<div class="home-van-item"><div class="home-van-value">'+battery+'</div><div class="home-van-label">Battery</div></div>'
+    +'<div class="home-van-item"><div class="home-van-value">'+cabin+'</div><div class="home-van-label">Cabin</div></div>'
+    +'<div class="home-van-item"><div class="home-van-value">'+garage+'</div><div class="home-van-label">Garage</div></div>'
+    +'</div></button>';
+}
+
+function homeTelemetryFreshness(vehicle){
+  var telemetry=homeTelemetryConfidence(vehicle);
+  if(telemetry.state==='unavailable')return 'Telemetry unavailable';
+  if(telemetry.state==='stale')return 'Latest telemetry is stale';
+  return telemetry.copy;
+}
+
+function buildMoreFooter(){
+  return '<footer class="footer">'
+    +'<div class="footer-wordmark">Au<span style="color:var(--gold)">drey</span></div>'
+    +'<div style="font-size:10px;color:var(--text-muted);margin-bottom:4px">8M BAILEY AUTOGRAPH</div>'
+    +'<div class="last-updated" id="lastUpdated"></div>'
+    +'<button class="settings-toggle" id="settingsBtn" onclick="toggleSettings()">⚙️ Settings</button>'
+    +'<div class="settings-panel" id="settingsPanel"></div>'
+    +'</footer>';
 }
 
 // ── MASTER BAR ────────────────────────────────────────────────
@@ -615,8 +1576,9 @@ function buildCountdown(meta,driveHtml){
 }
 
 
-function buildNextDrive(meta,fc){
+function buildNextDrive(meta,fc,viewId){
   var nd=meta.nextDrive;if(!nd)return'';
+  viewId=viewId||'drive';
   var fuel=calcFuel(nd.distanceKm,fc);
  
   // Pass strip — winter trips, drive days only
@@ -657,12 +1619,14 @@ function buildNextDrive(meta,fc){
     +(nd.notes?'<div class="drive-stat"><span class="drive-stat-label">Notes</span><span class="drive-stat-value" style="color:var(--text-dim)">'+nd.notes+'</span></div>':'')
     +'</div>'
         +passHtml
-    +buildEnRouteWeather_(nd)
+    +buildEnRouteWeather_(nd,viewId)
     +'</div>';
 }
 
-function buildEnRouteWeather_(nd) {
+function buildEnRouteWeather_(nd,viewId) {
   if (!nd || !nd.enRoute || !nd.enRoute.length) return '';
+  var waypointId='enroute-waypoints-'+viewId;
+  var chevronId='enroute-chevron-'+viewId;
 
   var worst = nd.enRoute.some(function(w){ return w.overallRisk==='danger'; })  ? 'danger'
             : nd.enRoute.some(function(w){ return w.overallRisk==='caution'; }) ? 'caution'
@@ -677,13 +1641,13 @@ function buildEnRouteWeather_(nd) {
 
   
       var html = '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border2)">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleEnRoute()">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer" onclick="toggleEnRoute(\''+viewId+'\')">'
     + '<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">En-route conditions</div>'
     + '<div style="display:flex;align-items:center;gap:8px">'
     + '<div style="font-size:11px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</div>'
-    + '<div id="enroute-chevron" style="font-size:11px;color:var(--text-muted)">›</div>'
+    + '<div id="'+chevronId+'" style="font-size:11px;color:var(--text-muted)">›</div>'
     + '</div></div>'
-    + '<div id="enroute-waypoints" style="display:none">';            
+    + '<div id="'+waypointId+'" style="display:none">';
 
   nd.enRoute.forEach(function(w) {
     var riskIcon = w.overallRisk==='danger'  ? '🔴'
@@ -790,8 +1754,13 @@ function buildLpgSection(lpg){
 }
 
 // ── WEATHER ───────────────────────────────────────────────────
-function buildWeatherSection(weather){
-  if(!weather||!weather.length)return'';
+function buildWeatherSection(weather,options){
+  options=options||{};
+  if(!weather||!weather.length){
+    return options.allowUnavailable?makeSection('weather','Weather','Forecast unavailable','',
+      '<div class="weather-empty"><strong>Forecast not available yet</strong>Weather for these trip dates will appear when they enter the available forecast window.</div>'):
+      '';
+  }
 
     // Limit display to today + 3 days, or trip start + 3 days if PRE_TRIP
   var now=new Date();now.setHours(0,0,0,0);
@@ -812,7 +1781,11 @@ function buildWeatherSection(weather){
     now=firstDate;
   }
   weather=filtered;
-  if(!weather.length)return'';
+  if(!weather.length){
+    return options.allowUnavailable?makeSection('weather','Weather','Forecast unavailable','',
+      '<div class="weather-empty"><strong>Forecast not available yet</strong>Weather for these trip dates will appear when they enter the available forecast window.</div>'):
+      '';
+  }
 
   // Group by location preserving first-appearance order
   var groups={},order=[];
@@ -991,7 +1964,7 @@ function buildSnowSection(snow, meta, itin) {
   var vanAlert = r0 && r0.snowAtVanLevel
     ? '<span style="font-size:10px;font-weight:600;color:var(--caution);background:#fcf8e3;padding:2px 8px;border-radius:4px">❄️ Snow at van level</span>'
     : '';
-  var vanStrip = '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">'
+  var vanStrip = vanAlert ? '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap;gap:6px">'
     +(function(){
       var vanElev = currentData&&currentData.vehicle&&currentData.vehicle.vanElevationM;
       return '<span style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)">🚐 Van · '+(vanElev?vanElev.toLocaleString()+'m':'—')+'</span>';
@@ -1001,7 +1974,7 @@ function buildSnowSection(snow, meta, itin) {
     +(r0&&r0.freezeM?'<span style="font-size:11px;color:var(--text-dim)">↑ Freeze <strong style="color:var(--text)">'+Math.round(r0.freezeM).toLocaleString()+'m</strong></span>':'')
     +(r0&&r0.botWindKh?'<span style="font-size:11px;color:var(--text-dim)">💨 <strong style="color:var(--text)">'+r0.botWindKh+' km/h</strong></span>':'')
     + vanAlert
-    +'</div></div>';
+    +'</div></div>':'';
  
   // ── Drive day road risk banner ───────────────────────────────
   var roadRiskHtml = '';
@@ -1310,11 +2283,16 @@ function toggleSettings(){
   var panel=document.getElementById('settingsPanel');
   var btn=document.getElementById('settingsBtn');
   var open=panel.classList.toggle('open');
+  isSettingsPanelOpen=open;
   btn.textContent=open?'✕ Close':'⚙️ Settings';
   if(open&&currentData)renderSettings(currentData);
 }
 
 function renderSettings(d){
+  // Settings edits reuse this renderer after a refresh. In Audrey 2.0 it now
+  // targets MORE's Configuration group rather than a footer popover.
+  var currentPanel=document.getElementById('settingsPanel');
+  if(currentPanel){currentPanel.innerHTML=buildMoreSettingsHtml(d,d.fuelConfig);return;}
   var fc=d.fuelConfig||{};
   var trips=d.trips||[];
   var resorts=d.snowStatus&&d.snowStatus.resorts?d.snowStatus.resorts:[];
@@ -1828,7 +2806,7 @@ function renderCyclingUpload() {
   body.innerHTML = '<div class="cycling-upload">'
     + '<div class="cycling-upload-area" id="cyclingDropZone" onclick="document.getElementById(\'cyclingFileInput\').click()">'
     + '<div style="font-size:28px;margin-bottom:6px">🗺️</div>'
-    + '<div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:4px">Upload GPX file</div>'
+    + '<div style="font-family:var(--ui);font-size:14px;font-weight:700;margin-bottom:4px">Upload GPX file</div>'
     + '<div style="font-size:11px;color:var(--text-muted)">Strava · Garmin · RideWithGPS · Komoot</div>'
     + '</div>'
     + '<input type="file" id="cyclingFileInput" accept=".gpx" style="display:none" onchange="handleGPXFile(event)">'
@@ -1885,7 +2863,7 @@ function processGPXFile(file) {
     // Update upload area to show file loaded
     var dropZone = document.getElementById('cyclingDropZone');
     dropZone.innerHTML = '<div style="font-size:20px;margin-bottom:4px">✅</div>'
-      + '<div style="font-family:var(--display);font-size:13px;font-weight:700">' + gpx.name + '</div>'
+      + '<div style="font-family:var(--ui);font-size:13px;font-weight:700">' + gpx.name + '</div>'
       + '<div style="font-size:11px;color:var(--text-muted)">'
       + gpx.totalKm + 'km &middot; ' + gpx.totalEleM.toLocaleString() + 'm &middot; '
       + gpx.points.length.toLocaleString() + ' points</div>';
@@ -1985,9 +2963,9 @@ function renderCyclingResults(data) {
   var riskColor = data.routeRisk === 'danger'  ? 'var(--danger)'
                 : data.routeRisk === 'caution' ? 'var(--caution)'
                 : 'var(--go)';
-  var riskLabel = data.routeRisk === 'danger'  ? '🔴 High risk'
-                : data.routeRisk === 'caution' ? '🟡 Caution'
-                : '🟢 All clear';
+  var riskLabel = data.routeRisk === 'danger'  ? 'NOT IDEAL'
+                : data.routeRisk === 'caution' ? 'CAUTION'
+                : 'GO';
  
   // Check if any alerts for GPX download
   var hasAlerts = segs.some(function(s){ return s.overallRisk && s.overallRisk !== 'ok'; });
@@ -2003,18 +2981,18 @@ function renderCyclingResults(data) {
     + '</div></div>'
     // Risk banner
     + '<div class="cycling-risk-banner">'
-    + '<span style="font-family:var(--display);font-size:13px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</span>'
+    + '<span style="font-family:var(--ui);font-size:13px;font-weight:700;letter-spacing:.4px;color:' + riskColor + '">' + riskLabel + '</span>'
     + '<button onclick="openCyclingModal()" style="background:none;border:none;font-size:11px;color:var(--frost);cursor:pointer">← New route</button>'
     + '</div>'
     // Segments
     + '<div>';
  
   segs.forEach(function(seg, idx) {
-    var riskIcon = seg.overallRisk === 'danger'  ? '🔴'
-                 : seg.overallRisk === 'caution' ? '⚠️'
+    var riskIcon = seg.overallRisk === 'danger'  ? '!'
+                 : seg.overallRisk === 'caution' ? '•'
                  : seg.type === 'finish'         ? '🏁'
                  : seg.type === 'start'          ? '🚴'
-                 : '✅';
+                 : '•';
  
     var segName = seg.type === 'start'  ? 'Start'
                 : seg.type === 'finish' ? 'Finish'
@@ -2064,7 +3042,7 @@ function renderCyclingResults(data) {
           html += '<div class="cycling-alert ' + cls + '">' + r.label + '</div>';
         });
       } else {
-        html += '<div class="cycling-alert c-alert-ok">✅ Clear conditions at this segment</div>';
+        html += '<div class="cycling-alert c-alert-ok">Clear conditions at this segment</div>';
       }
     }
  
@@ -2076,11 +3054,11 @@ function renderCyclingResults(data) {
   // Alert GPX download
   if (hasAlerts) {
     html += '<div class="cycling-gpx-download">'
-      + '<div style="font-size:12px;font-weight:600;color:var(--go);margin-bottom:4px">📎 Alert GPX ready</div>'
+      + '<div style="font-size:12px;font-weight:600;color:var(--go);margin-bottom:4px">Alert GPX ready</div>'
       + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:10px">'
       + 'Waypoint alerts at risk segments — load to Garmin Connect tonight, syncs overnight.</div>'
-      + '<button onclick="downloadAlertGPX()" style="width:100%;padding:11px;background:var(--go);color:#fff;border:none;border-radius:6px;font-family:var(--display);font-size:13px;font-weight:700;cursor:pointer">'
-      + '⬇️ Download alert GPX</button>'
+      + '<button onclick="downloadAlertGPX()" style="width:100%;padding:11px;background:var(--go);color:#fff;border:none;border-radius:6px;font-family:var(--ui);font-size:13px;font-weight:700;cursor:pointer">'
+      + 'Download alert GPX</button>'
       + '</div>';
   }
  
@@ -2206,12 +3184,219 @@ function downloadAlertGPX() {
 
 var actCurrentTab      = 'trail';
 var actCurrentFilter   = 'all';
+var actCurrentFilters  = {trail:'all',cycle:'all'};
+var actRouteCollections= {trail:null,cycle:null};
 var actRoutes          = [];        // curated routes from sheet
 var actOverpassRoutes  = [];        // discovered from Overpass
 var actSelectedRoute   = null;      // route being analysed
 var actAnalysisResults = null;      // weather results
- 
-// ── Build section ─────────────────────────────────────────
+var actSavedRoutes     = {trail:[],cycle:[],rwgps:[]};
+var currentDoSubview   = 'home';
+var doCyclingOverview  = null;
+
+// ── AUDREY 2.0 DO COMPOSITION ─────────────────────────────
+// This is intentionally a thin decision-first layer. Detailed discovery,
+// parsing and analysis continue to use the existing activity builders below.
+function buildDoView(d){
+  var scene=getDoScene(d);
+  return '<div class="do-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+doSceneStyle(scene)+'"><div class="do-canvas">'
+    +'<div class="do-subview do-home'+(currentDoSubview==='home'?' is-active':'')+'">'
+    +'<header class="do-head"><div class="do-eyebrow">Audrey · Do</div><div class="do-title">What\'s good today?</div><div class="do-subtitle">A clear view before you choose an activity.</div></header>'
+    +'<div class="do-layout"><section class="do-briefing"><div class="do-section-label">Today\'s opportunities</div>'+buildDoOpportunities(d)+'</section>'
+    +'<section class="do-my-activities"><div class="do-section-heading"><div><div class="do-section-label">My activities</div><div class="do-section-title">Saved routes and GPX</div></div><button class="do-section-action" type="button" onclick="openDoBrowse(\'trail\')">Browse →</button></div><div class="do-activity-list" id="do-my-activities">'+buildDoSavedPlaceholder()+'</div></section>'
+    +'<button class="do-launcher" type="button" onclick="openDoBrowse(\'trail\')"><div class="do-launcher-title">Browse &amp; tools</div><div class="do-launcher-copy">Browse activities · Upload GPX · Discover routes</div></button></div></div>'
+    +'<div class="do-subview do-route-panel"></div>'
+    +'<div class="do-subview do-browse'+(currentDoSubview!=='home'?' is-active':'')+'"><header class="do-head"><button class="do-browse-back" type="button" onclick="showDoHome()">← Back to DO</button><div class="do-eyebrow">Audrey · Browse</div><div class="do-title">Browse routes</div><div class="do-subtitle">Saved routes, GPX and specialist conditions.</div></header><div class="do-browse-shell">'+buildActivitiesSection(d)+'</div></div>'
+    +'</div></div></div>';
+}
+
+function getDoScene(d){
+  var snow=d&&d.snowStatus;
+  var mode=snow&&snow.resorts&&snow.resorts.length?'ski':'unknown';
+  return getHomeScene(d||{},{mode:mode});
+}
+
+function doSceneStyle(scene){
+  var style='--do-scene-position:'+scene.position+';--do-scene-position-tablet:'+scene.tabletPosition+';--do-scene-position-wide:'+scene.widePosition+';';
+  if(scene.asset)style+='--do-scene-image:url(\''+scene.asset+'\');';
+  return style;
+}
+
+function buildDoOpportunities(d){
+  var snow=d&&d.snowStatus,resorts=snow&&snow.resorts?snow.resorts:[];
+  if(!resorts.length)return '<div class="do-data-note"><strong>CHECK CONDITIONS</strong><br>Not enough current activity-specific data to rate an opportunity yet. Browse your saved routes or open an activity to analyse its GPX and route conditions.</div>';
+  var groupOrder={go:0,possible:1,check:2,'not-today':3};
+  // Stable sorting groups the existing configured collection without claiming
+  // that snow depth or score creates an objective resort ranking.
+  var assessed=resorts.map(function(resort,index){return{resort:resort,index:index,decision:getDoSkiDecision(resort)};});
+  assessed.sort(function(a,b){return groupOrder[a.decision.level]-groupOrder[b.decision.level]||a.index-b.index;});
+  return '<div class="do-ski-heading">Where to ski today</div><div class="do-opportunities">'
+    +assessed.map(function(item){return buildDoSkiOpportunity(item.resort,item.index,item.decision);}).join('')+'</div>';
+}
+
+// Only an explicit adverse resort signal can produce NOT TODAY. Missing or
+// unparseable scores are deliberately neutral rather than treated as zero.
+function getDoSkiDecision(resort){
+  var text=[resort.status,resort.condition,resort.ssTagline,resort.fitment].filter(Boolean).join(' ').toLowerCase();
+  var score=Number(resort.ssScore),hasScore=isFinite(score)&&score>0;
+  var hasLiftStatus=resort.liftsOpen!==undefined&&resort.liftsOpen!==null&&resort.liftsOpen!=='';
+  var liftsOpen=Number(resort.liftsOpen),hasOpenLifts=hasLiftStatus&&isFinite(liftsOpen)&&liftsOpen>0;
+  var liftsTotal=Number(resort.liftsTotal),hasLiftTotal=isFinite(liftsTotal)&&liftsTotal>0;
+  var hasRunStatus=resort.runsOpen!==undefined&&resort.runsOpen!==null&&resort.runsOpen!=='';
+  var runsOpen=Number(resort.runsOpen),runsTotal=Number(resort.runsTotal);
+  var noOpenLifts=hasLiftStatus&&hasLiftTotal&&isFinite(liftsOpen)&&liftsOpen===0;
+  var noOpenRuns=hasRunStatus&&isFinite(runsTotal)&&runsTotal>0&&isFinite(runsOpen)&&runsOpen===0;
+  var adverse=/\b(closed|closure|unsafe|storm|strong winds?|high winds?|not recommended|road closed|no skiing)\b/.test(text);
+  var operationalText=/\b(resort|lifts?|skiing)\s+(?:is\s+)?open\b|\bopen\s+(?:resort|lifts?|skiing)\b/.test(text);
+  var positive=/\b(clear|good|excellent|skiing conditions)\b/.test(text);
+  var snowDepth=resort.snowDepthCm||resort.snowCm;
+  var wind=Number(resort.topWindKh!==undefined?resort.topWindKh:resort.windKmh);
+  var hasWind=isFinite(wind)&&wind>0;
+  var defaultWhen='Open resort detail for the latest mountain conditions.';
+
+  if(noOpenLifts||noOpenRuns)return{level:'not-today',status:'NOT TODAY',why:(snowDepth?snowDepth+'cm base, but ':'')+'the resort is not open for skiing yet.',when:defaultWhen};
+  if(adverse)return{level:'not-today',status:'NOT TODAY',why:resort.ssTagline||resort.status||'An adverse resort condition is reported.',when:defaultWhen};
+  if(!hasOpenLifts&&!operationalText)return{level:'check',status:'CHECK CONDITIONS',why:resort.ssTagline||'Operational resort status is not available in the current data.',when:defaultWhen};
+  // These wind bands match the existing Snow detail's displayed wind semantics.
+  if(hasWind&&wind>50)return{level:'not-today',status:'NOT TODAY',why:'Summit wind is '+wind+' km/h in the current resort data.',when:defaultWhen};
+  if(hasWind&&wind>30)return{level:'possible',status:'POSSIBLE',why:(resort.ssTagline||'Resort conditions are available.')+' Summit wind is '+wind+' km/h.',when:defaultWhen};
+  if(positive||hasScore&&score>=80)return{level:'go',status:'GO',why:resort.ssTagline||'Existing resort conditions look positive.',when:defaultWhen};
+  if(hasScore&&score>=60)return{level:'possible',status:'POSSIBLE',why:resort.ssTagline||'Resort data supports skiing, with conditions to check.',when:defaultWhen};
+  if(hasScore||snowDepth)return{level:'check',status:'CHECK CONDITIONS',why:resort.ssTagline||'Resort conditions look encouraging.',when:defaultWhen};
+  return{level:'check',status:'CHECK CONDITIONS',why:'Current resort data is incomplete.',when:defaultWhen};
+}
+
+function buildDoSkiOpportunity(resort,index,decision){
+  var evidence=[];
+  if(resort.liftsOpen!==undefined&&resort.liftsOpen!==null&&resort.liftsTotal!==undefined&&resort.liftsTotal!==null)evidence.push(resort.liftsOpen+'/'+resort.liftsTotal+' lifts');
+  if(resort.runsOpen!==undefined&&resort.runsOpen!==null&&resort.runsTotal!==undefined&&resort.runsTotal!==null)evidence.push(resort.runsOpen+'/'+resort.runsTotal+' runs');
+  var depth=resort.snowDepthCm||resort.snowCm;
+  if(depth)evidence.push(depth+'cm base');
+  if(resort.ssScore!==undefined&&resort.ssScore!==null&&resort.ssScore!=='')evidence.push('Score '+resort.ssScore);
+  if(resort.surfaceCondition)evidence.push(resort.surfaceCondition);
+  return '<button class="do-opportunity do-'+decision.level+'" type="button" onclick="openDoSkiResort('+index+')"><div class="do-opportunity-status">'+decision.status+'</div><div class="do-opportunity-title">'+(resort.name||'Ski area')+'</div>'
+    +(evidence.length?'<div class="do-opportunity-copy">'+evidence.join(' · ')+'</div>':'')
+    +'<div class="do-opportunity-when">'+decision.why+' · View resort →</div></button>';
+}
+
+function buildDoOpportunity(level,status,title,why,when,tab){
+  return '<button class="do-opportunity do-'+level+'" type="button" onclick="openDoBrowse(\''+tab+'\')"><div class="do-opportunity-status">'+status+'</div><div class="do-opportunity-title">'+title+'</div><div class="do-opportunity-copy">'+why+'</div><div class="do-opportunity-when">'+when+' →</div></button>';
+}
+
+function buildDoSavedPlaceholder(){
+  return '<div class="do-empty">Your saved routes will appear here as Audrey loads them. You can also upload a GPX from Browse &amp; tools.</div>';
+}
+
+function openDoBrowse(tab){
+  currentDoSubview='browse';
+  document.querySelectorAll('.do-subview').forEach(function(view){view.classList.remove('is-active');});
+  var browse=document.querySelector('.do-browse');
+  if(browse)browse.classList.add('is-active');
+  switchActTab(tab||'trail');
+  if(browse&&browse.scrollIntoView)browse.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function openDoSkiResort(index){
+  openDoBrowse('ski');
+  currentDoSubview='detail';
+  var chips=document.querySelectorAll('#act-screen-ski .act-chip');
+  switchSkiResort(index,chips[index]);
+}
+
+function showDoHome(){
+  currentDoSubview='home';
+  document.querySelectorAll('.do-subview').forEach(function(view){view.classList.remove('is-active');});
+  var home=document.querySelector('.do-home');
+  if(home)home.classList.add('is-active');
+}
+
+function openDoSavedActivity(source,type,key){
+  if(type==='cycle')return openDoCyclingOverview(source,key);
+  openDoBrowse(type);
+  currentDoSubview='detail';
+  if(source==='curated')actSelectCurated(Number(key),type);
+  else if(source==='rwgps')actSelectRWGPS(key,type);
+}
+
+function openDoCyclingOverview(source,key){
+  var route=source==='rwgps'?(actSavedRoutes.rwgps||[]).find(function(item){return String(item.id)===String(key);}):(actSavedRoutes.cycle||[])[Number(key)];
+  if(!route)return openDoBrowse('cycle');
+  doCyclingOverview={source:source,key:key,route:route};
+  currentDoSubview='overview';
+  showDoSubview('.do-route-panel');
+  var panel=document.querySelector('.do-route-panel');
+  if(panel)panel.innerHTML=buildDoCyclingOverview(route);
+}
+
+function showDoSubview(selector){
+  document.querySelectorAll('.do-subview').forEach(function(view){view.classList.remove('is-active');});
+  var view=document.querySelector(selector);if(view)view.classList.add('is-active');
+}
+
+function buildDoCyclingOverview(route){
+  var meta=[];
+  if(route.distanceKm!==undefined&&route.distanceKm!==null)meta.push(route.distanceKm+' km');
+  if(route.elevationM!==undefined&&route.elevationM!==null)meta.push(route.elevationM.toLocaleString()+' m ascent');
+  var settings=doCyclingOverview&&doCyclingOverview.settings?doCyclingOverview.settings:getActivityDefaultSettings('cycle');
+  return '<header class="do-head"><button class="do-browse-back" type="button" onclick="showDoHome()">← Back to DO</button><div class="do-eyebrow">Audrey · Cycling</div></header><section class="do-route-card"><div class="do-section-label">Cycling</div><div class="do-route-name">'+(route.name||'Saved ride')+'</div><div class="do-route-meta">'+(meta.join(' · ')||'Route details available after GPX analysis')+'</div>'
+    +(route.difficulty?'<div class="do-route-meta">'+route.difficulty+(route.area?' · '+route.area:'')+'</div>':route.area?'<div class="do-route-meta">'+route.area+'</div>':'')
+    +(route.notes?'<div class="do-route-meta">'+route.notes+'</div>':'')
+    +buildDoCyclingSetup(settings,'Analyse ride →','analyseDoCyclingOverview()')+'</section>';
+}
+
+function buildDoCyclingSetup(settings,label,action){
+  return '<div class="do-route-setup"><div class="do-route-field"><label>Start date</label><input type="date" id="act-start-date" value="'+settings.startDate+'"></div><div class="do-route-field"><label>Start time</label><input type="time" id="act-start-time" value="'+settings.startTime+'"></div><div class="do-route-field"><label>Expected speed</label><input type="number" id="act-flat-speed" value="'+settings.flatSpeed+'"></div><div class="do-route-field"><label>Climb speed</label><input type="number" id="act-climb-speed" value="'+settings.climbSpeed+'"></div><button class="do-route-action" type="button" onclick="'+action+'">'+label+'</button></div>';
+}
+
+function analyseDoCyclingOverview(){
+  if(!doCyclingOverview)return;
+  doCyclingOverview.settings=getActivitySettingsFromControls('cycle');
+  currentDoSubview='detail';
+  var item=doCyclingOverview;
+  if(item.source==='rwgps')actSelectRWGPS(item.key,'cycle');
+  else actSelectCurated(Number(item.key),'cycle');
+}
+
+function returnToDoCyclingOverview(){
+  if(!doCyclingOverview)return showDoHome();
+  currentDoSubview='overview';
+  showDoSubview('.do-route-panel');
+  var panel=document.querySelector('.do-route-panel');
+  if(panel)panel.innerHTML=buildDoCyclingOverview(doCyclingOverview.route);
+}
+
+function renderDoMyActivities(){
+  var container=document.getElementById('do-my-activities');
+  if(!container)return;
+  var items=[];
+  ['trail','cycle'].forEach(function(type){
+    (actSavedRoutes[type]||[]).forEach(function(route,index){items.push({source:'curated',type:type,key:index,route:route});});
+  });
+  (actSavedRoutes.rwgps||[]).forEach(function(route){items.push({source:'rwgps',type:'cycle',key:route.id,route:route});});
+  if(!items.length){container.innerHTML=buildDoSavedPlaceholder();return;}
+  container.innerHTML=items.slice(0,6).map(function(item){
+    var route=item.route,meta=[];
+    var typeLabel=formatDoActivityType(route.type);
+    if(typeLabel)meta.push(typeLabel);
+    if(route.elevationM!==undefined&&route.elevationM!==null)meta.push(route.elevationM+'m ascent');
+    if(route.durationMin)meta.push(fmtDuration(route.durationMin));
+    else if(route.difficulty)meta.push(route.difficulty);
+    if(route.area)meta.push(route.area);
+    return '<button class="do-activity-item" type="button" onclick="openDoSavedActivity(\''+item.source+'\',\''+item.type+'\','+JSON.stringify(String(item.key))+')"><span><span class="do-activity-name">'+(route.name||'Saved route')+'</span><span class="do-activity-meta">'+(meta.join(' · ')||'Saved activity')+'</span></span><span class="do-activity-distance">'+(route.distanceKm!==undefined&&route.distanceKm!==null?route.distanceKm+' km':'Open')+'</span></button>';
+  }).join('');
+}
+
+function formatDoActivityType(type){
+  if(!type)return'';
+  var value=String(type).toLowerCase();
+  if(value==='hiking'||value==='trail')return'Hiking';
+  if(value==='cycling'||value==='cycle'||value==='mtb'||value==='gravel')return'Cycling';
+  if(value==='ski'||value==='skiing')return'Skiing';
+  if(value==='water')return'Water';
+  return String(type);
+}
+
+// ── Existing activity tools ───────────────────────────────
 function buildActivitiesSection(d) {
   var meta     = d && d.meta     ? d.meta     : {};
   var snow     = d && d.snowStatus ? d.snowStatus : null;
@@ -2253,7 +3438,7 @@ function buildActivitiesSection(d) {
     + buildWaterScreen(d)
     + '</div>';
 
-  return makeSection('activities', 'Activities', '', '', body);
+  return body;
 }
  
 // ── Tab switcher ──────────────────────────────────────────
@@ -2384,12 +3569,19 @@ async function loadActRoutes(location, type) {
 // ── Render route list ─────────────────────────────────────
 function renderActRouteList(container, curated, overpass, type, rwgps) {
   rwgps = rwgps || [];
+  // Keep the loaded collections intact: filters only change the visible cards.
+  actRouteCollections[type]={curated:curated,overpass:overpass,rwgps:rwgps};
+  var filter=(actCurrentFilters&&actCurrentFilters[type])||'all';
+  var visibleCurated=curated.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
+  var visibleRWGPS=rwgps.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
+  var visibleOverpass=overpass.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
   var html = '';
  
   // Curated routes first
-  if (curated.length) {
+  if (visibleCurated.length) {
     html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Saved routes</div>';
-    curated.forEach(function(r, i) {
+    visibleCurated.forEach(function(r) {
+      var i=curated.indexOf(r);
       var icon = r.type === 'cycling' ? '🚴' : r.type === 'mtb' ? '🚵' : r.type === 'gravel' ? '🚵' : '🥾';
       var diffCls = r.difficulty.toLowerCase() === 'easy' ? 'act-diff-easy'
                   : r.difficulty.toLowerCase() === 'hard' ? 'act-diff-hard'
@@ -2401,16 +3593,16 @@ function renderActRouteList(container, curated, overpass, type, rwgps) {
         + '<div class="act-route-meta">' + r.notes + '</div>'
         + '</div>'
         + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:' + (type==='cycle'?'var(--frost)':'#4a7c3f') + '">' + r.distanceKm + 'km</div>'
+        + '<div class="act-route-dist" style="color:' + (type==='cycle'?'var(--do-accent)':'#9bd5a8') + '">' + r.distanceKm + 'km</div>'
         + '<span class="act-diff ' + diffCls + '">' + r.difficulty + '</span>'
         + '</div></div>';
     });
   }
  
   // Overpass routes
-    if (rwgps.length) {
+    if (visibleRWGPS.length) {
     html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your RideWithGPS routes</div>';
-    rwgps.forEach(function(r, i) {
+    visibleRWGPS.forEach(function(r) {
       var icon = r.activityType === 'mountain_biking' ? '🚵' : '🚴';
       html += '<div class="act-route-card" onclick="actSelectRWGPS(' + r.id + ',\'' + type + '\')">'
         + '<div class="act-route-icon">' + icon + '</div>'
@@ -2419,15 +3611,16 @@ function renderActRouteList(container, curated, overpass, type, rwgps) {
         + '<div class="act-route-meta">' + r.distanceKm + 'km · ' + r.elevationM + 'm · RideWithGPS</div>'
         + '</div>'
         + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:var(--cycle)">' + r.distanceKm + 'km</div>'
+        + '<div class="act-route-dist" style="color:var(--do-accent)">' + r.distanceKm + 'km</div>'
         + '</div></div>';
     });
        window._actRWGPS = rwgps;
   }
 
-  if (overpass.length) {
+  if (visibleOverpass.length) {
     html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named routes nearby</div>';
-    overpass.forEach(function(r, i) {
+    visibleOverpass.forEach(function(r) {
+      var i=overpass.indexOf(r);
       var icon = type === 'cycle' ? '🚴' : '🥾';
       html += '<div class="act-route-card" onclick="actSelectOverpass(' + i + ',\'' + type + '\')">'
         + '<div class="act-route-icon">' + icon + '</div>'
@@ -2436,13 +3629,15 @@ function renderActRouteList(container, curated, overpass, type, rwgps) {
         + '<div class="act-route-meta">' + (r.network ? r.network.toUpperCase() + ' · ' : '') + 'OpenStreetMap</div>'
         + '</div>'
         + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:var(--text-muted)">' + (r.distanceKm ? r.distanceKm + 'km' : '—') + '</div>'
+        + '<div class="act-route-dist" style="color:var(--do-text-secondary)">' + (r.distanceKm ? r.distanceKm + 'km' : '—') + '</div>'
         + '</div></div>';
     });
   }
  
   if (!html) {
-    html = '<div class="act-loading">No routes found nearby — upload your own GPX below</div>';
+    html = filter==='all'
+      ?'<div class="act-loading">No routes found nearby — upload your own GPX below</div>'
+      :'<div class="act-loading">No '+activityFilterLabel(filter)+' routes are currently loaded. Try All or upload your own GPX below.</div>';
   }
  
   container.innerHTML = html;
@@ -2451,10 +3646,31 @@ function renderActRouteList(container, curated, overpass, type, rwgps) {
   if (type === 'trail' || type === 'hiking') {
     window._actCuratedTrail   = curated;
     window._actOverpassTrail  = overpass;
+    actSavedRoutes.trail      = curated;
   } else {
     window._actCuratedCycle   = curated;
     window._actOverpassCycle  = overpass;
+    actSavedRoutes.cycle      = curated;
+    actSavedRoutes.rwgps      = rwgps;
   }
+  // The DO-level list reflects these existing responses; it does not fetch
+  // routes independently or alter selection/analysis behaviour.
+  renderDoMyActivities();
+}
+
+function routeMatchesActivityFilter(route,filter,type){
+  if(filter==='all')return true;
+  var values=[route.type,route.activityType,route.difficulty,route.tags].filter(Boolean).join(' ').toLowerCase();
+  if(filter==='easy'||filter==='moderate')return values.indexOf(filter)!==-1;
+  if(filter==='hiking')return /hiking|walk|trail|foot/.test(values);
+  if(filter==='mtb')return /\bmtb\b|mountain.?bik/.test(values);
+  if(filter==='gravel')return /gravel/.test(values);
+  if(filter==='cycling')return /cycling|road.?cycl|road bike/.test(values);
+  return type==='trail'?/hiking|walk|trail|foot/.test(values):/cycling|road|gravel|mtb|mountain.?bik/.test(values);
+}
+
+function activityFilterLabel(filter){
+  return {hiking:'walking',mtb:'MTB',cycling:'road',gravel:'gravel',easy:'easy',moderate:'moderate'}[filter]||filter;
 }
  
 // ── Discover routes via Overpass ──────────────────────────
@@ -2600,71 +3816,96 @@ function chainOrderWays(members) {
 }
 function ptDist(a,b){ return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2)); }
  
-// ── Analyse GPX content ───────────────────────────────────
+// ── Activity GPX analysis state ───────────────────────────
+// Parse raw XML once, then retain the parsed geometry and selected timing.
+// Reanalysis must never feed a parsed object back into parseGPX().
 async function actAnalyseGPXContent(gpxText, routeName, type) {
   var gpx = parseGPX(gpxText);
   if (!gpx) { showActError(type, 'Could not parse GPX'); return; }
- 
-  // Use defaults for pace
-  var flatSpeed  = type === 'cycle' ? 30 : type === 'mtb' ? 15 : 4;
-  var climbSpeed = type === 'cycle' ? 10 : type === 'mtb' ?  8 : 2;
- 
-  var now      = new Date();
-  var startDt  = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0);
-  if (startDt <= now) startDt.setDate(startDt.getDate() + 1);
- 
-  var segments = detectSegments(gpx, startDt, flatSpeed, climbSpeed);
-  if (segments.length > 10) {
-    var s = segments[0];
-    var f = segments[segments.length-1];
-    var m = segments.slice(1,-1).sort(function(a,b){ return b.ele-a.ele; }).slice(0,8);
-    m.sort(function(a,b){ return a.distanceKm-b.distanceKm; });
-    segments = [s].concat(m).concat([f]);
+  var initialSettings=type==='cycle'&&doCyclingOverview&&doCyclingOverview.settings
+    ?doCyclingOverview.settings:getActivityDefaultSettings(type);
+  actSelectedRoute={
+    name:routeName||gpx.name,type:type,gpx:gpx,rawGpx:gpxText,
+    settings:initialSettings,segments:[]
+  };
+  return runActiveActivityAnalysis(type);
+}
+
+function getActivityDefaultSettings(type){
+  var now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate(),7,0,0);
+  if(start<=now)start.setDate(start.getDate()+1);
+  return {
+    startDate:start.getFullYear()+'-'+String(start.getMonth()+1).padStart(2,'0')+'-'+String(start.getDate()).padStart(2,'0'),
+    startTime:'07:00',flatSpeed:type==='cycle'?30:type==='mtb'?15:4,
+    climbSpeed:type==='cycle'?10:type==='mtb'?8:2
+  };
+}
+
+function getActivitySettingsFromControls(type){
+  var route=actSelectedRoute,settings=Object.assign({},route&&route.settings||getActivityDefaultSettings(type));
+  function value(id){var el=document.getElementById(id);return el?el.value:'';}
+  if(type==='cycle'||type==='mtb'){
+    settings.flatSpeed=parseFloat(value('act-flat-speed'))||settings.flatSpeed;
+    settings.climbSpeed=parseFloat(value('act-climb-speed'))||settings.climbSpeed;
+  }else{
+    settings.flatSpeed=parseFloat(value('act-walk-speed'))||settings.flatSpeed;
   }
- 
-  showActLoading(type, 'Fetching weather for ' + segments.length + ' segments...');
- 
-  try {
-    var trimmed = segments.map(function(s){
-      return { lat:s.lat, lon:s.lon, ele:s.ele, distanceKm:s.distanceKm,
-               etaISO:s.etaISO, etaStr:s.etaStr, type:s.type, bearing:s.bearing||0 };
-    });
-    var params = new URLSearchParams({
-      action:    'analyse_gpx',
-      segments:  JSON.stringify(trimmed),
-      routeName: routeName || gpx.name,
-      totalKm:   gpx.totalKm,
-      totalEleM: gpx.totalEleM,
-      _:         Date.now()
-    });
-    var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
-    var data = await r.json();
-    if (!data.success) throw new Error(data.error || 'Analysis failed');
- 
-    actAnalysisResults = data;
-    actSelectedRoute   = { name: routeName || gpx.name, type: type, gpx: gpx, segments: segments };
-    renderActAnalysis(type, data, segments);
- 
-    // Async name enrichment
+  settings.startDate=value('act-start-date')||settings.startDate;
+  settings.startTime=value('act-start-time')||settings.startTime;
+  return settings;
+}
+
+function activityStartDateTime(settings){
+  var date=(settings.startDate||'').split('-'),time=(settings.startTime||'07:00').split(':');
+  if(date.length===3)return new Date(Number(date[0]),Number(date[1])-1,Number(date[2]),Number(time[0])||0,Number(time[1])||0,0);
+  return new Date();
+}
+
+function trimActivitySegments(segments){
+  if(segments.length<=10)return segments;
+  var start=segments[0],finish=segments[segments.length-1];
+  var middle=segments.slice(1,-1).sort(function(a,b){return b.ele-a.ele;}).slice(0,8);
+  middle.sort(function(a,b){return a.distanceKm-b.distanceKm;});
+  return [start].concat(middle).concat([finish]);
+}
+
+async function runActiveActivityAnalysis(type){
+  var route=actSelectedRoute;
+  if(!route||!route.gpx)return;
+  var settings=getActivitySettingsFromControls(type);
+  var startDt=activityStartDateTime(settings);
+  var segments=trimActivitySegments(detectSegments(route.gpx,startDt,settings.flatSpeed,settings.climbSpeed));
+  route.settings=settings;
+  route.segments=segments;
+  showActLoading(type,'Fetching weather for '+segments.length+' segments...');
+  try{
+    var trimmed=segments.map(function(s){return{lat:s.lat,lon:s.lon,ele:s.ele,distanceKm:s.distanceKm,etaISO:s.etaISO,etaStr:s.etaStr,type:s.type,bearing:s.bearing||0};});
+    var params=new URLSearchParams({action:'analyse_gpx',segments:JSON.stringify(trimmed),routeName:route.name,totalKm:route.gpx.totalKm,totalEleM:route.gpx.totalEleM,_:Date.now()});
+    var r=await fetch(API_URL+'?'+params.toString(),{redirect:'follow'}),data=await r.json();
+    if(!data.success)throw new Error(data.error||'Analysis failed');
+    actAnalysisResults=data;
+    renderActAnalysis(type,data,segments);
     enrichSegmentNames(segments);
- 
-  } catch(err) {
-    showActError(type, 'Analysis failed: ' + err.message);
-  }
+  }catch(err){showActError(type,'Analysis failed: '+err.message);}
 }
  
 // ── Render analysis results ───────────────────────────────
 function renderActAnalysis(type, data, segments) {
   var screen = document.getElementById('act-screen-' + type);
   if (!screen) return;
+  // Modern Cycling Conditions owns timing and speed controls in its route
+  // panel. Its embedded legacy analysis is evidence-only to avoid duplicate IDs.
+  var detailOnly=type==='cycle'&&currentDoSubview==='detail';
+  var settings=actSelectedRoute&&actSelectedRoute.settings?actSelectedRoute.settings:getActivityDefaultSettings(type);
  
   var segs      = data.segments || [];
   var riskColor = data.routeRisk === 'danger'  ? 'var(--danger)'
                 : data.routeRisk === 'caution' ? 'var(--caution)'
                 : 'var(--go)';
-  var riskLabel = data.routeRisk === 'danger'  ? '🔴 High risk'
-                : data.routeRisk === 'caution' ? '🟡 Caution'
-                : '🟢 All clear';
+  var riskLabel = data.routeRisk === 'danger'  ? 'NOT IDEAL'
+                : data.routeRisk === 'caution' ? 'CAUTION'
+                : 'GO';
+  var riskLevel = data.routeRisk === 'danger' ? 'danger' : data.routeRisk === 'caution' ? 'caution' : 'go';
   var accentColor = type === 'cycle' ? 'var(--frost)' : '#4a7c3f';
   var analyseBtn  = type === 'cycle' ? 'act-btn-cycle' : 'act-btn-trail';
  
@@ -2673,43 +3914,47 @@ function renderActAnalysis(type, data, segments) {
     + '<span class="act-analysis-back-lbl">Back to routes</span>'
     + '</div>'
     // Route header
-    + '<div style="padding:12px 14px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--display);font-size:15px;font-weight:800;margin-bottom:3px">' + data.routeName + '</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px">'
-    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + data.totalKm + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">km</div></div>'
-    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + (data.totalEleM||0).toLocaleString() + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">metres</div></div>'
-    + '<div style="text-align:center"><div style="font-size:15px;font-weight:700;font-family:var(--display);color:' + accentColor + '">' + segs.length + '</div><div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">segments</div></div>'
+    + '<div class="act-analysis-header">'
+    + '<div class="act-analysis-title">' + data.routeName + '</div>'
+    + '<div class="act-analysis-facts">'
+    + '<div class="act-analysis-fact"><strong style="color:' + accentColor + '">' + data.totalKm + '</strong>km</div>'
+    + '<div class="act-analysis-fact"><strong style="color:' + accentColor + '">' + (data.totalEleM||0).toLocaleString() + '</strong>metres</div>'
+    + '<div class="act-analysis-fact"><strong style="color:' + accentColor + '">' + segs.length + '</strong>segments</div>'
     + '</div></div>'
     // Risk banner
-    + '<div style="padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)">'
-    + '<span style="font-family:var(--display);font-size:12px;font-weight:700;color:' + riskColor + '">' + riskLabel + '</span>'
-    + '</div>';
+    + '<div class="act-analysis-decision ' + riskLevel + '">' + riskLabel + '</div>';
  
   // Settings row
-  if (type === 'cycle') {
+  if (!detailOnly && type === 'cycle') {
     html += '<div class="act-settings-row">'
       + '<div class="act-setting"><span class="act-setting-lbl">Flat speed (km/h)</span>'
-      + '<input class="act-setting-input" type="number" id="act-flat-speed" value="30" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<input class="act-setting-input" type="number" id="act-flat-speed" value="'+settings.flatSpeed+'" onchange="actReanalyse(\'' + type + '\')"></div>'
       + '<div class="act-setting"><span class="act-setting-lbl">Climb speed (km/h)</span>'
-      + '<input class="act-setting-input" type="number" id="act-climb-speed" value="10" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<input class="act-setting-input" type="number" id="act-climb-speed" value="'+settings.climbSpeed+'" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<div class="act-setting"><span class="act-setting-lbl">Start date</span>'
+      + '<input class="act-setting-input" type="date" id="act-start-date" value="'+settings.startDate+'" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<div class="act-setting"><span class="act-setting-lbl">Start time</span>'
+      + '<input class="act-setting-input" type="time" id="act-start-time" value="'+settings.startTime+'" onchange="actReanalyse(\'' + type + '\')"></div>'
       + '</div>';
-  } else {
+  } else if (!detailOnly) {
     html += '<div class="act-settings-row">'
       + '<div class="act-setting"><span class="act-setting-lbl">Walking pace (km/h)</span>'
-      + '<input class="act-setting-input" type="number" id="act-walk-speed" value="4" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<input class="act-setting-input" type="number" id="act-walk-speed" value="'+settings.flatSpeed+'" onchange="actReanalyse(\'' + type + '\')"></div>'
+      + '<div class="act-setting"><span class="act-setting-lbl">Start date</span>'
+      + '<input class="act-setting-input" type="date" id="act-start-date" value="'+settings.startDate+'" onchange="actReanalyse(\'' + type + '\')"></div>'
       + '<div class="act-setting"><span class="act-setting-lbl">Start time</span>'
-      + '<input class="act-setting-input" type="time" id="act-start-time" value="07:00"></div>'
+      + '<input class="act-setting-input" type="time" id="act-start-time" value="'+settings.startTime+'" onchange="actReanalyse(\'' + type + '\')"></div>'
       + '</div>';
   }
  
   // Segments
   html += '<div>';
   segs.forEach(function(seg, idx) {
-    var riskIcon = seg.overallRisk === 'danger'  ? '🔴'
-                 : seg.overallRisk === 'caution' ? '⚠️'
+    var riskIcon = seg.overallRisk === 'danger'  ? '!'
+                 : seg.overallRisk === 'caution' ? '•'
                  : seg.type === 'finish'         ? '🏁'
                  : seg.type === 'start'          ? (type==='cycle'?'🚴':'🥾')
-                 : '✅';
+                 : '•';
     var segName  = seg.segName || (seg.type === 'start' ? 'Start' : seg.type === 'finish' ? 'Finish' : seg.ele + 'm');
  
     html += '<div class="act-seg" onclick="toggleActSeg(\'as' + idx + '\')">'
@@ -2718,7 +3963,7 @@ function renderActAnalysis(type, data, segments) {
       + '<div class="act-seg-left">'
       + '<div class="act-seg-name" data-seg-idx="' + idx + '">' + segName + '</div>'
       + '<div class="act-seg-alt">' + seg.ele + 'm · ETA ' + seg.etaStr
-      + (seg.crosswindAngle > 45 && seg.crosswindAngle < 135 && seg.windKmh > 25 ? ' · ⚠️ Crosswind' : '')
+      + (seg.crosswindAngle > 45 && seg.crosswindAngle < 135 && seg.windKmh > 25 ? ' · Crosswind' : '')
       + '</div>'
       + '</div>'
       + '<div class="act-seg-right">'
@@ -2728,7 +3973,7 @@ function renderActAnalysis(type, data, segments) {
       + '<div class="act-seg-body" id="as' + idx + '">';
  
     if (seg.error) {
-      html += '<div class="act-alert act-a-warn">⚠️ Could not fetch weather</div>';
+        html += '<div class="act-alert act-a-warn">Weather is not available for this point.</div>';
     } else {
       html += '<div class="act-wx-grid">'
         + '<div class="act-wx-item"><div class="act-wx-lbl">Temp</div>'
@@ -2753,7 +3998,7 @@ function renderActAnalysis(type, data, segments) {
           html += '<div class="act-alert ' + cls + '">' + r.label + '</div>';
         });
       } else {
-        html += '<div class="act-alert act-a-ok">✅ Clear conditions</div>';
+        html += '<div class="act-alert act-a-ok">Clear conditions</div>';
       }
     }
     html += '</div></div>';
@@ -2789,15 +4034,37 @@ function renderActAnalysis(type, data, segments) {
   var hasAlerts = segs.some(function(s){ return s.overallRisk && s.overallRisk !== 'ok'; });
   if (hasAlerts) {
     html += '<div class="act-gpx-card">'
-      + '<div class="act-gpx-title">📎 Alert GPX ready for Garmin</div>'
+      + '<div class="act-gpx-title">Alert GPX ready for Garmin</div>'
       + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Waypoint alerts at risk segments — sync overnight.</div>'
-      + '<button class="act-btn ' + analyseBtn + '" onclick="actDownloadGPX()">⬇️ Download alert GPX</button>'
+      + '<button class="act-btn ' + analyseBtn + '" onclick="actDownloadGPX()">Download alert GPX</button>'
       + '</div>';
   } else {
-    html += '<div style="padding:10px 14px;font-size:11px;color:var(--go)">✅ No alerts — conditions clear throughout</div>';
+    html += '<div style="padding:10px 14px;font-size:11px;color:var(--go)">No alerts — conditions clear throughout</div>';
   }
  
+  if(detailOnly){
+    renderDoCyclingConditions(data,segments,html);
+    return;
+  }
   screen.innerHTML = html;
+}
+
+function renderDoCyclingConditions(data,segments,legacyHtml){
+  var panel=document.querySelector('.do-route-panel');
+  if(!panel)return;
+  var risk=data.routeRisk==='danger'?'danger':data.routeRisk==='caution'?'caution':'go';
+  var label=risk==='danger'?'NOT IDEAL':risk==='caution'?'CAUTION':'GO';
+  var evidence=(data.segments||[]).reduce(function(all,seg){return all.concat((seg.risks||[]).map(function(item){return item.label;}));},[]);
+  var copy=evidence[0]|| (risk==='go'?'Conditions are clear across the available route checks.':'Review the available route conditions before leaving.');
+  var start=segments[0],finish=segments[segments.length-1],duration=start&&finish?Math.round((new Date(finish.etaISO)-new Date(start.etaISO))/60000):0;
+  var points=(data.segments&&data.segments.length?data.segments:segments).filter(function(seg,i,list){return seg.type==='start'||seg.type==='finish'||(seg.type==='summit'&&i<list.length-1);}).slice(0,4);
+  panel.innerHTML='<header class="do-head"><button class="do-browse-back" type="button" onclick="returnToDoCyclingOverview()">← Route overview</button><div class="do-eyebrow">Audrey · Route conditions</div></header><section class="do-route-card"><div class="do-route-name">'+(actSelectedRoute.name||'Saved ride')+'</div>'
+    +'<div class="do-route-conclusion '+risk+'"><div class="do-route-status">'+label+'</div><div class="do-route-copy">'+copy+'</div></div>'
+    +'<div class="do-route-facts"><span><strong>'+data.totalKm+' km</strong>Distance</span><span><strong>'+(data.totalEleM||0).toLocaleString()+' m</strong>Ascent</span><span><strong>'+(duration?fmtDuration(duration):'—')+'</strong>Estimated ride</span><span><strong>'+((actSelectedRoute.settings||{}).startTime||'—')+'</strong>Start</span></div>'
+    +buildDoCyclingSetup(actSelectedRoute.settings,'Update conditions',"actReanalyse('cycle')")
+    +'<div class="do-route-progress">'+points.map(function(point){var title=point.type==='start'?'Start':point.type==='finish'?'Finish':point.segName||'Key climb';return '<div class="do-route-point"><div class="do-route-point-type">'+(point.type||'route point')+'</div><div class="do-route-point-title">'+title+'</div><div class="do-route-point-meta">'+(point.etaStr||'—')+(point.tempC!==undefined?' · '+point.tempC+'°':'')+(point.windKmh?' · '+point.windKmh+' km/h wind':'')+(point.crosswindAngle>45&&point.crosswindAngle<135?' · crosswind':'')+'</div></div>';}).join('')+'</div>'
+    +'<details class="do-route-details"><summary>Full route analysis</summary>'+legacyHtml+'</details></section>';
+  showDoSubview('.do-route-panel');
 }
  
 // ── Helpers ───────────────────────────────────────────────
@@ -2861,15 +4128,17 @@ function actDownloadGPX() {
 }
  
 function filterAct(el, filter, type) {
-  document.querySelectorAll('.act-chip').forEach(function(c){ c.classList.remove('active'); });
+  var bar=el.closest('.act-filter-bar');
+  if(bar)bar.querySelectorAll('.act-chip').forEach(function(c){ c.classList.remove('active'); });
   el.classList.add('active');
   actCurrentFilter = filter;
+  actCurrentFilters[type]=filter;
+  var collection=actRouteCollections[type],container=document.getElementById('act-routes-'+type);
+  if(collection&&container)renderActRouteList(container,collection.curated,collection.overpass,type,collection.rwgps);
 }
  
 function actReanalyse(type) {
-  if (actSelectedRoute) {
-    actAnalyseGPXContent(actSelectedRoute.gpx ? actSelectedRoute.gpx._raw : '', actSelectedRoute.name, type);
-  }
+  if(actSelectedRoute&&actSelectedRoute.type===type)runActiveActivityAnalysis(type);
 }
  
 // ── Ski screen ────────────────────────────────────────────
@@ -2877,7 +4146,7 @@ function buildSkiScreen(snow, meta) {
   if (!snow || !snow.resorts || !snow.resorts.length) {
     return '<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted)">'
       + '<div style="font-size:28px;margin-bottom:8px">⛷️</div>'
-      + '<div style="font-family:var(--display);font-size:14px;font-weight:700;margin-bottom:6px">Ski conditions</div>'
+      + '<div style="font-family:var(--ui);font-size:14px;font-weight:700;margin-bottom:6px">Ski conditions</div>'
       + '<div>Snow data appears here from November when the season opens.<br>Resorts configured in Settings.</div>'
       + '</div>';
   }
@@ -2898,7 +4167,7 @@ function buildSkiScreen(snow, meta) {
 function switchSkiResort(idx, el) {
   if (!currentData || !currentData.snowStatus) return;
   document.querySelectorAll('#act-screen-ski .act-chip').forEach(function(c){ c.classList.remove('active'); });
-  el.classList.add('active');
+  if(el)el.classList.add('active');
   var detail = document.getElementById('act-ski-detail');
   if (detail) detail.innerHTML = buildSkiResortDetail(currentData.snowStatus.resorts[idx], currentData.meta);
 }
@@ -2906,59 +4175,35 @@ function switchSkiResort(idx, el) {
 function buildSkiResortDetail(r, meta) {
   if (!r) return '';
   var scoreColor = r.ssScore >= 80 ? 'var(--go)' : r.ssScore >= 60 ? 'var(--caution)' : 'var(--danger)';
- 
-  var html = '<div style="padding:12px 14px;border-bottom:1px solid var(--border)">'
-    + '<div style="font-family:var(--display);font-size:15px;font-weight:800;margin-bottom:2px">' + r.name + '</div>'
-    + '<div style="font-size:10px;color:var(--text-muted)">' + (r.elevationM ? r.elevationM + 'm' : '') + '</div>'
+  var html = '<div class="do-ski-detail">'
+    + '<div class="do-ski-detail-head"><div class="do-ski-detail-name">' + r.name + '</div>'
+    + '<div class="do-ski-detail-alt">' + (r.elevationM ? r.elevationM + 'm' : '') + '</div></div>'
+    + '<div class="do-ski-metric-grid">'
+    + '<div class="do-ski-metric do-ski-operational"><span class="do-ski-metric-label">Lifts</span><span class="do-ski-metric-value">' + (r.liftsOpen||'—') + '/' + (r.liftsTotal||'—') + '</span></div>'
+    + '<div class="do-ski-metric"><span class="do-ski-metric-label">Base depth</span><span class="do-ski-metric-value">' + (r.snowDepthCm||r.snowCm||0) + 'cm</span></div>'
+    + '<div class="do-ski-metric do-ski-score" style="--do-score-color:' + scoreColor + '"><span class="do-ski-metric-label">Score</span><span class="do-ski-metric-value">' + (r.ssScore||'—') + '</span></div>'
+    + '</div><div class="do-ski-temperature-grid">'
+    + '<div class="do-ski-metric"><span class="do-ski-metric-label">Valley</span><span class="do-ski-metric-value">' + (r.botTempC !== undefined ? r.botTempC + '°' : '—') + '</span></div>'
+    + '<div class="do-ski-metric"><span class="do-ski-metric-label">Piste</span><span class="do-ski-metric-value">' + (r.midTempC !== undefined ? r.midTempC + '°' : '—') + '</span></div>'
+    + '<div class="do-ski-metric"><span class="do-ski-metric-label">Summit</span><span class="do-ski-metric-value">' + (r.topTempC !== undefined ? r.topTempC + '°' : '—') + '</span></div>'
     + '</div>'
-    // Snow strip
-    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
-    + '<div style="padding:10px 8px;text-align:center;border-right:1px solid var(--border)">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Base depth</div>'
-    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:#6a3d9a">' + (r.snowDepthCm||r.snowCm||0) + 'cm</div>'
-    + '</div>'
-    + '<div style="padding:10px 8px;text-align:center;border-right:1px solid var(--border)">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Score</div>'
-    + '<div style="font-size:20px;font-weight:700;font-family:var(--display);color:' + scoreColor + '">' + (r.ssScore||'—') + '</div>'
-    + '</div>'
-    + '<div style="padding:10px 8px;text-align:center">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Lifts</div>'
-    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.liftsOpen||'—') + '/' + (r.liftsTotal||'—') + '</div>'
-    + '</div></div>'
-    // Elevation temps
-    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
-    + '<div style="padding:8px;text-align:center;border-right:1px solid var(--border)">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Valley</div>'
-    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.botTempC !== undefined ? r.botTempC + '°' : '—') + '</div>'
-    + '</div>'
-    + '<div style="padding:8px;text-align:center;border-right:1px solid var(--border)">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Piste</div>'
-    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.midTempC !== undefined ? r.midTempC + '°' : '—') + '</div>'
-    + '</div>'
-    + '<div style="padding:8px;text-align:center">'
-    + '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Summit</div>'
-    + '<div style="font-size:16px;font-weight:700;font-family:var(--display)">' + (r.topTempC !== undefined ? r.topTempC + '°' : '—') + '</div>'
-    + '</div></div>'
-    // Tagline
-    + (r.ssTagline ? '<div style="padding:8px 14px;font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border)">' + r.ssTagline + '</div>' : '')
-    // 3 day forecast
+    + (r.ssTagline ? '<div class="do-ski-tagline">' + r.ssTagline + '</div>' : '')
     + (r.forecast3d && r.forecast3d.length ? buildSkiForecast(r.forecast3d) : '')
-    // Van road status
-    + (r.fitment ? '<div style="padding:8px 14px;font-size:11px;border-top:1px solid var(--border)">'
-      + '🚐 Van road: <strong>' + r.fitment + '</strong></div>' : '');
+    + (r.fitment ? '<div class="do-ski-road">Van road: <strong>' + r.fitment + '</strong></div>' : '')
+    + '</div>';
  
   return html;
 }
  
 function buildSkiForecast(fc) {
-  var html = '<div style="border-top:1px solid var(--border)">';
+  var html = '<div class="do-ski-forecast">';
   fc.slice(0,3).forEach(function(day, i) {
     var label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : (new Date(day.date)).toLocaleDateString('en-GB',{weekday:'short'});
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid var(--border);font-size:12px">'
-      + '<span style="color:var(--text-muted);min-width:70px">' + label + '</span>'
-      + '<span>' + (day.desc||'') + '</span>'
-      + '<span style="font-weight:700;color:#6a3d9a">' + (day.snowfall ? day.snowfall.toFixed(1) + 'cm' : '0cm') + '</span>'
-      + '<span style="font-size:10px;color:var(--text-muted)">' + day.tempMin + '–' + day.tempMax + '°</span>'
+    html += '<div class="do-ski-forecast-row">'
+      + '<span class="do-ski-forecast-day">' + label + '</span>'
+      + '<span class="do-ski-forecast-desc">' + (day.desc||'') + '</span>'
+      + '<span class="do-ski-forecast-snow">' + (day.snowfall ? day.snowfall.toFixed(1) + 'cm' : '0cm') + '</span>'
+      + '<span class="do-ski-forecast-temp">' + day.tempMin + '–' + day.tempMax + '°</span>'
       + '</div>';
   });
   html += '</div>';
@@ -3046,7 +4291,7 @@ function renderMarineData(container, data, location) {
  
     // Tide state banner
     + '<div style="padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">'
-    + '<div style="font-family:var(--display);font-size:14px;font-weight:700;color:' + tideColor + '">'
+    + '<div style="font-family:var(--ui);font-size:14px;font-weight:700;color:' + tideColor + '">'
     + tideIcon + ' Tide ' + (data.tideState||'—')
     + '</div>'
     + '<div style="font-size:11px;color:var(--text-muted)">Next: ' + nextStr + '</div>'
@@ -3166,9 +4411,10 @@ async function runAllModulesNow() {
   }
 }
 
-function toggleEnRoute() {
-  var wp  = document.getElementById('enroute-waypoints');
-  var ch  = document.getElementById('enroute-chevron');
+function toggleEnRoute(viewId) {
+  var suffix=viewId||'drive';
+  var wp  = document.getElementById('enroute-waypoints-'+suffix);
+  var ch  = document.getElementById('enroute-chevron-'+suffix);
   if (!wp) return;
   var open = wp.style.display !== 'none';
   wp.style.display = open ? 'none' : 'block';
