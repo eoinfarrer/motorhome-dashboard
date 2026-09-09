@@ -471,6 +471,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:15
 .act-setting-lbl{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);}
 .act-setting-input{background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 7px;border-radius:4px;width:100%;}
 
+/* Keep native iPhone date/time controls inside the Activities settings row. */
+.do-experience .act-settings-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;}
+.do-experience .act-setting{min-width:0;}
+.do-experience .act-setting-input{min-width:0;max-width:100%;}
+@media(max-width:600px){.do-experience .act-settings-row{grid-template-columns:repeat(2,minmax(0,1fr));}.do-experience .act-setting-input{font-size:16px;}}
+@media(max-width:360px){.do-experience .act-settings-row{grid-template-columns:minmax(0,1fr);}}
+.van-health.van-context{border-left-color:#a4a9a0;}.van-context .van-health-state{color:#a4a9a0;}
+
 /* The legacy Activities builder originally inherited dark text from the light
    dashboard body. Keep its rules contained, but give every DO surface an
    explicit Audrey dark-theme text scale instead of relying on inheritance. */
@@ -945,11 +953,9 @@ function buildMoreSettingsHtml(d,fc){
     +settingsRow('LPG',fc.lpgPrice?fc.lpgPrice.toFixed(2):'—','£/L','lpg')
     +settingsRow('Motorhome MPG',fc.mpg?fc.mpg.toFixed(1):'—','mpg','mpg')
     +settingsRow('LPG tank',fc.tankLitres||'—','L','tank')+'</div>';
-  if(allResorts.length){
-    html+='<details class="settings-group"><summary class="settings-group-head"><span class="settings-group-title">Snow resorts</span></summary><div id="resortList">';
-    allResorts.forEach(function(resort){var active=resort.active!==false;html+='<div class="resort-row" id="rr-'+resort.name.replace(/\s/g,'_')+'"><div><div class="resort-name-s'+(active?'':' inactive')+'">'+resort.name+'</div><div class="resort-sub-s">'+(resort.elevationM?resort.elevationM+'m':'')+'</div></div><div class="resort-row-right"><button class="toggle '+(active?'toggle-on':'toggle-off')+'" onclick="toggleResortActive(this,\''+resort.name+'\')" aria-label="Toggle '+resort.name+'"><div class="toggle-knob"></div></button><span class="toggle-lbl '+(active?'toggle-lbl-on':'toggle-lbl-off')+'">'+(active?'Active':'Off')+'</span><button class="remove-btn" onclick="removeResort(\''+resort.name+'\')" title="Remove resort">✕</button></div></div>';});
-    html+='</div><div class="add-resort-row"><input class="add-resort-input" id="resortInput" type="text" placeholder="Resort name or SnowSure slug…"><button class="add-resort-btn" onclick="addResort()">+ Add</button></div><div class="settings-note">Changes update the SnowStatus sheet and apply on the next refresh.</div></details>';
-  }
+  html+='<section class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Ski resorts</span></div><div id="resortList">';
+  allResorts.forEach(function(resort){var active=resort.active!==false;html+='<div class="resort-row" id="rr-'+resort.name.replace(/\s/g,'_')+'"><div><div class="resort-name-s'+(active?'':' inactive')+'">'+resort.name+'</div><div class="resort-sub-s">'+(resort.elevationM?resort.elevationM+'m':'')+'</div></div><div class="resort-row-right"><button class="toggle '+(active?'toggle-on':'toggle-off')+'" onclick="toggleResortActive(this,\''+resort.name+'\')" aria-label="Toggle '+resort.name+'"><div class="toggle-knob"></div></button><span class="toggle-lbl '+(active?'toggle-lbl-on':'toggle-lbl-off')+'">'+(active?'Active':'Off')+'</span><button class="remove-btn" onclick="removeResort(\''+resort.name+'\')" title="Remove resort">✕</button></div></div>';});
+  html+='</div><div class="add-resort-row"><input class="add-resort-input" id="resortInput" aria-label="Ski resort name or SnowSure slug" type="text" placeholder="Resort name or SnowSure slug…"><button class="add-resort-btn" onclick="addResort()">+ Add Ski Resort</button></div><div class="settings-note">Changes update the SnowStatus sheet and apply on the next refresh.</div></section>';
   return html;
 }
 
@@ -973,9 +979,9 @@ function vanTelemetryInfo(v){
   var age='Telemetry timestamp unavailable';
   if(timestamp&&!isNaN(timestamp.getTime())){
     var mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
-    age=mins<2?'Updated just now':mins<60?'Updated '+mins+'m ago':'Last telemetry '+Math.floor(mins/60)+'h ago';
+    age=mins<2?'Updated just now':mins<60?'Updated '+mins+'m ago':'Last update '+Math.floor(mins/60)+'h ago';
   }
-  if(status==='STALE')return{state:'STALE',age:age,level:'caution'};
+  if(status==='STALE')return{state:'STALE',age:age,level:'context'};
   if(status==='LIVE')return{state:'LIVE',age:age,level:'go'};
   return{state:status||'TELEMETRY',age:age,level:timestamp?'go':'caution'};
 }
@@ -995,21 +1001,18 @@ function vanTemperatureState(value,type){
 function getVanHealth(d){
   var v=d.vehicle||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null,issues=[];
   function add(level,message,key){issues.push({level:level,message:message,key:key});}
-  if(!Object.keys(v).length)add('caution','Vehicle telemetry is unavailable.','unavailable');
+  var unavailable=homeTelemetryConfidence(v).state==='unavailable';
   if(v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK'))add('danger',v.systemAlert,'system');
-  if(String(v.telStatus||'').toUpperCase()==='STALE')add('caution','Telemetry is stale; displayed readings may no longer be current.','telemetry');
   if(v.batteryV!==null&&v.batteryV!==undefined&&v.batteryV<12.4)add('danger','Battery is at '+v.batteryV+'V. Check the charging situation.','battery');
   var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
   if(cabin.level==='caution'&&v.cabinTempC!==null&&v.cabinTempC!==undefined)add('caution','Cabin temperature is '+cabin.label.toLowerCase()+'.','cabin');
   if(garage.level!=='go'&&v.garageTempC!==null&&v.garageTempC!==undefined)add(garage.level,'Garage temperature is '+garage.label.toLowerCase()+'.','garage');
   if(lpg&&(lpg.alert==='CRITICAL'||lpg.alert==='LOW'))add(lpg.alert==='CRITICAL'?'danger':'caution',lpg.statusMsg||'LPG level is low. Consider a refill.','lpg');
-  var level=issues.some(function(issue){return issue.level==='danger';})?'danger':issues.length?'caution':'go';
-  var title='Van&rsquo;s happy',copy='Everything looks normal.';
+  var level=issues.some(function(issue){return issue.level==='danger';})?'danger':issues.length?'caution':unavailable?'context':'go';
+  var title=unavailable?'Vehicle telemetry unavailable':'Van&rsquo;s happy',copy=unavailable?'Current vehicle state cannot be confirmed.':'Everything looks normal.';
   if(issues.length===1){
     var issue=issues[0];
-    if(issue.key==='telemetry'){title='Telemetry is stale';copy=issue.message;}
-    else if(issue.key==='unavailable'){title='Vehicle telemetry unavailable';copy=issue.message;}
-    else if(issue.key==='battery'){title='Battery needs attention';copy=issue.message;}
+    if(issue.key==='battery'){title='Battery needs attention';copy=issue.message;}
     else if(issue.key==='lpg'){title='LPG needs attention';copy=issue.message;}
     else {title='Van needs attention';copy=issue.message;}
   }else if(issues.length>1){title=issues.length+' things need attention';copy='Review the items below before relying on the current vehicle state.';}
@@ -1033,7 +1036,7 @@ function buildVanView(d,fc){
   var parts=[];
   parts.push('<div class="van-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+vanSceneStyle(scene)+'"><div class="van-canvas">');
   parts.push('<header class="van-head"><div class="van-eyebrow">Audrey · Van</div><div class="van-title">Is the van okay?</div><div class="van-subtitle">Current state, confidence and the detail behind it.</div></header>');
-  parts.push('<section class="van-health van-'+health.level+'"><div class="van-health-state">'+(health.level==='go'?'ALL GOOD':'NEEDS ATTENTION')+'</div><div class="van-health-title">'+health.title+'</div><div class="van-health-copy">'+health.copy+'</div>'
+  parts.push('<section class="van-health van-'+health.level+'"><div class="van-health-state">'+(health.level==='go'?'ALL GOOD':health.level==='context'?'STATUS UNAVAILABLE':'NEEDS ATTENTION')+'</div><div class="van-health-title">'+health.title+'</div><div class="van-health-copy">'+health.copy+'</div>'
     +'<div class="van-alert-list">'+health.issues.map(function(issue){return'<div class="van-alert van-alert-'+issue.level+'">'+issue.message+'</div>';}).join('')+'</div></section>');
   parts.push('<div class="van-layout"><div class="van-support">');
   parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Power</div><div class="van-surface-title">Battery</div></div><div class="van-surface-meta">'+telemetry.state+'<br>'+telemetry.age+'</div></div><div class="van-power-value">'+battery+'</div><div class="van-power-status">'+(v.batteryStatus||'Battery status unavailable')+'</div></section>');
@@ -1348,11 +1351,10 @@ function getHomeContext(d){
     result.attention=attention;return result;
   }
   if(meta.tripStatus==='POST_TRIP'){
-    result.mode='returned';result.eyebrow=telemetry.state==='stale'?'Latest check':telemetry.state==='unavailable'?'Status update':'All good';result.stateLabel='Trip complete';
-    result.message=telemetry.state==='stale'?"You're home. The van looked fine at the last check."
-      :telemetry.state==='unavailable'?"You're home. Current vehicle state hasn't been confirmed recently."
+    result.mode='returned';result.eyebrow=telemetry.state==='unavailable'?'Status update':'All good';result.stateLabel='Trip complete';
+    result.message=telemetry.state==='unavailable'?"You're home. Current vehicle state hasn't been confirmed recently."
       :"You're home. The van looks happy.";
-    result.meta=telemetry.copy;
+    result.meta=telemetry.state==='unavailable'?telemetry.copy:'';
     return result;
   }
   if(isDrive&&meta.nextDrive){
@@ -1377,7 +1379,6 @@ function getHomeContext(d){
   }
   result.mode='parked';result.eyebrow='Today\'s opportunity';result.stateLabel='Parked up';
   result.message='A good moment to see what the area has to offer.';
-  if(telemetry.state==='stale')result.meta=telemetry.copy;
   if(telemetry.state==='unavailable'){
     result.eyebrow='Status update';result.stateLabel='Vehicle state unavailable';result.message='Current vehicle telemetry has not been confirmed recently.';result.meta=telemetry.copy;
   }
@@ -1388,8 +1389,8 @@ function getHomeContext(d){
 // introducing a second freshness threshold or treating stale data as a fault.
 function homeTelemetryConfidence(vehicle){
   var v=vehicle||{},telemetry=vanTelemetryInfo(v);
-  if(!Object.keys(v).length||!v.locationTimestamp)return{state:'unavailable',copy:'Vehicle telemetry is unavailable.'};
-  if(telemetry.state==='STALE')return{state:'stale',copy:'Latest telemetry is stale; current vehicle state is unconfirmed.'};
+  if(!Object.keys(v).length||!v.locationTimestamp||isNaN(new Date(v.locationTimestamp).getTime())||['UNAVAILABLE','MISSING','OFFLINE','ERROR'].indexOf(telemetry.state)>=0)return{state:'unavailable',copy:'Vehicle telemetry is unavailable.'};
+  if(telemetry.state==='STALE')return{state:'stale',copy:telemetry.age};
   return{state:'current',copy:telemetry.age};
 }
 
@@ -1503,7 +1504,7 @@ function buildHomeVehicleStatus(v){
   var cabin=v.cabinTempC!==null&&v.cabinTempC!==undefined?v.cabinTempC+'&deg;':'—';
   var garage=v.garageTempC!==null&&v.garageTempC!==undefined?v.garageTempC+'&deg;':'—';
   var telemetry=homeTelemetryConfidence(v),freshness=homeTelemetryFreshness(v);
-  var health=telemetry.state==='current'&&v.systemAlert&&v.systemAlert.includes('VAN SYSTEMS OK')?'✓ Systems normal':'';
+  var health=telemetry.state!=='unavailable'&&v.systemAlert&&v.systemAlert.includes('VAN SYSTEMS OK')?'✓ Systems normal':'';
   return '<button class="home-vehicle-surface home-vehicle-button" type="button" onclick="switchAppView(\'van\')" aria-label="Open detailed van status">'
     +'<div class="home-vehicle-heading"><span class="home-section-label">Van now</span><span class="home-vehicle-status-meta">'
     +(health?'<span class="home-vehicle-health">'+health+'</span>':'')
@@ -1518,8 +1519,7 @@ function buildHomeVehicleStatus(v){
 function homeTelemetryFreshness(vehicle){
   var telemetry=homeTelemetryConfidence(vehicle);
   if(telemetry.state==='unavailable')return 'Telemetry unavailable';
-  if(telemetry.state==='stale')return 'Latest telemetry is stale';
-  return telemetry.copy;
+  return '';
 }
 
 function buildMoreFooter(){
