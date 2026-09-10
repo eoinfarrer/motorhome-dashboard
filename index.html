@@ -1275,7 +1275,7 @@ var HOME_SCENES={
   highlands:{asset:'',enabled:false,position:'center 42%',tabletPosition:'center 45%',widePosition:'center 48%'},
   // Travelling uses the mountain asset only when the drive state is explicit.
   travelling:{asset:'assets/scenes/mountains.jpg',enabled:true,position:'52% center',tabletPosition:'48% center',widePosition:'center 48%'},
-  generic:{asset:'',enabled:false,position:'center',tabletPosition:'center',widePosition:'center'}
+  generic:{asset:'assets/scenes/home.jpg',enabled:true,position:'82% center',tabletPosition:'66% center',widePosition:'center 45%'}
 };
 
 function getHomeScene(d,context){
@@ -1290,7 +1290,7 @@ function getHomeScene(d,context){
   // These matches are only against explicit payload labels, never place names.
   else if(/coast|coastal|water|beach|sea/.test(explicit))key='coast';
   else if(/highlands|rural/.test(explicit))key='highlands';
-  else if(/mountain|mountains|alpine/.test(explicit))key='mountains';
+  else if(/mountain|mountains|alpine/.test(explicit))key=meta.season==='winter'?'alpine':'mountains';
 
   var hour=(new Date()).getHours();
   var time=hour>=22||hour<6?'night':hour>=18?'evening':'day';
@@ -1342,7 +1342,7 @@ function getHomeContext(d){
   var telemetry=homeTelemetryConfidence(vehicle);
   var dayType=meta.todayType||'';
   var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(dayType)>=0;
-  var hasSki=meta.season==='winter'&&snow.resorts&&snow.resorts.length;
+  var hasSki=meta.tripStatus==='ACTIVE'&&meta.season==='winter'&&snow.resorts&&snow.resorts.length;
   var hour=(new Date()).getHours();
   var evening=hour>=18||hour<6;
   var result={tone:'calm',eyebrow:'Your motorhome co-pilot',stateLabel:'All good',message:'Here when you need a clear view of the road ahead.',meta:''};
@@ -1369,7 +1369,7 @@ function getHomeContext(d){
     result.message='A quick look at the mountain conditions may help shape the day.';
     return result;
   }
-  if(evening){
+  if(evening&&meta.tripStatus!=='PRE_TRIP'){
     result.mode='evening';result.eyebrow='Settle in';result.stateLabel='Evening & overnight';
     result.message='A calm check of tonight and tomorrow, then switch off.';
     return result;
@@ -3212,9 +3212,17 @@ function buildDoView(d){
     +'</div></div></div>';
 }
 
+function isSkiSeason(meta){
+  meta=meta||{};
+  var source=meta.tripStatus==='ACTIVE'?meta.updated:(meta.departDate||meta.updated);
+  var date=source?new Date(source):new Date();
+  var month=isNaN(date.getTime())?(new Date()).getMonth()+1:date.getUTCMonth()+1;
+  return month===12||month<=4;
+}
+
 function getDoScene(d){
   var snow=d&&d.snowStatus;
-  var mode=snow&&snow.resorts&&snow.resorts.length?'ski':'unknown';
+  var mode=isSkiSeason(d&&d.meta)&&snow&&snow.resorts&&snow.resorts.length?'ski':'unknown';
   return getHomeScene(d||{},{mode:mode});
 }
 
@@ -3225,7 +3233,8 @@ function doSceneStyle(scene){
 }
 
 function buildDoOpportunities(d){
-  var snow=d&&d.snowStatus,resorts=snow&&snow.resorts?snow.resorts:[];
+  var meta=d&&d.meta||{},snow=d&&d.snowStatus,resorts=snow&&snow.resorts?snow.resorts:[];
+  if(!isSkiSeason(meta))return '<div class="do-data-note"><strong>CHECK CONDITIONS</strong><br>Browse your saved cycling and walking routes, or open an activity to analyse its GPX and route conditions.</div>';
   if(!resorts.length)return '<div class="do-data-note"><strong>CHECK CONDITIONS</strong><br>Not enough current activity-specific data to rate an opportunity yet. Browse your saved routes or open an activity to analyse its GPX and route conditions.</div>';
   var groupOrder={go:0,possible:1,check:2,'not-today':3};
   // Stable sorting groups the existing configured collection without claiming
@@ -3403,10 +3412,10 @@ function buildActivitiesSection(d) {
   var meta     = d && d.meta     ? d.meta     : {};
   var snow     = d && d.snowStatus ? d.snowStatus : null;
   var location = meta.currentLocation || '';
-  var season   = meta.season || 'summer';
+  var skiSeason = isSkiSeason(meta);
  
-  // Default tab — ski in winter if snow data, else trail
-  var defaultTab = (season === 'winter' && snow && snow.resorts && snow.resorts.length)
+  // Default tab — ski during the configured December-April window, else trail
+  var defaultTab = (skiSeason && snow && snow.resorts && snow.resorts.length)
     ? 'ski' : 'trail';
  
   var body = '<div class="act-tabs">'
@@ -3414,8 +3423,8 @@ function buildActivitiesSection(d) {
     + '<span class="act-tab-icon">🥾</span><span class="act-tab-lbl">Trails</span></button>'
     + '<button class="act-tab-btn cycle-tab' + (defaultTab==='cycle'?' active':'') + '" onclick="switchActTab(\'cycle\')">'
     + '<span class="act-tab-icon">🚴</span><span class="act-tab-lbl">Cycling</span></button>'
-    + '<button class="act-tab-btn ski-tab' + (defaultTab==='ski'?' active':'') + '" onclick="switchActTab(\'ski\')">'
-    + '<span class="act-tab-icon">⛷️</span><span class="act-tab-lbl">Skiing</span></button>'
+    + (skiSeason?'<button class="act-tab-btn ski-tab' + (defaultTab==='ski'?' active':'') + '" onclick="switchActTab(\'ski\')">'
+    + '<span class="act-tab-icon">⛷️</span><span class="act-tab-lbl">Skiing</span></button>':'')
      + '<button class="act-tab-btn water-tab' + (defaultTab==='water'?' active':'') + '" onclick="switchActTab(\'water\')">'
     + '<span class="act-tab-icon">🌊</span><span class="act-tab-lbl">Water</span></button>'
     + '</div>'
@@ -3431,9 +3440,9 @@ function buildActivitiesSection(d) {
     + '</div>'
  
     // Ski screen
-    + '<div class="act-screen' + (defaultTab==='ski'?' active':'') + '" id="act-screen-ski">'
+    + (skiSeason?'<div class="act-screen' + (defaultTab==='ski'?' active':'') + '" id="act-screen-ski">'
         + buildSkiScreen(snow, meta)
-    + '</div>'
+    + '</div>':'')
 
     // Water screen
     + '<div class="act-screen' + (defaultTab==='water'?' active':'') + '" id="act-screen-water">'
@@ -4149,7 +4158,7 @@ function buildSkiScreen(snow, meta) {
     return '<div style="padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted)">'
       + '<div style="font-size:28px;margin-bottom:8px">⛷️</div>'
       + '<div style="font-family:var(--ui);font-size:14px;font-weight:700;margin-bottom:6px">Ski conditions</div>'
-      + '<div>Snow data appears here from November when the season opens.<br>Resorts configured in Settings.</div>'
+      + '<div>Snow data appears here during the December-April ski window.<br>Resorts configured in Settings.</div>'
       + '</div>';
   }
  
