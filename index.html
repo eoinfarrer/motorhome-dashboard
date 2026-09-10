@@ -3301,7 +3301,7 @@ function buildDoLocalPlace(place){
     +(place.summary?'<div class="do-opportunity-copy">'+escapeDoHtml(place.summary)+'</div>':'')
     +(evidence.length?'<div class="do-opportunity-when">'+escapeDoHtml(evidence.join(' · '))+(url?' · Open →':'')+'</div>':'')
     +(signals.length?'<div class="do-source-signals">'+signals.map(function(signal){return '<span class="do-source-signal">'+signal+'</span>';}).join('')+'</div>':'')+'</div>'
-    +(image?'<img class="do-local-place-image" src="'+escapeDoHtml(image)+'" alt="">':'')+'</'+tag+'>';
+    +(image?'<img class="do-local-place-image" src="'+escapeDoHtml(image)+'" alt="" loading="lazy" onerror="this.remove()">':'')+'</'+tag+'>';
 }
 
 function escapeDoHtml(value){
