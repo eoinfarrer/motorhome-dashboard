@@ -3212,6 +3212,7 @@ function buildDoView(d){
     +'</div></div></div>';
 }
 
+// Audrey's European ski opportunity window runs from December through April.
 function isSkiSeason(meta){
   meta=meta||{};
   var source=meta.tripStatus==='ACTIVE'?meta.updated:(meta.departDate||meta.updated);
