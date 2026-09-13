@@ -979,15 +979,34 @@ function vanSceneStyle(scene){
 
 function vanTelemetryInfo(v){
   var status=String(v.telStatus||'').toUpperCase();
-  var timestamp=v.locationTimestamp?new Date(v.locationTimestamp):null;
+  var timestamp=v.snapshotUpdatedAt?new Date(v.snapshotUpdatedAt):(v.locationTimestamp?new Date(v.locationTimestamp):null);
   var age='Telemetry timestamp unavailable';
+  var mins=null;
   if(timestamp&&!isNaN(timestamp.getTime())){
-    var mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
-    age=mins<2?'Updated just now':mins<60?'Updated '+mins+'m ago':'Last update '+Math.floor(mins/60)+'h ago';
+    mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
+    age=mins<2?'Checked just now':mins<60?'Checked '+mins+'m ago':'Last checked '+Math.floor(mins/60)+'h ago';
   }
+  if(mins!==null&&mins>90)return{state:'STALE',age:age,level:'context'};
   if(status==='STALE')return{state:'STALE',age:age,level:'context'};
   if(status==='LIVE')return{state:'LIVE',age:age,level:'go'};
   return{state:status||'TELEMETRY',age:age,level:timestamp?'go':'caution'};
+}
+
+function vanReadingAge(value){
+  if(!value)return'';
+  var timestamp=new Date(value);
+  if(isNaN(timestamp.getTime()))return'';
+  var mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
+  return mins<2?'just now':mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
+}
+
+function vanHumidityState(value){
+  if(value===null||value===undefined||!isFinite(Number(value)))return{label:'No reading',color:'#a4a9a0'};
+  var humidity=Number(value);
+  if(humidity<30)return{label:'Dry',color:'#a9d3df'};
+  if(humidity<70)return{label:'Normal',color:'#8ac59b'};
+  if(humidity<90)return{label:'Elevated',color:'#e2b161'};
+  return{label:'High',color:'#e18d80'};
 }
 
 function vanTemperatureState(value,type){
@@ -1028,6 +1047,7 @@ function buildVanView(d,fc){
   var health=getVanHealth(d),telemetry=vanTelemetryInfo(v),scene=getVanScene(d);
   var battery=v.batteryV!==null&&v.batteryV!==undefined?v.batteryV+'V':'—';
   var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
+  var cabinHumidity=vanHumidityState(v.cabinHumidityPct),garageHumidity=vanHumidityState(v.garageHumidityPct);
   var tank=Number(fc&&fc.tankLitres),litres=lpg&&lpg.litres!==null&&lpg.litres!==undefined?Number(lpg.litres):null;
   var hasTank=isFinite(tank)&&tank>0,pct=hasTank&&litres!==null?Math.max(0,Math.min(100,Math.round(litres/tank*100))):null;
   var lpgLevel=lpg&&lpg.alert==='CRITICAL'?'danger':lpg&&lpg.alert==='LOW'?'caution':'go';
@@ -1035,7 +1055,8 @@ function buildVanView(d,fc){
   var nextForecast=forecast[0],lastForecast=forecast[forecast.length-1];
   var location=meta.currentLocation||'Vehicle location';
   var map=v.lat&&v.lon?'https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey':'';
-  var timestamp=v.locationTimestamp&&!isNaN(new Date(v.locationTimestamp).getTime())?new Date(v.locationTimestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
+  var snapshotTimestamp=v.snapshotUpdatedAt||v.locationTimestamp;
+  var timestamp=snapshotTimestamp&&!isNaN(new Date(snapshotTimestamp).getTime())?new Date(snapshotTimestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
   var nextDrive=meta.nextDrive&&meta.nextDrive.distanceKm?calcFuel(meta.nextDrive.distanceKm,fc):null;
   var parts=[];
   parts.push('<div class="van-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+vanSceneStyle(scene)+'"><div class="van-canvas">');
@@ -1045,13 +1066,15 @@ function buildVanView(d,fc){
   parts.push('<div class="van-layout"><div class="van-support">');
   parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Power</div><div class="van-surface-title">Battery</div></div><div class="van-surface-meta">'+telemetry.state+'<br>'+telemetry.age+'</div></div><div class="van-power-value">'+battery+'</div><div class="van-power-status">'+(v.batteryStatus||'Battery status unavailable')+'</div></section>');
   parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Climate</div><div class="van-surface-title">Inside the van</div></div><div class="van-surface-meta">'+(lpg&&lpg.heatSource?lpg.heatSource:'Heating source unavailable')+'</div></div><div class="van-metric-grid">'
-    +'<div class="van-metric"><div class="van-metric-value" style="color:'+cabin.color+'">'+(v.cabinTempC!==null&&v.cabinTempC!==undefined?v.cabinTempC+'&deg;':'—')+'</div><div class="van-metric-label">Cabin</div><div class="van-metric-status">'+cabin.label+'</div></div>'
-    +'<div class="van-metric"><div class="van-metric-value" style="color:'+garage.color+'">'+(v.garageTempC!==null&&v.garageTempC!==undefined?v.garageTempC+'&deg;':'—')+'</div><div class="van-metric-label">Garage</div><div class="van-metric-status">'+garage.label+'</div></div></div></section>');
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+cabin.color+'">'+(v.cabinTempC!==null&&v.cabinTempC!==undefined?v.cabinTempC+'&deg;':'—')+'</div><div class="van-metric-label">Cabin temperature</div><div class="van-metric-status">'+cabin.label+(vanReadingAge(v.cabinTempTimestamp)?' · '+vanReadingAge(v.cabinTempTimestamp):'')+'</div></div>'
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+cabinHumidity.color+'">'+(v.cabinHumidityPct!==null&&v.cabinHumidityPct!==undefined?v.cabinHumidityPct+'%':'—')+'</div><div class="van-metric-label">Cabin humidity</div><div class="van-metric-status">'+cabinHumidity.label+(vanReadingAge(v.cabinHumidityTimestamp)?' · '+vanReadingAge(v.cabinHumidityTimestamp):'')+'</div></div>'
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+garage.color+'">'+(v.garageTempC!==null&&v.garageTempC!==undefined?v.garageTempC+'&deg;':'—')+'</div><div class="van-metric-label">Garage temperature</div><div class="van-metric-status">'+garage.label+(vanReadingAge(v.garageTempTimestamp)?' · '+vanReadingAge(v.garageTempTimestamp):'')+'</div></div>'
+    +'<div class="van-metric"><div class="van-metric-value" style="color:'+garageHumidity.color+'">'+(v.garageHumidityPct!==null&&v.garageHumidityPct!==undefined?v.garageHumidityPct+'%':'—')+'</div><div class="van-metric-label">Garage humidity</div><div class="van-metric-status">'+garageHumidity.label+(vanReadingAge(v.garageHumidityTimestamp)?' · '+vanReadingAge(v.garageHumidityTimestamp):'')+'</div></div></div></section>');
   if(lpg)parts.push('<section class="van-surface van-wide"><div class="van-surface-head"><div><div class="van-section-label">LPG &amp; heating</div><div class="van-surface-title">Heating runway</div></div><div class="van-surface-meta">'+(lpg.statusMsg||'')+'</div></div><div class="van-lpg-top"><div><div class="van-lpg-value" style="color:'+(lpgLevel==='danger'?'#e18d80':lpgLevel==='caution'?'#e2b161':'#8ac59b')+'">'+(litres!==null?litres.toFixed(1)+'L':'—')+'</div><div class="van-lpg-status">'+(hasTank&&pct!==null?pct+'% of '+tank+'L tank':'Tank capacity unavailable')+'</div></div><button class="van-refill-btn" id="refillBtn" type="button" onclick="lpgRefill()">Refill</button></div><div class="van-lpg-bar"><div class="van-lpg-fill van-'+lpgLevel+'" style="width:'+(pct===null?0:pct)+'%"></div></div>'
     +(forecast.length?'<div class="van-runway"><div class="van-runway-item"><div class="van-runway-label">Next planned use</div><div class="van-runway-value">'+(nextForecast.location||'Planned stop')+'</div><div class="van-runway-meta">'+(fmtDate(nextForecast.date)||'')+(nextForecast.minTempC!==null?' · '+nextForecast.minTempC+'&deg;':'')+(nextForecast.litresUsed!==null?' · '+nextForecast.litresUsed+'L':'')+'</div></div><div class="van-runway-item"><div class="van-runway-label">End of available plan</div><div class="van-runway-value">'+(lastForecast.tankRemL!==null?lastForecast.tankRemL+'L remaining':'—')+'</div><div class="van-runway-meta">'+(fmtDate(lastForecast.date)||'')+(lastForecast.heatSource?' · '+lastForecast.heatSource:'')+'</div></div></div>':'')
     +'</section>');
   parts.push('<section class="van-surface"><div class="van-section-label">Fuel</div><div class="van-surface-title">Running costs</div><div class="van-fuel-facts"><div class="van-fuel-fact"><div class="van-fuel-label">Diesel</div><div class="van-fuel-value">'+(fc&&fc.pricePerLitre?'£'+fc.pricePerLitre.toFixed(2)+'/L':'—')+'</div></div><div class="van-fuel-fact"><div class="van-fuel-label">Motorhome MPG</div><div class="van-fuel-value">'+(fc&&fc.mpg?fc.mpg.toFixed(1):'—')+'</div></div>'+(nextDrive?'<div class="van-fuel-fact"><div class="van-fuel-label">Next drive</div><div class="van-fuel-value">£'+nextDrive.cost+'</div></div>':'')+'</div><details class="van-details"><summary>Fuel price settings</summary><div class="van-price-row"><span>Diesel <strong>£'+(fc&&fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'diesel\',\''+(fc&&fc.pricePerLitre||1.182)+'\')">Edit</button></div><div class="van-price-row"><span>LPG <strong>£'+(fc&&fc.lpgPrice?fc.lpgPrice.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'lpg\',\''+(fc&&fc.lpgPrice||0.95)+'\')">Edit</button></div></details></section>');
-  parts.push('<section class="van-surface"><div class="van-section-label">Vehicle</div><div class="van-surface-title">Vehicle detail</div><div class="van-detail-list"><div class="van-detail-row"><span>Location</span><strong>'+(map?'<a class="van-map-link" href="'+map+'" target="_blank">'+location+' ↗</a>':location)+'</strong></div><div class="van-detail-row"><span>Telemetry</span><strong>'+telemetry.state+' · '+telemetry.age+'</strong></div><div class="van-detail-row"><span>Timestamp</span><strong>'+timestamp+'</strong></div><div class="van-detail-row"><span>Odometer</span><strong>'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+(v.odometerSource?' · '+v.odometerSource:'')+'</strong></div><div class="van-detail-row"><span>Elevation</span><strong>'+(v.vanElevationM!==null&&v.vanElevationM!==undefined?v.vanElevationM.toLocaleString()+'m':'—')+'</strong></div></div></section>');
+  parts.push('<section class="van-surface"><div class="van-section-label">Vehicle</div><div class="van-surface-title">Vehicle detail</div><div class="van-detail-list"><div class="van-detail-row"><span>Location</span><strong>'+(map?'<a class="van-map-link" href="'+map+'" target="_blank">'+location+' ↗</a>':location)+'</strong></div><div class="van-detail-row"><span>Telemetry</span><strong>'+telemetry.state+' · '+telemetry.age+'</strong></div><div class="van-detail-row"><span>Last poll</span><strong>'+timestamp+'</strong></div><div class="van-detail-row"><span>Odometer</span><strong>'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+(v.odometerSource?' · '+v.odometerSource:'')+'</strong></div><div class="van-detail-row"><span>Elevation</span><strong>'+(v.vanElevationM!==null&&v.vanElevationM!==undefined?v.vanElevationM.toLocaleString()+'m':'—')+'</strong></div></div></section>');
   parts.push('</div></div></div></div>');
   return parts.join('');
 }
@@ -1393,7 +1416,8 @@ function getHomeContext(d){
 // introducing a second freshness threshold or treating stale data as a fault.
 function homeTelemetryConfidence(vehicle){
   var v=vehicle||{},telemetry=vanTelemetryInfo(v);
-  if(!Object.keys(v).length||!v.locationTimestamp||isNaN(new Date(v.locationTimestamp).getTime())||['UNAVAILABLE','MISSING','OFFLINE','ERROR'].indexOf(telemetry.state)>=0)return{state:'unavailable',copy:'Vehicle telemetry is unavailable.'};
+  var timestamp=v.snapshotUpdatedAt||v.locationTimestamp;
+  if(!Object.keys(v).length||!timestamp||isNaN(new Date(timestamp).getTime())||['UNAVAILABLE','MISSING','OFFLINE','ERROR'].indexOf(telemetry.state)>=0)return{state:'unavailable',copy:'Vehicle telemetry is unavailable.'};
   if(telemetry.state==='STALE')return{state:'stale',copy:telemetry.age};
   return{state:'current',copy:telemetry.age};
 }
@@ -1523,7 +1547,7 @@ function buildHomeVehicleStatus(v){
 function homeTelemetryFreshness(vehicle){
   var telemetry=homeTelemetryConfidence(vehicle);
   if(telemetry.state==='unavailable')return 'Telemetry unavailable';
-  return '';
+  return telemetry.state==='stale'?telemetry.copy:'';
 }
 
 function buildMoreFooter(){
