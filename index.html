@@ -980,14 +980,18 @@ function vanSceneStyle(scene){
 function vanTelemetryInfo(v){
   var status=String(v.telStatus||'').toUpperCase();
   var timestamp=v.snapshotUpdatedAt?new Date(v.snapshotUpdatedAt):(v.locationTimestamp?new Date(v.locationTimestamp):null);
+  var staleAfter=Number(v.snapshotStaleAfterMinutes);
+  if(!isFinite(staleAfter)||staleAfter<10)staleAfter=150;
   var age='Telemetry timestamp unavailable';
   var mins=null;
   if(timestamp&&!isNaN(timestamp.getTime())){
     mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
     age=mins<2?'Checked just now':mins<60?'Checked '+mins+'m ago':'Last checked '+Math.floor(mins/60)+'h ago';
   }
-  if(mins!==null&&mins>90)return{state:'STALE',age:age,level:'context'};
+  if(mins!==null&&mins>staleAfter)return{state:'STALE',age:age,level:'context'};
   if(status==='STALE')return{state:'STALE',age:age,level:'context'};
+  if(['UNKNOWN','UNAVAILABLE','MISSING','OFFLINE','ERROR'].indexOf(status)>=0)return{state:'UNAVAILABLE',age:age,level:'caution'};
+  if(status==='ANOMALOUS')return{state:'ANOMALOUS',age:age,level:'caution'};
   if(status==='LIVE')return{state:'LIVE',age:age,level:'go'};
   return{state:status||'TELEMETRY',age:age,level:timestamp?'go':'caution'};
 }
@@ -997,7 +1001,7 @@ function vanReadingAge(value){
   var timestamp=new Date(value);
   if(isNaN(timestamp.getTime()))return'';
   var mins=Math.max(0,Math.round((Date.now()-timestamp.getTime())/60000));
-  return mins<2?'just now':mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
+  return mins<2?'reported just now':mins<60?'reported '+mins+'m ago':'reported '+Math.floor(mins/60)+'h ago';
 }
 
 function vanHumidityState(value){
