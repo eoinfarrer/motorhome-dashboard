@@ -1004,8 +1004,8 @@ function vanHumidityState(value){
   if(value===null||value===undefined||!isFinite(Number(value)))return{label:'No reading',color:'#a4a9a0'};
   var humidity=Number(value);
   if(humidity<30)return{label:'Dry',color:'#a9d3df'};
-  if(humidity<=60)return{label:'Normal',color:'#8ac59b'};
-  if(humidity<=70)return{label:'Humid',color:'#e2b161'};
+  if(humidity<70)return{label:'Normal',color:'#8ac59b'};
+  if(humidity<90)return{label:'Elevated',color:'#e2b161'};
   return{label:'High',color:'#e18d80'};
 }
 
