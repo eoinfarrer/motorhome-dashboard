@@ -581,7 +581,8 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .water-inland{padding:16px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
 
 /* ── TRIP EDITOR ───────────────────────────────────────────── */
-.journey-new-trip{margin-top:14px;padding:9px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.1);color:#f4f3ed;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.7px;cursor:pointer;}
+.journey-trip-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.journey-new-trip{padding:9px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.1);color:#f4f3ed;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.7px;cursor:pointer;}
 .trip-editor-overlay{position:fixed;inset:0;z-index:260;display:none;align-items:flex-end;justify-content:center;background:rgba(4,7,6,.7);backdrop-filter:blur(5px);}
 .trip-editor-overlay.open{display:flex;}
 .trip-editor{width:min(100%,680px);max-height:94vh;overflow:auto;border-radius:20px 20px 0 0;background:#171b18;color:#f4f3ed;box-shadow:0 -20px 60px rgba(0,0,0,.42);}
@@ -710,6 +711,10 @@ var tripEditorDraft=null;
 var tripEditorStep='edit';
 var tripEditorSaving=false;
 var tripEditorError='';
+var tripEditorMode='create';
+var tripEditorOriginalName='';
+var tripEditorRevision='';
+var tripEditorOriginalItems=[];
 
 function switchAppView(view){
   if(!APP_VIEW_LABELS[view])return;
@@ -758,11 +763,38 @@ function openTripEditor(){
   var today=new Date();
   var iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
   tripEditorDraft={name:'',items:[tripEditorBlankItem(iso,'DEPART')]};
+  tripEditorMode='create';tripEditorOriginalName='';tripEditorRevision='';tripEditorOriginalItems=[];
   tripEditorStep='edit';tripEditorSaving=false;tripEditorError='';
   renderTripEditor();
   document.getElementById('tripEditorOverlay').classList.add('open');
   document.body.classList.add('trip-editor-open');
   setTimeout(function(){var input=document.getElementById('trip-editor-name');if(input)input.focus();},50);
+}
+
+async function openTripEditorForEdit(){
+  if(!currentTrip)return;
+  tripEditorMode='edit';tripEditorOriginalName=currentTrip;tripEditorRevision='';tripEditorOriginalItems=[];
+  tripEditorDraft={name:currentTrip,items:[]};tripEditorStep='edit';tripEditorSaving=false;tripEditorError='';
+  document.getElementById('tripEditorOverlay').classList.add('open');
+  document.body.classList.add('trip-editor-open');
+  document.getElementById('tripEditorTitle').textContent='Edit trip';
+  document.getElementById('tripEditorBody').innerHTML='<div class="trip-editor-intro"><div class="trip-editor-label">Loading trip</div><div class="trip-editor-help">Reading the complete itinerary before making changes.</div></div>';
+  try{
+    var params=new URLSearchParams();params.set('action','get_trip_draft');params.set('trip',currentTrip);params.set('_',Date.now());
+    var response=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    var text=await response.text(),result;
+    try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+    if(!result.success)throw new Error(result.error||'Trip could not be loaded');
+    tripEditorOriginalName=result.tripName;tripEditorRevision=result.revision;
+    tripEditorOriginalItems=JSON.parse(JSON.stringify(result.items||[]));
+    tripEditorDraft={name:result.tripName,items:result.items||[]};
+    if(!tripEditorDraft.items.length)tripEditorDraft.items=[tripEditorBlankItem('','STAY')];
+    renderTripEditor();
+  }catch(err){
+    tripEditorError=err.message;
+    document.getElementById('tripEditorBody').innerHTML='<div class="trip-editor-status" role="alert">'+tripEditorEscape(tripEditorError)+'</div><div class="trip-editor-footer"><button class="trip-editor-btn" type="button" onclick="closeTripEditor()">Close</button><button class="trip-editor-btn primary" type="button" onclick="openTripEditorForEdit()">Try again</button></div>';
+  }
 }
 
 function closeTripEditor(){
@@ -787,10 +819,12 @@ function tripEditorTypeOptions(selected){
 
 function renderTripEditor(){
   var body=document.getElementById('tripEditorBody');if(!body||!tripEditorDraft)return;
-  document.getElementById('tripEditorTitle').textContent=tripEditorStep==='review'?'Review trip':'Create a trip';
+  document.getElementById('tripEditorTitle').textContent=tripEditorStep==='review'?(tripEditorMode==='edit'?'Review changes':'Review trip'):(tripEditorMode==='edit'?'Edit trip':'Create a trip');
   if(tripEditorStep==='review')return renderTripEditorReview(body);
   var html=tripEditorError?'<div class="trip-editor-status" role="alert">'+tripEditorEscape(tripEditorError)+'</div>':'';
-  html+='<div class="trip-editor-intro"><label class="trip-editor-label" for="trip-editor-name">Trip name</label><input class="trip-editor-input" id="trip-editor-name" maxlength="60" placeholder="e.g. Tuscany and Lake Annecy" value="'+tripEditorEscape(tripEditorDraft.name)+'" oninput="tripEditorDraft.name=this.value"><div class="trip-editor-help">This becomes the new option in Audrey’s trip selector and the name of its hidden trip sheet.</div></div>';
+  var lockedName=tripEditorMode==='edit'?' readonly aria-readonly="true"':'';
+  var nameHelp=tripEditorMode==='edit'?'The trip name stays fixed while its itinerary is updated.':'This becomes the new option in Audrey’s trip selector and the name of its hidden trip sheet.';
+  html+='<div class="trip-editor-intro"><label class="trip-editor-label" for="trip-editor-name">Trip name</label><input class="trip-editor-input" id="trip-editor-name" maxlength="60" placeholder="e.g. Tuscany and Lake Annecy" value="'+tripEditorEscape(tripEditorDraft.name)+'" oninput="tripEditorDraft.name=this.value"'+lockedName+'><div class="trip-editor-help">'+nameHelp+'</div></div>';
   html+='<div class="trip-editor-list">';
   tripEditorDraft.items.forEach(function(item,index){html+=buildTripEditorItem(item,index);});
   html+='</div><button class="trip-editor-add" type="button" onclick="addTripEditorItem()">＋ Add itinerary item</button>';
@@ -847,13 +881,22 @@ function reviewTripEditor(){
 
 function renderTripEditorReview(body){
   var html=tripEditorError?'<div class="trip-editor-status" role="alert">'+tripEditorEscape(tripEditorError)+'</div>':'';
-  html+='<div class="trip-editor-intro"><div class="trip-editor-label">New trip</div><div class="trip-editor-title">'+tripEditorEscape(tripEditorDraft.name)+'</div><div class="trip-editor-help">'+tripEditorDraft.items.length+' itinerary item'+(tripEditorDraft.items.length===1?'':'s')+'. Audrey will add it to the trip selector after saving.</div></div><div class="trip-editor-review">';
+  var reviewLabel=tripEditorMode==='edit'?'Updating trip':'New trip';
+  var reviewHelp=tripEditorMode==='edit'?tripEditorEditSummary():tripEditorDraft.items.length+' itinerary item'+(tripEditorDraft.items.length===1?'':'s')+'. Audrey will add it to the trip selector after saving.';
+  html+='<div class="trip-editor-intro"><div class="trip-editor-label">'+reviewLabel+'</div><div class="trip-editor-title">'+tripEditorEscape(tripEditorDraft.name)+'</div><div class="trip-editor-help">'+tripEditorEscape(reviewHelp)+'</div></div><div class="trip-editor-review">';
   tripEditorDraft.items.forEach(function(item){
     var bits=[];if(item.distanceKm)bits.push(item.distanceKm+' km');if(item.durationMin)bits.push(item.durationMin+' min');if(item.ehu)bits.push('EHU '+item.ehu.toLowerCase());
     html+='<div class="trip-editor-review-row"><div class="trip-editor-review-date">'+tripEditorEscape(formatTripEditorDate(item.date))+'</div><div><div class="trip-editor-review-name">'+tripEditorEscape(item.location)+'</div><div class="trip-editor-review-meta">'+tripEditorEscape(bits.join(' · ')||(item.address||'No extra details'))+'</div></div><div class="trip-editor-type">'+tripEditorEscape(item.type)+'</div></div>';
   });
-  html+='</div><div class="trip-editor-footer"><button class="trip-editor-btn" type="button" onclick="tripEditorStep=\'edit\';tripEditorError=\'\';renderTripEditor()">Edit</button><button class="trip-editor-btn primary" id="trip-editor-save" type="button" onclick="saveTripEditor()"'+(tripEditorSaving?' disabled':'')+'>'+(tripEditorSaving?'Saving…':'Save trip')+'</button></div>';
+  html+='</div><div class="trip-editor-footer"><button class="trip-editor-btn" type="button" onclick="tripEditorStep=\'edit\';tripEditorError=\'\';renderTripEditor()">Back</button><button class="trip-editor-btn primary" id="trip-editor-save" type="button" onclick="saveTripEditor()"'+(tripEditorSaving?' disabled':'')+'>'+(tripEditorSaving?'Saving…':(tripEditorMode==='edit'?'Save changes':'Save trip'))+'</button></div>';
   body.innerHTML=html;
+}
+
+function tripEditorEditSummary(){
+  var before=tripEditorOriginalItems||[],after=tripEditorDraft.items||[],changed=0;
+  for(var i=0;i<Math.min(before.length,after.length);i++)if(JSON.stringify(before[i])!==JSON.stringify(after[i]))changed++;
+  var bits=[];if(changed)bits.push(changed+' changed');if(after.length>before.length)bits.push((after.length-before.length)+' added');if(before.length>after.length)bits.push((before.length-after.length)+' removed');
+  return bits.length?bits.join(' · ')+' — check the itinerary below before saving.':'No itinerary changes yet.';
 }
 
 function formatTripEditorDate(value){var d=new Date(value+'T00:00:00');return isNaN(d.getTime())?value:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
@@ -863,11 +906,13 @@ async function saveTripEditor(){
   tripEditorError=validateTripEditor();if(tripEditorError){tripEditorStep='edit';renderTripEditor();return;}
   tripEditorSaving=true;tripEditorError='';renderTripEditor();
   try{
-    var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify({action:'create_trip',tripName:tripEditorDraft.name,items:tripEditorDraft.items})});
+    var payload={action:tripEditorMode==='edit'?'update_trip':'create_trip',tripName:tripEditorDraft.name,items:tripEditorDraft.items};
+    if(tripEditorMode==='edit'){payload.originalTripName=tripEditorOriginalName;payload.expectedRevision=tripEditorRevision;}
+    var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify(payload)});
     if(!response.ok)throw new Error('HTTP '+response.status);
     var text=await response.text(),result;
     try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
-    if(!result.success)throw new Error(result.error||'Trip could not be created');
+    if(!result.success)throw new Error(result.error||(tripEditorMode==='edit'?'Trip could not be updated':'Trip could not be created'));
     closeTripEditor();
     currentTrip=result.tripName;currentAppView='journey';currentJourneyMode='trip';
     await refresh();
@@ -1274,7 +1319,7 @@ function buildJourneyView(d,fc){
   return '<div class="journey-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+journeySceneStyle(scene)+'"><div class="journey-canvas">'
     +'<header class="journey-head"><div class="journey-eyebrow">Audrey · Journey</div>'
     +'<div class="journey-title">'+title+'</div><div class="journey-subtitle">'+subtitle+'</div>'
-    +'<button class="journey-new-trip" type="button" onclick="openTripEditor()">＋ New trip</button>'
+    +'<div class="journey-trip-actions"><button class="journey-new-trip" type="button" onclick="openTripEditorForEdit()">✎ Edit trip</button><button class="journey-new-trip" type="button" onclick="openTripEditor()">＋ New trip</button></div>'
     +'<div class="journey-mode-switch" role="tablist" aria-label="Journey view">'
     +'<button class="journey-mode-btn'+todayClass+'" type="button" data-journey-mode="today" onclick="switchJourneyMode(\'today\')"'+(hasDrive?'':' disabled')+'>Today</button>'
     +'<button class="journey-mode-btn'+tripClass+'" type="button" data-journey-mode="trip" onclick="switchJourneyMode(\'trip\')">Trip</button>'
