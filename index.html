@@ -3516,7 +3516,7 @@ function renderDoMyActivities(){
     if(route.durationMin)meta.push(fmtDuration(route.durationMin));
     else if(route.difficulty)meta.push(route.difficulty);
     if(route.area)meta.push(route.area);
-    return '<button class="do-activity-item" type="button" onclick="openDoSavedActivity(\''+item.source+'\',\''+item.type+'\','+JSON.stringify(String(item.key))+')"><span><span class="do-activity-name">'+(route.name||'Saved route')+'</span><span class="do-activity-meta">'+(meta.join(' · ')||'Saved activity')+'</span></span><span class="do-activity-distance">'+(route.distanceKm!==undefined&&route.distanceKm!==null?route.distanceKm+' km':'Open')+'</span></button>';
+    return '<button class="do-activity-item" type="button" data-source="'+escapeDoHtml(item.source)+'" data-type="'+escapeDoHtml(item.type)+'" data-key="'+escapeDoHtml(item.key)+'" onclick="openDoSavedActivity(this.dataset.source,this.dataset.type,this.dataset.key)"><span><span class="do-activity-name">'+(route.name||'Saved route')+'</span><span class="do-activity-meta">'+(meta.join(' · ')||'Saved activity')+'</span></span><span class="do-activity-distance">'+(route.distanceKm!==undefined&&route.distanceKm!==null?route.distanceKm+' km':'Open')+'</span></button>';
   }).join('');
 }
 
