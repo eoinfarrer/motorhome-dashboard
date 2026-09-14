@@ -580,6 +580,48 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .water-loading{padding:20px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
 .water-inland{padding:16px 14px;text-align:center;font-size:12px;color:var(--text-muted);}
 
+/* ── TRIP EDITOR ───────────────────────────────────────────── */
+.journey-new-trip{margin-top:14px;padding:9px 12px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(255,255,255,.1);color:#f4f3ed;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.7px;cursor:pointer;}
+.trip-editor-overlay{position:fixed;inset:0;z-index:260;display:none;align-items:flex-end;justify-content:center;background:rgba(4,7,6,.7);backdrop-filter:blur(5px);}
+.trip-editor-overlay.open{display:flex;}
+.trip-editor{width:min(100%,680px);max-height:94vh;overflow:auto;border-radius:20px 20px 0 0;background:#171b18;color:#f4f3ed;box-shadow:0 -20px 60px rgba(0,0,0,.42);}
+.trip-editor-head{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:17px 18px 14px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(23,27,24,.96);backdrop-filter:blur(12px);}
+.trip-editor-eyebrow{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}
+.trip-editor-title{margin-top:4px;font-family:var(--ui);font-size:21px;font-weight:700;}
+.trip-editor-close{padding:5px;border:0;background:none;color:#b7b9b0;font-family:var(--ui);font-size:14px;cursor:pointer;}
+.trip-editor-body{padding:17px 18px calc(22px + env(safe-area-inset-bottom));}
+.trip-editor-label{display:block;margin:0 0 6px;color:#aeb2a9;font-size:9px;font-weight:600;letter-spacing:1.35px;text-transform:uppercase;}
+.trip-editor-input,.trip-editor-select,.trip-editor-textarea{width:100%;min-height:44px;padding:11px 12px;border:1px solid rgba(255,255,255,.13);border-radius:10px;background:#222822;color:#f4f3ed;font-family:var(--ui);font-size:16px;outline:none;}
+.trip-editor-input:focus,.trip-editor-select:focus,.trip-editor-textarea:focus{border-color:#8ac59b;box-shadow:0 0 0 2px rgba(138,197,155,.14);}
+.trip-editor-textarea{min-height:72px;resize:vertical;}
+.trip-editor-intro{margin-bottom:16px;padding:14px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:#20251f;}
+.trip-editor-help{margin-top:6px;color:#9fa49b;font-size:11px;line-height:1.45;}
+.trip-editor-list{display:grid;gap:10px;}
+.trip-editor-item{padding:13px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:#20251f;}
+.trip-editor-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;}
+.trip-editor-item-number{color:#cbb88f;font-size:9px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;}
+.trip-editor-item-actions{display:flex;gap:4px;}
+.trip-editor-icon-btn{min-width:34px;min-height:34px;padding:5px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:transparent;color:#b7b9b0;font-family:var(--ui);cursor:pointer;}
+.trip-editor-icon-btn:disabled{opacity:.3;cursor:default;}
+.trip-editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.trip-editor-field{margin-top:10px;}
+.trip-editor-details{margin-top:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:9px;}
+.trip-editor-details summary{color:#aeb2a9;font-size:11px;cursor:pointer;}
+.trip-editor-add{width:100%;margin-top:11px;padding:12px;border:1px dashed rgba(255,255,255,.2);border-radius:11px;background:transparent;color:#d7d8d0;font-family:var(--ui);font-size:13px;cursor:pointer;}
+.trip-editor-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:17px;padding-top:15px;border-top:1px solid rgba(255,255,255,.1);}
+.trip-editor-btn{min-height:42px;padding:10px 14px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:#252b25;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:600;cursor:pointer;}
+.trip-editor-btn.primary{border-color:#8ac59b;background:#8ac59b;color:#101712;}
+.trip-editor-btn:disabled{opacity:.55;cursor:wait;}
+.trip-editor-status{margin:0 0 13px;padding:10px 12px;border-radius:9px;background:rgba(216,121,105,.14);color:#efb0a5;font-size:12px;line-height:1.4;}
+.trip-editor-review{display:grid;gap:8px;margin-top:14px;}
+.trip-editor-review-row{display:grid;grid-template-columns:68px 1fr auto;gap:10px;align-items:center;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#20251f;}
+.trip-editor-review-date{color:#aeb2a9;font-size:11px;}
+.trip-editor-review-name{font-family:var(--ui);font-size:14px;font-weight:700;}
+.trip-editor-review-meta{margin-top:3px;color:#aeb2a9;font-size:10px;}
+.trip-editor-type{color:#8ac59b;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+body.trip-editor-open{overflow:hidden;}
+@media(max-width:560px){.trip-editor-grid{grid-template-columns:1fr;}.trip-editor{max-height:96vh;}.trip-editor-review-row{grid-template-columns:58px 1fr;}.trip-editor-type{grid-column:2;}}
+
 /* Scene viewport safety: svh tracks Safari's smallest visible viewport, so
    browser chrome cannot crop the canvas or cause it to resize while scrolling.
    The preceding vh declarations remain the fallback for older browsers. */
@@ -643,6 +685,16 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
   </div>
 </div>
 
+<div class="trip-editor-overlay" id="tripEditorOverlay" onclick="closeTripEditorIfOutside(event)">
+  <section class="trip-editor" role="dialog" aria-modal="true" aria-labelledby="tripEditorTitle">
+    <header class="trip-editor-head">
+      <div><div class="trip-editor-eyebrow">Audrey · Journey</div><div class="trip-editor-title" id="tripEditorTitle">Create a trip</div></div>
+      <button class="trip-editor-close" type="button" onclick="closeTripEditor()">Close</button>
+    </header>
+    <div class="trip-editor-body" id="tripEditorBody"></div>
+  </section>
+</div>
+
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
@@ -654,6 +706,10 @@ var currentAppView='home';
 var APP_VIEW_LABELS={home:'Home',journey:'Journey',do:'Do',van:'Van',more:'More'};
 var isSettingsPanelOpen=false;
 var currentJourneyMode='today';
+var tripEditorDraft=null;
+var tripEditorStep='edit';
+var tripEditorSaving=false;
+var tripEditorError='';
 
 function switchAppView(view){
   if(!APP_VIEW_LABELS[view])return;
@@ -696,6 +752,126 @@ function applyJourneyMode(){
     btn.classList.toggle('is-active',active);
     btn.setAttribute('aria-current',active?'page':'false');
   });
+}
+
+function openTripEditor(){
+  var today=new Date();
+  var iso=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  tripEditorDraft={name:'',items:[tripEditorBlankItem(iso,'DEPART')]};
+  tripEditorStep='edit';tripEditorSaving=false;tripEditorError='';
+  renderTripEditor();
+  document.getElementById('tripEditorOverlay').classList.add('open');
+  document.body.classList.add('trip-editor-open');
+  setTimeout(function(){var input=document.getElementById('trip-editor-name');if(input)input.focus();},50);
+}
+
+function closeTripEditor(){
+  document.getElementById('tripEditorOverlay').classList.remove('open');
+  document.body.classList.remove('trip-editor-open');
+}
+
+function closeTripEditorIfOutside(event){if(event.target.id==='tripEditorOverlay')closeTripEditor();}
+
+function tripEditorBlankItem(date,type){
+  return{date:date||'',type:type||'STAY',location:'',address:'',distanceKm:'',durationMin:'',ehu:'',notes:'',bookingRef:'',contact:'',nightlyCost:''};
+}
+
+function tripEditorEscape(value){return String(value===null||value===undefined?'':value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function tripEditorTypeOptions(selected){
+  return ['DEPART','DRIVE','STOPOVER','STAY','ARRIVE','RETURN','FLIGHT','FERRY'].map(function(type){
+    var label={DEPART:'Depart',DRIVE:'Drive',STOPOVER:'Stopover',STAY:'Stay',ARRIVE:'Arrive',RETURN:'Return',FLIGHT:'Flight',FERRY:'Ferry'}[type];
+    return '<option value="'+type+'"'+(type===selected?' selected':'')+'>'+label+'</option>';
+  }).join('');
+}
+
+function renderTripEditor(){
+  var body=document.getElementById('tripEditorBody');if(!body||!tripEditorDraft)return;
+  document.getElementById('tripEditorTitle').textContent=tripEditorStep==='review'?'Review trip':'Create a trip';
+  if(tripEditorStep==='review')return renderTripEditorReview(body);
+  var html=tripEditorError?'<div class="trip-editor-status" role="alert">'+tripEditorEscape(tripEditorError)+'</div>':'';
+  html+='<div class="trip-editor-intro"><label class="trip-editor-label" for="trip-editor-name">Trip name</label><input class="trip-editor-input" id="trip-editor-name" maxlength="60" placeholder="e.g. Tuscany and Lake Annecy" value="'+tripEditorEscape(tripEditorDraft.name)+'" oninput="tripEditorDraft.name=this.value"><div class="trip-editor-help">This becomes the new option in Audrey’s trip selector and the name of its hidden trip sheet.</div></div>';
+  html+='<div class="trip-editor-list">';
+  tripEditorDraft.items.forEach(function(item,index){html+=buildTripEditorItem(item,index);});
+  html+='</div><button class="trip-editor-add" type="button" onclick="addTripEditorItem()">＋ Add itinerary item</button>';
+  html+='<div class="trip-editor-footer"><button class="trip-editor-btn" type="button" onclick="closeTripEditor()">Cancel</button><button class="trip-editor-btn primary" type="button" onclick="reviewTripEditor()">Review trip</button></div>';
+  body.innerHTML=html;
+}
+
+function buildTripEditorItem(item,index){
+  var disabledUp=index===0?' disabled':'',disabledDown=index===tripEditorDraft.items.length-1?' disabled':'';
+  return '<article class="trip-editor-item"><div class="trip-editor-item-head"><span class="trip-editor-item-number">Itinerary item '+(index+1)+'</span><div class="trip-editor-item-actions">'
+    +'<button class="trip-editor-icon-btn" type="button" aria-label="Move item up" onclick="moveTripEditorItem('+index+',-1)"'+disabledUp+'>↑</button>'
+    +'<button class="trip-editor-icon-btn" type="button" aria-label="Move item down" onclick="moveTripEditorItem('+index+',1)"'+disabledDown+'>↓</button>'
+    +'<button class="trip-editor-icon-btn" type="button" aria-label="Remove item" onclick="removeTripEditorItem('+index+')"'+(tripEditorDraft.items.length===1?' disabled':'')+'>×</button></div></div>'
+    +'<div class="trip-editor-grid"><label><span class="trip-editor-label">Date</span><input class="trip-editor-input" type="date" value="'+tripEditorEscape(item.date)+'" onchange="updateTripEditorItem('+index+',\'date\',this.value)"></label>'
+    +'<label><span class="trip-editor-label">What happens?</span><select class="trip-editor-select" onchange="updateTripEditorItem('+index+',\'type\',this.value)">'+tripEditorTypeOptions(item.type)+'</select></label></div>'
+    +'<div class="trip-editor-field"><label><span class="trip-editor-label">Location</span><input class="trip-editor-input" maxlength="120" placeholder="Town, campsite or airport" value="'+tripEditorEscape(item.location)+'" oninput="updateTripEditorItem('+index+',\'location\',this.value)"></label></div>'
+    +'<div class="trip-editor-field"><label><span class="trip-editor-label">Address</span><input class="trip-editor-input" maxlength="300" placeholder="Used for routing and local suggestions" value="'+tripEditorEscape(item.address)+'" oninput="updateTripEditorItem('+index+',\'address\',this.value)"></label></div>'
+    +'<details class="trip-editor-details"><summary>Booking, timings and notes</summary><div class="trip-editor-grid">'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Distance (km)</span><input class="trip-editor-input" type="number" min="0" step="0.1" value="'+tripEditorEscape(item.distanceKm)+'" oninput="updateTripEditorItem('+index+',\'distanceKm\',this.value)"></label>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Duration (min)</span><input class="trip-editor-input" type="number" min="0" step="1" value="'+tripEditorEscape(item.durationMin)+'" oninput="updateTripEditorItem('+index+',\'durationMin\',this.value)"></label>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">EHU</span><select class="trip-editor-select" onchange="updateTripEditorItem('+index+',\'ehu\',this.value)"><option value=""'+(!item.ehu?' selected':'')+'>Unknown</option><option value="YES"'+(item.ehu==='YES'?' selected':'')+'>Yes</option><option value="NO"'+(item.ehu==='NO'?' selected':'')+'>No</option></select></label>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Nightly cost (£)</span><input class="trip-editor-input" type="number" min="0" step="0.01" value="'+tripEditorEscape(item.nightlyCost)+'" oninput="updateTripEditorItem('+index+',\'nightlyCost\',this.value)"></label>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Booking reference</span><input class="trip-editor-input" maxlength="120" value="'+tripEditorEscape(item.bookingRef)+'" oninput="updateTripEditorItem('+index+',\'bookingRef\',this.value)"></label>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Contact</span><input class="trip-editor-input" maxlength="160" value="'+tripEditorEscape(item.contact)+'" oninput="updateTripEditorItem('+index+',\'contact\',this.value)"></label></div>'
+    +'<label class="trip-editor-field"><span class="trip-editor-label">Notes</span><textarea class="trip-editor-textarea" maxlength="500" oninput="updateTripEditorItem('+index+',\'notes\',this.value)">'+tripEditorEscape(item.notes)+'</textarea></label></details></article>';
+}
+
+function updateTripEditorItem(index,key,value){if(tripEditorDraft&&tripEditorDraft.items[index])tripEditorDraft.items[index][key]=value;}
+function addTripEditorItem(){var last=tripEditorDraft.items[tripEditorDraft.items.length-1];tripEditorDraft.items.push(tripEditorBlankItem(last&&last.date||'','STAY'));renderTripEditor();}
+function removeTripEditorItem(index){if(tripEditorDraft.items.length<2)return;tripEditorDraft.items.splice(index,1);renderTripEditor();}
+function moveTripEditorItem(index,direction){var target=index+direction;if(target<0||target>=tripEditorDraft.items.length)return;var item=tripEditorDraft.items.splice(index,1)[0];tripEditorDraft.items.splice(target,0,item);renderTripEditor();}
+
+function validateTripEditor(){
+  var name=String(tripEditorDraft.name||'').trim();
+  if(!name)return'Enter a trip name.';
+  if(/^Trip:\s*/i.test(name))return'Enter the trip name without “Trip:”.';
+  if(/[\\\/\?\*\[\]:]/.test(name))return'The trip name contains a character Google Sheets cannot use.';
+  var previous='';
+  for(var i=0;i<tripEditorDraft.items.length;i++){
+    var item=tripEditorDraft.items[i];
+    if(!item.date)return'Choose a date for itinerary item '+(i+1)+'.';
+    if(previous&&item.date<previous)return'Put the itinerary dates in order.';
+    previous=item.date;
+    if(!String(item.location||'').trim())return'Add a location for itinerary item '+(i+1)+'.';
+  }
+  return'';
+}
+
+function reviewTripEditor(){
+  tripEditorError=validateTripEditor();
+  if(tripEditorError){renderTripEditor();return;}
+  tripEditorDraft.name=tripEditorDraft.name.trim();tripEditorStep='review';renderTripEditor();
+}
+
+function renderTripEditorReview(body){
+  var html=tripEditorError?'<div class="trip-editor-status" role="alert">'+tripEditorEscape(tripEditorError)+'</div>':'';
+  html+='<div class="trip-editor-intro"><div class="trip-editor-label">New trip</div><div class="trip-editor-title">'+tripEditorEscape(tripEditorDraft.name)+'</div><div class="trip-editor-help">'+tripEditorDraft.items.length+' itinerary item'+(tripEditorDraft.items.length===1?'':'s')+'. Audrey will add it to the trip selector after saving.</div></div><div class="trip-editor-review">';
+  tripEditorDraft.items.forEach(function(item){
+    var bits=[];if(item.distanceKm)bits.push(item.distanceKm+' km');if(item.durationMin)bits.push(item.durationMin+' min');if(item.ehu)bits.push('EHU '+item.ehu.toLowerCase());
+    html+='<div class="trip-editor-review-row"><div class="trip-editor-review-date">'+tripEditorEscape(formatTripEditorDate(item.date))+'</div><div><div class="trip-editor-review-name">'+tripEditorEscape(item.location)+'</div><div class="trip-editor-review-meta">'+tripEditorEscape(bits.join(' · ')||(item.address||'No extra details'))+'</div></div><div class="trip-editor-type">'+tripEditorEscape(item.type)+'</div></div>';
+  });
+  html+='</div><div class="trip-editor-footer"><button class="trip-editor-btn" type="button" onclick="tripEditorStep=\'edit\';tripEditorError=\'\';renderTripEditor()">Edit</button><button class="trip-editor-btn primary" id="trip-editor-save" type="button" onclick="saveTripEditor()"'+(tripEditorSaving?' disabled':'')+'>'+(tripEditorSaving?'Saving…':'Save trip')+'</button></div>';
+  body.innerHTML=html;
+}
+
+function formatTripEditorDate(value){var d=new Date(value+'T00:00:00');return isNaN(d.getTime())?value:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+
+async function saveTripEditor(){
+  if(tripEditorSaving)return;
+  tripEditorError=validateTripEditor();if(tripEditorError){tripEditorStep='edit';renderTripEditor();return;}
+  tripEditorSaving=true;tripEditorError='';renderTripEditor();
+  try{
+    var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify({action:'create_trip',tripName:tripEditorDraft.name,items:tripEditorDraft.items})});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    var text=await response.text(),result;
+    try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+    if(!result.success)throw new Error(result.error||'Trip could not be created');
+    closeTripEditor();
+    currentTrip=result.tripName;currentAppView='journey';currentJourneyMode='trip';
+    await refresh();
+  }catch(err){tripEditorSaving=false;tripEditorError=err.message;renderTripEditor();}
 }
 
 // ── COLLAPSIBLE STATE ─────────────────────────────────────────
@@ -1098,6 +1274,7 @@ function buildJourneyView(d,fc){
   return '<div class="journey-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+journeySceneStyle(scene)+'"><div class="journey-canvas">'
     +'<header class="journey-head"><div class="journey-eyebrow">Audrey · Journey</div>'
     +'<div class="journey-title">'+title+'</div><div class="journey-subtitle">'+subtitle+'</div>'
+    +'<button class="journey-new-trip" type="button" onclick="openTripEditor()">＋ New trip</button>'
     +'<div class="journey-mode-switch" role="tablist" aria-label="Journey view">'
     +'<button class="journey-mode-btn'+todayClass+'" type="button" data-journey-mode="today" onclick="switchJourneyMode(\'today\')"'+(hasDrive?'':' disabled')+'>Today</button>'
     +'<button class="journey-mode-btn'+tripClass+'" type="button" data-journey-mode="trip" onclick="switchJourneyMode(\'trip\')">Trip</button>'
@@ -1272,7 +1449,7 @@ function buildJourneyTripPoint(row,completed,fc){
 
 function journeyTimelineKind(type){
   var normalized=type.toUpperCase();
-  return /DRIVE|DEPART|ARRIV|RETURN/.test(normalized)?'leg':'place';
+  return /DRIVE|DEPART|ARRIV|RETURN|FLIGHT|FERRY/.test(normalized)?'leg':'place';
 }
 
 function journeyTimelineTitle(row,kind){
@@ -1281,6 +1458,8 @@ function journeyTimelineTitle(row,kind){
     if(/DEPART/.test(type))return 'Depart · '+location;
     if(/ARRIV/.test(type))return 'Arrive · '+location;
     if(/RETURN/.test(type))return 'Return · '+location;
+    if(/FLIGHT/.test(type))return 'Fly to '+location;
+    if(/FERRY/.test(type))return 'Ferry to '+location;
     return 'Drive to '+location;
   }
   if(/STOPOVER|OVERNIGHT/.test(type))return 'Overnight · '+location;
