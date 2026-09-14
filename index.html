@@ -3485,6 +3485,7 @@ function buildDoCyclingSetup(settings,label,action){
 function analyseDoCyclingOverview(){
   if(!doCyclingOverview)return;
   doCyclingOverview.settings=getActivitySettingsFromControls('cycle');
+  openDoBrowse('cycle');
   currentDoSubview='detail';
   var item=doCyclingOverview;
   if(item.source==='rwgps')actSelectRWGPS(item.key,'cycle');
@@ -4520,7 +4521,7 @@ async function actSelectRWGPS(routeId, type) {
     var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
     var data = await r.json();
     if (!data.success || !data.gpx) throw new Error(data.error || 'No GPX');
-    var route = (window._actRWGPS || []).find(function(r){ return r.id === routeId; });
+    var route = (window._actRWGPS || []).find(function(r){ return String(r.id) === String(routeId); });
     actAnalyseGPXContent(data.gpx, route ? route.name : 'RideWithGPS route', type);
   } catch(err) {
     showActError(type, 'Could not fetch route: ' + err.message);
