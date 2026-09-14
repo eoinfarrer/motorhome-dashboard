@@ -4516,16 +4516,28 @@ async function actSelectRWGPS(routeId, type) {
     var params = new URLSearchParams({
       action:  'get_ridewithgps_gpx',
       routeId: routeId,
+      encoding: 'gzip-base64',
       _:       Date.now()
     });
     var r    = await fetch(API_URL + '?' + params.toString(), { redirect: 'follow' });
     var data = await r.json();
     if (!data.success || !data.gpx) throw new Error(data.error || 'No GPX');
+    var gpxText = await decodeActivityGPX(data.gpx, data.encoding);
     var route = (window._actRWGPS || []).find(function(r){ return String(r.id) === String(routeId); });
-    actAnalyseGPXContent(data.gpx, route ? route.name : 'RideWithGPS route', type);
+    actAnalyseGPXContent(gpxText, route ? route.name : 'RideWithGPS route', type);
   } catch(err) {
     showActError(type, 'Could not fetch route: ' + err.message);
   }
+}
+
+async function decodeActivityGPX(payload, encoding) {
+  if (encoding !== 'gzip-base64') return payload;
+  if (typeof DecompressionStream !== 'function') throw new Error('This browser cannot unpack the route file');
+  var binary = atob(payload);
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Response(stream).text();
 }
 
 async function runAllModulesNow() {
