@@ -781,11 +781,7 @@ async function openTripEditorForEdit(){
   document.getElementById('tripEditorTitle').textContent='Edit trip';
   document.getElementById('tripEditorBody').innerHTML='<div class="trip-editor-intro"><div class="trip-editor-label">Loading trip</div><div class="trip-editor-help">Reading the complete itinerary before making changes.</div></div>';
   try{
-    var params=new URLSearchParams();params.set('action','get_trip_draft');params.set('trip',tripName);params.set('_',Date.now());
-    var response=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
-    if(!response.ok)throw new Error('HTTP '+response.status);
-    var text=await response.text(),result;
-    try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+    var result=await fetchTripEditorDraft(tripName);
     if(!result.success)throw new Error(result.error||'Trip could not be loaded');
     tripEditorOriginalName=result.tripName;tripEditorRevision=result.revision;
     tripEditorOriginalItems=JSON.parse(JSON.stringify(result.items||[]));
@@ -902,6 +898,38 @@ function tripEditorEditSummary(){
 
 function formatTripEditorDate(value){var d=new Date(value+'T00:00:00');return isNaN(d.getTime())?value:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
 
+function tripEditorWait(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+
+async function fetchTripEditorDraft(tripName){
+  var params=new URLSearchParams();params.set('action','get_trip_draft');params.set('trip',tripName);params.set('_',Date.now());
+  var response=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  var text=await response.text();
+  try{return JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+}
+
+function tripEditorComparableItem(item){
+  function text(value){return String(value===null||value===undefined?'':value).trim();}
+  function number(value){return value===''||value===null||value===undefined?'':Number(value);}
+  return{date:text(item.date),type:text(item.type).toUpperCase(),location:text(item.location),address:text(item.address),distanceKm:number(item.distanceKm),durationMin:number(item.durationMin),ehu:text(item.ehu).toUpperCase(),notes:text(item.notes),bookingRef:text(item.bookingRef),contact:text(item.contact),nightlyCost:number(item.nightlyCost)};
+}
+
+function tripEditorItemsMatch(left,right){
+  if(!Array.isArray(left)||!Array.isArray(right)||left.length!==right.length)return false;
+  return left.every(function(item,index){return JSON.stringify(tripEditorComparableItem(item))===JSON.stringify(tripEditorComparableItem(right[index]));});
+}
+
+async function recoverTripEditorSave(){
+  for(var attempt=0;attempt<3;attempt++){
+    await tripEditorWait(attempt?900:350);
+    try{
+      var saved=await fetchTripEditorDraft(tripEditorDraft.name);
+      if(saved.success&&tripEditorItemsMatch(saved.items,tripEditorDraft.items))return{success:true,tripName:saved.tripName,revision:saved.revision,recovered:true};
+    }catch(verifyErr){}
+  }
+  return null;
+}
+
 async function saveTripEditor(){
   if(tripEditorSaving)return;
   tripEditorError=validateTripEditor();if(tripEditorError){tripEditorStep='edit';renderTripEditor();return;}
@@ -910,9 +938,14 @@ async function saveTripEditor(){
     var payload={action:tripEditorMode==='edit'?'update_trip':'create_trip',tripName:tripEditorDraft.name,items:tripEditorDraft.items};
     if(tripEditorMode==='edit'){payload.originalTripName=tripEditorOriginalName;payload.expectedRevision=tripEditorRevision;}
     var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify(payload)});
-    if(!response.ok)throw new Error('HTTP '+response.status);
-    var text=await response.text(),result;
-    try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+    var result,text;
+    if(!response.ok){
+      result=response.status===404?await recoverTripEditorSave():null;
+      if(!result)throw new Error(response.status===404?'Audrey could not confirm whether the trip saved. Reload before trying again.':'HTTP '+response.status);
+    }else{
+      text=await response.text();
+      try{result=JSON.parse(text);}catch(parseErr){throw new Error('Invalid response from Audrey');}
+    }
     if(!result.success)throw new Error(result.error||(tripEditorMode==='edit'?'Trip could not be updated':'Trip could not be created'));
     closeTripEditor();
     currentTrip=result.tripName;currentAppView='journey';currentJourneyMode='trip';
@@ -978,6 +1011,7 @@ async function fetchData(trip){
   var r;
   try{r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
   catch(e){r=await fetch(url,{mode:'cors',credentials:'omit',redirect:'follow'});}
+  if(r.status===404){await tripEditorWait(800);r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
   if(!r.ok)throw new Error('HTTP '+r.status);
   var text=await r.text();
   try{return JSON.parse(text);}catch(e){throw new Error('Invalid response from server');}
