@@ -772,15 +772,16 @@ function openTripEditor(){
 }
 
 async function openTripEditorForEdit(){
-  if(!currentTrip)return;
-  tripEditorMode='edit';tripEditorOriginalName=currentTrip;tripEditorRevision='';tripEditorOriginalItems=[];
-  tripEditorDraft={name:currentTrip,items:[]};tripEditorStep='edit';tripEditorSaving=false;tripEditorError='';
+  var tripName=currentTrip||(currentData&&currentData.meta&&currentData.meta.tripName);
+  if(!tripName)return;
+  tripEditorMode='edit';tripEditorOriginalName=tripName;tripEditorRevision='';tripEditorOriginalItems=[];
+  tripEditorDraft={name:tripName,items:[]};tripEditorStep='edit';tripEditorSaving=false;tripEditorError='';
   document.getElementById('tripEditorOverlay').classList.add('open');
   document.body.classList.add('trip-editor-open');
   document.getElementById('tripEditorTitle').textContent='Edit trip';
   document.getElementById('tripEditorBody').innerHTML='<div class="trip-editor-intro"><div class="trip-editor-label">Loading trip</div><div class="trip-editor-help">Reading the complete itinerary before making changes.</div></div>';
   try{
-    var params=new URLSearchParams();params.set('action','get_trip_draft');params.set('trip',currentTrip);params.set('_',Date.now());
+    var params=new URLSearchParams();params.set('action','get_trip_draft');params.set('trip',tripName);params.set('_',Date.now());
     var response=await fetch(API_URL+'?'+params.toString(),{redirect:'follow',headers:{'Accept':'application/json'}});
     if(!response.ok)throw new Error('HTTP '+response.status);
     var text=await response.text(),result;
