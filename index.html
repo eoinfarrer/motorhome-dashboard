@@ -969,6 +969,16 @@ function toggleSection(id){
   var collapsed=el.classList.toggle('collapsed');
   setCollapsed(id,collapsed);
 }
+function openMoreSection(id){
+  setCollapsed(id,false);
+  switchAppView('more');
+  var el=document.getElementById('sec-'+id);
+  if(!el)return;
+  el.classList.remove('collapsed');
+  var body=el.querySelector('.section-body');
+  if(body)body.style.maxHeight=body.scrollHeight+'px';
+  setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'start'});},0);
+}
 function applyCollapsed(){
   var s=getCollapsed();
   Object.keys(s).forEach(function(id){
@@ -1803,7 +1813,7 @@ function buildHomePretripWeather(weather){
     +'<div class="home-section-label">Trip forecast</div>'
     +'<div class="home-opportunity-title">'+(first.location||'Your destination')+'</div>'
     +'<div class="home-opportunity-copy">'+details.join(' · ')+'</div>'
-    +'<button class="home-opportunity-action" type="button" onclick="switchAppView(\'more\')">See first 4 days →</button>'
+    +'<button class="home-opportunity-action" type="button" onclick="openMoreSection(\'weather\')">See first 4 days →</button>'
     +'</section>';
 }
 
