@@ -1618,8 +1618,13 @@ function buildHomeView(d,fc){
     else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
     else parts.push(buildHomeOpportunity(d,context));
   }
-  var relevantWeather=getHomeRelevantWeather(d.weather,context);
-  if(relevantWeather.length)parts.push(buildHomeConditions(relevantWeather));
+  if(context.mode==='pretrip'){
+    var pretripWeather=getHomePretripWeather(d);
+    if(pretripWeather.length)parts.push(buildHomePretripWeather(pretripWeather));
+  }else{
+    var relevantWeather=getHomeRelevantWeather(d.weather,context);
+    if(relevantWeather.length)parts.push(buildHomeConditions(relevantWeather));
+  }
   parts.push(buildHomeVehicleStatus(d.vehicle));
   parts.push('</div></div></div>');
   return parts.join('');
@@ -1762,6 +1767,44 @@ function buildHomeOpportunity(d,context){
 function getHomeWeather(weather){
   if(!weather||!weather.length)return null;
   return weather.find(function(w){return w.isToday;})||weather[0];
+}
+
+function getHomePretripWeather(d){
+  var weather=Array.isArray(d.weather)?d.weather:[];
+  if(!weather.length)return[];
+  var itinerary=Array.isArray(d.itinerary)?d.itinerary:[];
+  var stay=itinerary.find(function(item){
+    return item&&!item.isPast&&['STAY','STOPOVER','ARRIVE'].indexOf(String(item.type||'').toUpperCase())>=0;
+  });
+  var destination=stay&&stay.location?String(stay.location).toLowerCase().trim():'';
+  var matched=destination?weather.filter(function(item){
+    return String(item.location||'').toLowerCase().trim()===destination;
+  }):[];
+  if(!matched.length){
+    var firstDate=weather[0].date;
+    var firstDay=weather.filter(function(item){return item.date===firstDate;});
+    var fallback=firstDay.length?firstDay[firstDay.length-1]:weather[0];
+    matched=weather.filter(function(item){return item.location===fallback.location;});
+  }
+  return matched.slice(0,4);
+}
+
+function buildHomePretripWeather(weather){
+  if(!weather||!weather.length)return'';
+  var first=weather[0];
+  var date=fmtDate(first.date)||'First trip day';
+  var temps=[];
+  if(first.minTempC!==null&&first.minTempC!==undefined)temps.push(first.minTempC+'&deg;');
+  if(first.maxTempC!==null&&first.maxTempC!==undefined)temps.push(first.maxTempC+'&deg;');
+  var details=[date,first.condition||first.risk||'Forecast available'];
+  if(temps.length)details.push(temps.join('–'));
+  if(first.gustKmh)details.push('gusts '+first.gustKmh+' km/h');
+  return '<section class="home-opportunity">'
+    +'<div class="home-section-label">Trip forecast</div>'
+    +'<div class="home-opportunity-title">'+(first.location||'Your destination')+'</div>'
+    +'<div class="home-opportunity-copy">'+details.join(' · ')+'</div>'
+    +'<button class="home-opportunity-action" type="button" onclick="switchAppView(\'more\')">See first 4 days →</button>'
+    +'</section>';
 }
 
 // Weather is a Home decision aid, not an automatic feed. Ski days only admit
