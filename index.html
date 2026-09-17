@@ -1579,10 +1579,10 @@ var HOME_SCENES={
 
 // Curated destination scenes. Add a place matcher and metadata here as the library grows.
 var DESTINATION_SCENES=[
-  {key:'dolomites',asset:'assets/scenes/dolomites-cycling.jpg',places:/\b(maratona|dolomites|dolomiti|alta badia|corvara|arabba|selva di val gardena)\b/i,seasons:['summer'],transport:['motorhome','flight','other'],position:'52% center',tabletPosition:'50% center',widePosition:'center 48%'},
-  {key:'tuscany',asset:'assets/scenes/tuscany-summer-motorhome.jpg',places:/\b(tuscany|toscana|siena|chianti|val d.orcia|montepulciano|pienza)\b/i,seasons:['summer'],transport:['motorhome'],position:'58% center',tabletPosition:'54% center',widePosition:'center 48%'},
+  {key:'dolomites',asset:'assets/scenes/dolomites-cycling.jpg',places:/\b(maratona|dolomites|dolomiti|alta badia|corvara|arabba|armentarola|selva di val gardena)\b/i,seasons:['summer'],transport:['motorhome','flight','other'],position:'52% center',tabletPosition:'50% center',widePosition:'center 48%'},
+  {key:'tuscany',asset:'assets/scenes/tuscany-summer-motorhome.jpg',places:/\b(tuscany|toscana|siena|chianti|val d.orcia|montepulciano|pienza|lucca)\b/i,seasons:['summer'],transport:['motorhome'],position:'58% center',tabletPosition:'54% center',widePosition:'center 48%'},
   {key:'annecy',asset:'assets/scenes/lake-annecy-summer-motorhome.jpg',places:/\b(annecy|talloires|sevrier|saint.jorioz|duingt)\b/i,seasons:['summer'],transport:['motorhome'],position:'56% center',tabletPosition:'52% center',widePosition:'center 48%'},
-  {key:'greece',asset:'assets/scenes/greece-beach.jpg',places:/\b(greece|greek|hellas|crete|corfu|rhodes|santorini|naxos|mykonos|kefalonia|kefallonia|cephalonia|argostoli|lassi|skala)\b/i,seasons:['summer'],transport:['flight','other','motorhome'],position:'50% center',tabletPosition:'50% center',widePosition:'center 48%'}
+  {key:'greece',asset:'assets/scenes/greece-beach.jpg',places:/\b(greece|greek|hellas|crete|corfu|rhodes|santorini|naxos|mykonos|kefalonia|kefallonia|cephalonia|argostoli|lassi|skala)\b/i,seasons:['summer','autumn'],transport:['flight','other','motorhome'],position:'50% center',tabletPosition:'50% center',widePosition:'center 48%'}
 ];
 function sceneDate(value){
   if(!value)return null;
@@ -1599,7 +1599,7 @@ function sceneItineraryStop(d){
   var dated=rows.filter(function(row){return sceneDate(row.date);}).sort(function(a,b){return sceneDate(a.date)-sceneDate(b.date);});
   var current=dated.filter(function(row){return sceneDate(row.date).getTime()<=stamp;}).pop();
   var next=dated.find(function(row){return sceneDate(row.date).getTime()>stamp;});
-  var row=rows.find(function(item){return item.isToday;})||current||next||null;
+  var row=rows.filter(function(item){return item.isToday;}).pop()||current||next||null;
   var location=String(meta.currentLocation||'').trim();
   // Current location is authoritative on active trips; planned trips use the itinerary.
   if(meta.tripStatus!=='ACTIVE'||!location)location=row&&row.location||meta.nextDrive&&meta.nextDrive.destination||location;
@@ -1616,9 +1616,27 @@ function sceneTransport(meta,stop){
   return 'motorhome';
 }
 function getDestinationScene(d){
-  var meta=d.meta||{},stop=sceneItineraryStop(d),season=sceneSeason(stop.date,meta),transport=sceneTransport(meta,stop);
-  if(!stop.location||!season)return null;
-  var match=DESTINATION_SCENES.find(function(scene){return scene.places.test(stop.location)&&scene.seasons.indexOf(season)>=0&&scene.transport.indexOf(transport)>=0;});
+  var meta=d.meta||{},stop=sceneItineraryStop(d),transport=sceneTransport(meta,stop);
+  function matchPlace(location,date,mode){
+    var when=sceneSeason(date,meta);
+    return DESTINATION_SCENES.find(function(scene){return location&&when&&scene.places.test(location)&&scene.seasons.indexOf(when)>=0&&scene.transport.indexOf(mode)>=0;});
+  }
+  var match;
+  if(meta.tripStatus==='PRE_TRIP'){
+    // The first home/departure row is not the destination of a planned trip.
+    match=stop.rows.map(function(row){
+      return matchPlace(row.location,sceneDate(row.date),sceneTransport(meta,{row:row,rows:stop.rows}));
+    }).find(Boolean);
+  }else{
+    match=matchPlace(stop.location,stop.date,transport)||matchPlace(stop.row&&stop.row.location,stop.date,transport);
+    if(!match&&transport==='flight'){
+      // Carry an arrival flight's region through hotel rows that lack a place name.
+      // The next flight or return replaces that region, so the image cannot linger home.
+      var relevant=stop.rows.filter(function(row){return stop.row&&sceneDate(row.date)<=sceneDate(stop.row.date);});
+      var lastFlight=relevant.filter(function(row){return /^(FLIGHT|RETURN)$/i.test(String(row.type||''));}).pop();
+      if(lastFlight&&/^FLIGHT$/i.test(String(lastFlight.type||'')))match=matchPlace(lastFlight.location,stop.date,'flight');
+    }
+  }
   return match?{key:match.key,asset:match.asset,position:match.position,tabletPosition:match.tabletPosition,widePosition:match.widePosition}:null;
 }
 
