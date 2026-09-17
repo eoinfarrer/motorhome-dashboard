@@ -1,20 +1,12 @@
-# Audrey Home scenes
+# Audrey background scenes
 
-Optional local Home background assets belong here. Audrey is configured to use
-the first four paths below when they are present; if a file is absent or fails
-to load, its layered gradient scene remains visible instead.
+The four generic photos and four destination photos in this directory are used by Home, Journey, Do, and Van. CSS gradients remain visible if an image cannot load.
 
-The central `HOME_SCENES` map in `index.html` owns the mapping:
+`HOME_SCENES` in `index.html` defines the generic fallback. `DESTINATION_SCENES` defines each curated destination's place matcher, season, transport context, image, and phone/tablet/wide focal position. Add new locations there.
 
-- `home.jpg`
-- `mountains.jpg`
-- `alpine.jpg`
-- `coast.jpg`
-- `highlands.jpg`
-- `driving.jpg`
-- `generic.jpg` (reserved for a future generic photo)
+The destination picker uses the active itinerary stop and date, or the next planned stop. Current location takes priority during an active trip. It reads an explicit transport mode when supplied and otherwise infers flight from the latest itinerary leg. Unknown places, nonmatching seasons, and nonmatching transport contexts use the generic scene.
 
-The initial active files are `home.jpg`, `mountains.jpg`, `alpine.jpg`, and
-`coast.jpg`. `mountains.jpg` is also used for an explicit driving scene.
-Audrey will continue to use its gradient scene treatment if a configured image
-is missing, so no missing-image UI is ever exposed.
+- Dolomites/Maratona summer cycling: no motorhome.
+- Tuscany summer motorhome.
+- Lake Annecy summer motorhome.
+- Greece summer beach: no motorhome.

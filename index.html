@@ -1577,11 +1577,58 @@ var HOME_SCENES={
   generic:{asset:'assets/scenes/home.jpg',enabled:true,position:'82% center',tabletPosition:'66% center',widePosition:'center 45%'}
 };
 
+// Curated destination scenes. Add a place matcher and metadata here as the library grows.
+var DESTINATION_SCENES=[
+  {key:'dolomites',asset:'assets/scenes/dolomites-cycling.jpg',places:/\b(maratona|dolomites|dolomiti|alta badia|corvara|arabba|selva di val gardena)\b/i,seasons:['summer'],transport:['motorhome','flight','other'],position:'52% center',tabletPosition:'50% center',widePosition:'center 48%'},
+  {key:'tuscany',asset:'assets/scenes/tuscany-summer-motorhome.jpg',places:/\b(tuscany|toscana|siena|chianti|val d.orcia|montepulciano|pienza)\b/i,seasons:['summer'],transport:['motorhome'],position:'58% center',tabletPosition:'54% center',widePosition:'center 48%'},
+  {key:'annecy',asset:'assets/scenes/lake-annecy-summer-motorhome.jpg',places:/\b(annecy|talloires|sevrier|saint.jorioz|duingt)\b/i,seasons:['summer'],transport:['motorhome'],position:'56% center',tabletPosition:'52% center',widePosition:'center 48%'},
+  {key:'greece',asset:'assets/scenes/greece-beach.jpg',places:/\b(greece|greek|hellas|crete|corfu|rhodes|santorini|naxos|mykonos)\b/i,seasons:['summer'],transport:['flight','other','motorhome'],position:'50% center',tabletPosition:'50% center',widePosition:'center 48%'}
+];
+function sceneDate(value){
+  if(!value)return null;
+  var date=new Date(/^\d{4}-\d{2}-\d{2}$/.test(String(value))?String(value)+'T12:00:00':value);
+  return isNaN(date.getTime())?null:date;
+}
+function sceneSeason(date,meta){
+  if(date){var month=date.getMonth()+1;return month>=6&&month<=8?'summer':month>=9&&month<=11?'autumn':month>=3&&month<=5?'spring':'winter';}
+  return /^(spring|summer|autumn|winter)$/i.test(meta.season||'')?meta.season.toLowerCase():null;
+}
+function sceneItineraryStop(d){
+  var meta=d.meta||{},rows=Array.isArray(d.itinerary)?d.itinerary:[];
+  var today=new Date(),stamp=new Date(today.getFullYear(),today.getMonth(),today.getDate(),12).getTime();
+  var dated=rows.filter(function(row){return sceneDate(row.date);}).sort(function(a,b){return sceneDate(a.date)-sceneDate(b.date);});
+  var current=dated.filter(function(row){return sceneDate(row.date).getTime()<=stamp;}).pop();
+  var next=dated.find(function(row){return sceneDate(row.date).getTime()>stamp;});
+  var row=rows.find(function(item){return item.isToday;})||current||next||null;
+  var location=String(meta.currentLocation||'').trim();
+  // Current location is authoritative on active trips; planned trips use the itinerary.
+  if(meta.tripStatus!=='ACTIVE'||!location)location=row&&row.location||meta.nextDrive&&meta.nextDrive.destination||location;
+  var date=sceneDate(row&&row.date)||sceneDate(meta.tripStatus==='ACTIVE'?meta.updated:meta.departDate);
+  return {location:location,date:date,row:row,rows:dated};
+}
+function sceneTransport(meta,stop){
+  var explicit=String(meta.transportMode||meta.tripTransport||meta.travelMode||'').toLowerCase();
+  if(/flight|fly|air/.test(explicit))return 'flight';
+  if(/motorhome|camper|van|drive|road/.test(explicit))return 'motorhome';
+  var relevant=stop.rows.filter(function(row){return !stop.row||sceneDate(row.date)<=sceneDate(stop.row.date);});
+  var lastLeg=relevant.filter(function(row){return /^(FLIGHT|DRIVE|DEPART|RETURN)$/.test(String(row.type||'').toUpperCase());}).pop();
+  if(lastLeg&&/FLIGHT/i.test(lastLeg.type))return 'flight';
+  return 'motorhome';
+}
+function getDestinationScene(d){
+  var meta=d.meta||{},stop=sceneItineraryStop(d),season=sceneSeason(stop.date,meta),transport=sceneTransport(meta,stop);
+  if(!stop.location||!season)return null;
+  var match=DESTINATION_SCENES.find(function(scene){return scene.places.test(stop.location)&&scene.seasons.indexOf(season)>=0&&scene.transport.indexOf(transport)>=0;});
+  return match?{key:match.key,asset:match.asset,position:match.position,tabletPosition:match.tabletPosition,widePosition:match.widePosition}:null;
+}
+
 function getHomeScene(d,context){
   var meta=d.meta||{};
   var explicit=[meta.scene,meta.locationType,meta.currentLocationType,meta.regionType,meta.currentLocationContext,meta.activity,meta.todayActivity]
     .filter(function(value){return value!==undefined&&value!==null;}).join(' ').toLowerCase();
   var key='generic';
+  var destination=context.mode==='returned'?null:getDestinationScene(d);
+  if(destination){var hour=(new Date()).getHours();destination.time=hour>=22||hour<6?'night':hour>=18?'evening':'day';return destination;}
 
   if(context.mode==='returned')key='home';
   else if(context.mode==='drive')key='travelling';
