@@ -1494,11 +1494,20 @@ function buildJourneyTrip(d,fc){
   var meta=d.meta||{},itin=d.itinerary||[],rt=d.runningTotal;
   var completed=meta.tripStatus==='POST_TRIP';
   var totalKm=rt&&rt.totalKm!==undefined?rt.totalKm:itin.reduce(function(sum,row){return sum+(Number(row.distanceKm)||0);},0);
-  var stopCount=itin.length;
+  var dates=itin.map(function(row){return row.date;}).filter(function(date){return /^\d{4}-\d{2}-\d{2}$/.test(date||'');}).sort();
+  var start=meta.departDate||dates[0],end=meta.returnDate||dates[dates.length-1];
+  var duration=start&&end?Math.max(1,Math.round((Date.parse(end+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000)):0;
+  var stops={};
+  itin.forEach(function(row){
+    if(!/^(STAY|STOPOVER)$/.test((row.type||'').toUpperCase()))return;
+    var place=(row.location||'').trim().toLocaleLowerCase();
+    if(place)stops[place]=true;
+  });
+  var stopCount=Object.keys(stops).length;
   var heading=completed?'Completed trip':'Trip timeline';
   var html='<section class="journey-overview"><div class="journey-kicker">'+heading+'</div>'
     +'<div class="journey-overview-grid">'
-    +journeyOverview(itin.length,'days')+journeyOverview(totalKm+' km','distance')+journeyOverview(stopCount,'stops')
+    +journeyOverview(duration,'days')+journeyOverview(totalKm+' km','distance')+journeyOverview(stopCount,'stops')
     +'</div></section><div class="journey-section-title">'+(completed?'Completed timeline':'Trip timeline')+'</div>';
   if(!itin.length)return html+'<div class="journey-point-card"><div class="journey-point-title">No itinerary entries available</div></div>';
   html+='<div class="journey-timeline">';
