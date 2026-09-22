@@ -3974,12 +3974,28 @@ function switchActTab(tab) {
 
   // Load marine data when water tab selected
   if (tab === 'water' && currentData) {
-    var lat = currentData.vehicle && currentData.vehicle.lat ? currentData.vehicle.lat
-            : currentData.meta && currentData.meta.currentLocationCoords ? currentData.meta.currentLocationCoords.lat : null;
-    var lon = currentData.vehicle && currentData.vehicle.lon ? currentData.vehicle.lon
-            : currentData.meta && currentData.meta.currentLocationCoords ? currentData.meta.currentLocationCoords.lon : null;
-    loadMarineData(lat, lon, currentData.meta && currentData.meta.currentLocation);
+    var waterCoords = getActivityCoordinates(currentData);
+    loadMarineData(waterCoords.lat, waterCoords.lon, currentData.meta && currentData.meta.currentLocation);
   }
+}
+
+// Flight trips describe the traveller's location independently of the van.
+// For other trips, live vehicle telemetry remains the most accurate position.
+function getActivityCoordinates(d) {
+  d = d || {};
+  var meta = d.meta || {};
+  var tripCoords = meta.currentLocationCoords;
+  var vehicle = d.vehicle || {};
+  var hasFlight = (d.itinerary || []).some(function(row) {
+    return (row.type || '').toUpperCase() === 'FLIGHT';
+  });
+  var validTrip = tripCoords && isFinite(Number(tripCoords.lat)) && isFinite(Number(tripCoords.lon));
+  var validVehicle = isFinite(Number(vehicle.lat)) && isFinite(Number(vehicle.lon))
+    && vehicle.lat !== null && vehicle.lat !== '' && vehicle.lon !== null && vehicle.lon !== '';
+  if (hasFlight && validTrip) return {lat:Number(tripCoords.lat),lon:Number(tripCoords.lon),source:'itinerary'};
+  if (validVehicle) return {lat:Number(vehicle.lat),lon:Number(vehicle.lon),source:'vehicle'};
+  if (validTrip) return {lat:Number(tripCoords.lat),lon:Number(tripCoords.lon),source:'itinerary'};
+  return {lat:null,lon:null,source:'none'};
 }
  
 // ── Discovery view ────────────────────────────────────────
@@ -4077,14 +4093,9 @@ async function loadActRoutes(location, type) {
 
     // 3. Discover Overpass routes
     var overpass = [];
-        var ovLat = currentData && currentData.vehicle && currentData.vehicle.lat
-                ? currentData.vehicle.lat
-                : currentData && currentData.meta && currentData.meta.currentLocationCoords
-                ? currentData.meta.currentLocationCoords.lat : null;
-    var ovLon = currentData && currentData.vehicle && currentData.vehicle.lon
-                ? currentData.vehicle.lon
-                : currentData && currentData.meta && currentData.meta.currentLocationCoords
-                ? currentData.meta.currentLocationCoords.lon : null;
+    var discoveryCoords = getActivityCoordinates(currentData);
+    var ovLat = discoveryCoords.lat;
+    var ovLon = discoveryCoords.lon;
 
         if (ovLat) {
       console.log('Discovering routes at:', ovLat, ovLon);
@@ -4758,12 +4769,6 @@ function buildSkiForecast(fc) {
 }
  
 function buildWaterScreen(d) {
-  var lat = d && d.vehicle && d.vehicle.lat ? d.vehicle.lat
-          : d && d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lat
-          : null;
-  var lon = d && d.vehicle && d.vehicle.lon ? d.vehicle.lon
-          : d && d.meta && d.meta.currentLocationCoords ? d.meta.currentLocationCoords.lon
-          : null;
   var location = d && d.meta ? d.meta.currentLocation || '' : '';
  
   // Check if near coast — rough check using weather data or just show loading
