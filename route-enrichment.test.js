@@ -33,6 +33,7 @@ const context = {
 vm.createContext(context);
 vm.runInContext([
   'routeHaversineM_', 'normaliseEnrichmentRoute_', 'projectPointToRoute_',
+  'sampleRouteForOverpass_',
   'categoriseRoutePoi_', 'routeCoursePointName_', 'scoreRoutePoi_',
   'buildRoutePoiCandidate_', 'normaliseRoutePoiName_', 'rankRoutePois_',
   'buildRouteOverpassQuery_'
@@ -108,4 +109,12 @@ test('Overpass query follows the supplied route corridor', () => {
   assert.match(query, /drinking_water/);
   assert.match(query, /bicycle/);
   assert.match(query, /viewpoint/);
+});
+
+test('long routes are bounded to one eighty-point Overpass corridor', () => {
+  const points = Array.from({length: 500}, (_, index) => ({lat: 50 + index / 10000, lon: -1, distanceM: index * 10}));
+  const sampled = context.sampleRouteForOverpass_(points, 80);
+  assert.equal(sampled.length, 80);
+  assert.equal(sampled[0].distanceM, 0);
+  assert.equal(sampled[79].distanceM, 4990);
 });
