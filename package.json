@@ -1,0 +1,14 @@
+{
+  "name": "audrey-dashboard",
+  "private": true,
+  "scripts": {
+    "build:fit": "esbuild src/fit-export.mjs --bundle --minify --format=iife --global-name=AudreyFit --outfile=assets/fit-export.js",
+    "test": "node --test *.test.js *.test.mjs"
+  },
+  "dependencies": {
+    "@garmin/fitsdk": "21.217.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10"
+  }
+}

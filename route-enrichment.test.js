@@ -23,11 +23,11 @@ const context = {
     water: {label: 'Drinking water', fitType: 'water', weight: 30},
     food: {label: 'Food', fitType: 'food', weight: 21},
     cafe: {label: 'Cafe', fitType: 'food', weight: 20},
-    toilets: {label: 'Toilets', fitType: 'generic', weight: 24},
-    bike_repair: {label: 'Bike repair', fitType: 'generic', weight: 28},
-    shelter: {label: 'Shelter', fitType: 'generic', weight: 25},
-    viewpoint: {label: 'Viewpoint', fitType: 'summit', weight: 16},
-    pharmacy: {label: 'Pharmacy', fitType: 'generic', weight: 15}
+    toilets: {label: 'Toilets', fitType: 'toilet', weight: 24},
+    bike_repair: {label: 'Bike repair', fitType: 'service', weight: 28},
+    shelter: {label: 'Shelter', fitType: 'shelter', weight: 25},
+    viewpoint: {label: 'Viewpoint', fitType: 'overlook', weight: 16},
+    pharmacy: {label: 'Pharmacy', fitType: 'firstAid', weight: 15}
   }
 };
 vm.createContext(context);
