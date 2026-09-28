@@ -1293,7 +1293,7 @@ function vanTemperatureState(value,type){
 }
 
 function getVanHealth(d){
-  var v=d.vehicle||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null,issues=[];
+  var v=d.vehicle||{},meta=d.meta||{},lpg=meta.vehicleRelevant===false?null:(d.lpg&&d.lpg.current?d.lpg.current:null),issues=[];
   function add(level,message,key){issues.push({level:level,message:message,key:key});}
   var unavailable=homeTelemetryConfidence(v).state==='unavailable';
   if(v.systemAlert&&!v.systemAlert.includes('VAN SYSTEMS OK'))add('danger',v.systemAlert,'system');
@@ -1314,7 +1314,7 @@ function getVanHealth(d){
 }
 
 function buildVanView(d,fc){
-  var v=d.vehicle||{},meta=d.meta||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null;
+  var v=d.vehicle||{},meta=d.meta||{},lpg=meta.vehicleRelevant===false?null:(d.lpg&&d.lpg.current?d.lpg.current:null);
   var health=getVanHealth(d),telemetry=vanTelemetryInfo(v),scene=getVanScene(d);
   var battery=v.batteryV!==null&&v.batteryV!==undefined?v.batteryV+'V':'—';
   var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
@@ -1322,9 +1322,9 @@ function buildVanView(d,fc){
   var tank=Number(fc&&fc.tankLitres),litres=lpg&&lpg.litres!==null&&lpg.litres!==undefined?Number(lpg.litres):null;
   var hasTank=isFinite(tank)&&tank>0,pct=hasTank&&litres!==null?Math.max(0,Math.min(100,Math.round(litres/tank*100))):null;
   var lpgLevel=lpg&&lpg.alert==='CRITICAL'?'danger':lpg&&lpg.alert==='LOW'?'caution':'go';
-  var forecast=d.lpg&&d.lpg.forecast?d.lpg.forecast.filter(function(item){return item&&item.isFuture;}):[];
+  var forecast=meta.vehicleRelevant===false?[]:(d.lpg&&d.lpg.forecast?d.lpg.forecast.filter(function(item){return item&&item.isFuture;}):[]);
   var nextForecast=forecast[0],lastForecast=forecast[forecast.length-1];
-  var location=meta.currentLocation||'Vehicle location';
+  var location=v.locationLabel||'Vehicle location';
   var map=v.lat&&v.lon?'https://maps.apple.com/?ll='+v.lat+','+v.lon+'&q=Audrey':'';
   var snapshotTimestamp=v.snapshotUpdatedAt||v.locationTimestamp;
   var timestamp=snapshotTimestamp&&!isNaN(new Date(snapshotTimestamp).getTime())?new Date(snapshotTimestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
@@ -1709,7 +1709,7 @@ function buildHomeView(d,fc){
     var relevantWeather=getHomeRelevantWeather(d.weather,context);
     if(relevantWeather.length)parts.push(buildHomeConditions(relevantWeather));
   }
-  parts.push(buildHomeVehicleStatus(d.vehicle));
+  if(meta.vehicleRelevant!==false)parts.push(buildHomeVehicleStatus(d.vehicle));
   parts.push('</div></div></div>');
   return parts.join('');
 }
@@ -1717,7 +1717,8 @@ function buildHomeView(d,fc){
 function getHomeContext(d){
   var meta=d.meta||{},vehicle=d.vehicle||{},snow=d.snowStatus||{};
   var attention=getHomeAttention(d);
-  var telemetry=homeTelemetryConfidence(vehicle);
+  var vehicleRelevant=meta.vehicleRelevant!==false;
+  var telemetry=vehicleRelevant?homeTelemetryConfidence(vehicle):{state:'not-applicable',copy:''};
   var dayType=meta.todayType||'';
   var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(dayType)>=0;
   var hasSki=meta.tripStatus==='ACTIVE'&&meta.season==='winter'&&snow.resorts&&snow.resorts.length;
@@ -1757,9 +1758,9 @@ function getHomeContext(d){
     result.message='The essentials are here when you are ready to plan the next move.';
     return result;
   }
-  result.mode='parked';result.eyebrow='Today\'s opportunity';result.stateLabel='Parked up';
+  result.mode='parked';result.eyebrow='Today\'s opportunity';result.stateLabel=vehicleRelevant?'Parked up':'Staying here';
   result.message='A good moment to see what the area has to offer.';
-  if(telemetry.state==='unavailable'){
+  if(vehicleRelevant&&telemetry.state==='unavailable'){
     result.eyebrow='Status update';result.stateLabel='Vehicle state unavailable';result.message='Current vehicle telemetry has not been confirmed recently.';result.meta=telemetry.copy;
   }
   return result;
@@ -1776,6 +1777,8 @@ function homeTelemetryConfidence(vehicle){
 }
 
 function getHomeAttention(d){
+  var meta=d.meta||{};
+  if(meta.vehicleRelevant===false)return '';
   var vehicle=d.vehicle||{},lpg=d.lpg&&d.lpg.current?d.lpg.current:null;
   if(vehicle.systemAlert&&!vehicle.systemAlert.includes('VAN SYSTEMS OK'))return vehicle.systemAlert;
   if(vehicle.batteryV!==null&&vehicle.batteryV!==undefined&&vehicle.batteryV<12.4)return 'Battery is at '+vehicle.batteryV+'V. Check the charging situation.';
@@ -3986,13 +3989,13 @@ function getActivityCoordinates(d) {
   var meta = d.meta || {};
   var tripCoords = meta.currentLocationCoords;
   var vehicle = d.vehicle || {};
-  var hasFlight = (d.itinerary || []).some(function(row) {
+  var isFlight = meta.transportMode === 'flight' || (d.itinerary || []).some(function(row) {
     return (row.type || '').toUpperCase() === 'FLIGHT';
   });
   var validTrip = tripCoords && isFinite(Number(tripCoords.lat)) && isFinite(Number(tripCoords.lon));
   var validVehicle = isFinite(Number(vehicle.lat)) && isFinite(Number(vehicle.lon))
     && vehicle.lat !== null && vehicle.lat !== '' && vehicle.lon !== null && vehicle.lon !== '';
-  if (hasFlight && validTrip) return {lat:Number(tripCoords.lat),lon:Number(tripCoords.lon),source:'itinerary'};
+  if (isFlight && validTrip) return {lat:Number(tripCoords.lat),lon:Number(tripCoords.lon),source:'itinerary'};
   if (validVehicle) return {lat:Number(vehicle.lat),lon:Number(vehicle.lon),source:'vehicle'};
   if (validTrip) return {lat:Number(tripCoords.lat),lon:Number(tripCoords.lon),source:'itinerary'};
   return {lat:null,lon:null,source:'none'};
