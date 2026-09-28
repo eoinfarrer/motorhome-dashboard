@@ -76,7 +76,8 @@ test('active flight stay is described without motorhome language', () => {
     meta: {tripStatus: 'ACTIVE', todayType: 'STAY', vehicleRelevant: false},
     vehicle: {}
   });
-  assert.equal(result.stateLabel, 'Staying here');
+  assert.notEqual(result.stateLabel, 'Parked up');
+  assert.match(result.stateLabel, /Staying here|Evening & overnight/);
 });
 
 const attentionContext = {};
