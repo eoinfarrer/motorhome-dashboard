@@ -82,6 +82,29 @@ test('maps useful OpenStreetMap tags into export categories', () => {
   assert.equal(context.categoriseRoutePoi_({shop: 'bicycle'}), 'bike_repair');
   assert.equal(context.categoriseRoutePoi_({amenity: 'toilets'}), 'toilets');
   assert.equal(context.categoriseRoutePoi_({tourism: 'viewpoint'}), 'viewpoint');
+  assert.equal(context.categoriseRoutePoi_({natural: 'peak'}), 'viewpoint');
+  assert.equal(context.categoriseRoutePoi_({natural: 'saddle'}), 'viewpoint');
+  assert.equal(context.categoriseRoutePoi_({mountain_pass: 'yes'}), 'viewpoint');
+});
+
+test('summits and mountain passes export as Garmin summit course points', () => {
+  const route = context.normaliseEnrichmentRoute_({
+    points: [{lat: 54.44, lon: -3.1}, {lat: 54.45, lon: -3.08}]
+  });
+  const summit = context.buildRoutePoiCandidate_({
+    osmId: 'node/3', lat: 54.445, lon: -3.09,
+    tags: {natural: 'peak', name: 'Example Pike'}
+  }, route.points, 'hiking');
+  const pass = context.buildRoutePoiCandidate_({
+    osmId: 'node/4', lat: 54.445, lon: -3.09,
+    tags: {mountain_pass: 'yes', name: 'Example Pass'}
+  }, route.points, 'cycling');
+  assert.equal(summit.categoryLabel, 'Summit');
+  assert.equal(summit.fitType, 'summit');
+  assert.match(summit.coursePointName, /^SUMMIT /);
+  assert.equal(pass.categoryLabel, 'Mountain pass');
+  assert.equal(pass.fitType, 'summit');
+  assert.match(pass.coursePointName, /^PASS /);
 });
 
 test('excludes private POIs and prepares public POIs for later FIT export', () => {
@@ -122,6 +145,8 @@ test('Overpass query follows the supplied route corridor', () => {
   assert.match(query, /drinking_water/);
   assert.match(query, /bicycle/);
   assert.match(query, /viewpoint/);
+  assert.match(query, /mountain_pass/);
+  assert.match(query, /saddle/);
   assert.equal((query.match(/around:/g) || []).length, 1);
 });
 
@@ -131,6 +156,21 @@ test('long routes are bounded to one eighty-point Overpass corridor', () => {
   assert.equal(sampled.length, 80);
   assert.equal(sampled[0].distanceM, 0);
   assert.equal(sampled[79].distanceM, 4990);
+});
+
+test('browser route lookup uses the approved non-Russian endpoint and mountain tags', () => {
+  const browserQuery = {};
+  vm.createContext(browserQuery);
+  vm.runInContext(frontendFunctionSource('routeOverpassQuery'), browserQuery);
+  const query = browserQuery.routeOverpassQuery({
+    route: {points: [{lat: 54.44, lon: -3.1}, {lat: 54.45, lon: -3.08}]},
+    settings: {corridorM: 400}
+  });
+  assert.match(query, /mountain_pass/);
+  assert.match(query, /saddle/);
+  assert.equal((query.match(/around:/g) || []).length, 1);
+  assert.match(frontend, /https:\/\/overpass-api\.de\/api\/interpreter/);
+  assert.doesNotMatch(frontend, /maps\.mail\.ru/);
 });
 
 test('POI rows separate the name from metadata and avoid duplicate fallback labels', () => {
