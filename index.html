@@ -4422,6 +4422,7 @@ function routeEnrichmentPayload(route){
 
 async function loadRouteEnrichment(){
   if(!actSelectedRoute||!actSelectedRoute.gpx)return;
+  actFitExportStatus='';
   actRouteEnrichment={loading:true,pois:[]};
   refreshRouteEnrichmentCard();
   try{
