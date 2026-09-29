@@ -36,12 +36,16 @@ function degreesToSemicircles(value) {
 }
 
 function hashText(value) {
+  return hashNumber(value).toString(36).slice(-3).toUpperCase().padStart(3, '0');
+}
+
+function hashNumber(value) {
   let hash = 2166136261;
   for (let index = 0; index < value.length; index++) {
     hash ^= value.charCodeAt(index);
     hash = Math.imul(hash, 16777619);
   }
-  return (hash >>> 0).toString(36).slice(-3).toUpperCase().padStart(3, '0');
+  return hash >>> 0;
 }
 
 function deviceCourseName(name, points) {
@@ -79,6 +83,7 @@ export function encodeCourse(options = {}) {
     ? options.startTime : new Date();
   const sport = options.activityType === 'hiking' ? 'hiking' : 'cycling';
   const name = deviceCourseName(options.name, route);
+  const serialNumber = hashNumber(name + '|' + route[0].lat + ',' + route[0].lon + '|' + totalDistanceM) || 1;
   const pointsByRecord = new Map();
 
   (Array.isArray(options.coursePoints) ? options.coursePoints : []).forEach((point) => {
@@ -96,10 +101,21 @@ export function encodeCourse(options = {}) {
   const encoder = new Encoder();
   encoder.onMesg(Profile.MesgNum.FILE_ID, {
     type: 'course', manufacturer: 'development', product: 1,
-    serialNumber: 0, timeCreated: startTime
+    serialNumber, timeCreated: startTime
   });
   encoder.onMesg(Profile.MesgNum.COURSE, {
     sport, name, capabilities: COURSE_CAPABILITIES
+  });
+  const finish = records[records.length - 1];
+  const endTime = new Date(startTime.getTime() + totalSeconds * 1000);
+  encoder.onMesg(Profile.MesgNum.LAP, {
+    messageIndex: 0, timestamp: endTime, startTime,
+    startPositionLat: degreesToSemicircles(records[0].lat),
+    startPositionLong: degreesToSemicircles(records[0].lon),
+    endPositionLat: degreesToSemicircles(finish.lat),
+    endPositionLong: degreesToSemicircles(finish.lon),
+    totalElapsedTime: totalSeconds, totalTimerTime: totalSeconds,
+    totalDistance: totalDistanceM, sport, event: 'lap', eventType: 'stop'
   });
   encoder.onMesg(Profile.MesgNum.EVENT, {
     timestamp: startTime, event: 'timer', eventType: 'start'
@@ -128,19 +144,8 @@ export function encodeCourse(options = {}) {
     });
   });
 
-  const finish = records[records.length - 1];
-  const endTime = new Date(startTime.getTime() + totalSeconds * 1000);
   encoder.onMesg(Profile.MesgNum.EVENT, {
-    timestamp: endTime, event: 'timer', eventType: 'stopAll'
-  });
-  encoder.onMesg(Profile.MesgNum.LAP, {
-    messageIndex: 0, timestamp: endTime, startTime,
-    startPositionLat: degreesToSemicircles(records[0].lat),
-    startPositionLong: degreesToSemicircles(records[0].lon),
-    endPositionLat: degreesToSemicircles(finish.lat),
-    endPositionLong: degreesToSemicircles(finish.lon),
-    totalElapsedTime: totalSeconds, totalTimerTime: totalSeconds,
-    totalDistance: totalDistanceM, sport, event: 'lap', eventType: 'stop'
+    timestamp: endTime, event: 'timer', eventType: 'stopDisableAll'
   });
 
   return {bytes: encoder.close(), name, recordCount: records.length, coursePointCount: coursePointIndex};
@@ -150,6 +155,9 @@ export function inspectCourse(bytes) {
   const stream = Stream.fromByteArray(Array.from(bytes));
   const decoder = new Decoder(stream);
   const integrity = decoder.checkIntegrity();
-  const decoded = decoder.read();
-  return {integrity, errors: decoded.errors, messages: decoded.messages};
+  const messageSequence = [];
+  const decoded = decoder.read({
+    mesgListener: (messageNumber) => messageSequence.push(Profile.types.mesgNum[messageNumber])
+  });
+  return {integrity, errors: decoded.errors, messages: decoded.messages, messageSequence};
 }
