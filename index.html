@@ -4482,7 +4482,7 @@ async function loadRouteEnrichment(){
     actSelectedRoute.enrichment=result;
   }catch(error){
     var message=error&&error.name==='AbortError'
-      ?'Map search took too long. Tap Retry to try the backup provider.'
+      ?'Map search took too long. Tap Retry to try again.'
       :(error.message||'Route enrichment failed');
     actRouteEnrichment={loading:false,error:message,pois:[]};
   }
@@ -4573,7 +4573,8 @@ function buildRouteEnrichmentCard(){
   if(!result)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Garmin FIT course</div><div class="route-enrich-copy">'+weatherCount+' weather warning'+(weatherCount===1?'':'s')+' ready. Find and select useful stops if you want them included too.</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Find stops</button></div>'
     +(weatherCount?'<div class="route-enrich-actions"><button class="route-enrich-btn primary" type="button" onclick="exportRouteFIT(false)">Download Garmin FIT course</button></div>':'')+'</section>';
   if(result.loading)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-title">Finding useful stops…</div><div class="route-enrich-copy">Checking the OpenStreetMap corridor around this route.</div></section>';
-  if(result.error)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Useful stops unavailable</div><div class="route-enrich-error">'+escapeDoHtml(result.error)+'</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Retry</button></div></section>';
+  if(result.error)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Useful stops unavailable</div><div class="route-enrich-error">'+escapeDoHtml(result.error)+'</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Retry</button></div>'
+    +(weatherCount?'<div class="route-enrich-actions"><button class="route-enrich-btn primary" type="button" onclick="exportRouteFIT(false)">Download Garmin FIT course with '+weatherCount+' weather warning'+(weatherCount===1?'':'s')+'</button></div>':'')+'</section>';
   var pois=result.pois||[],selected=pois.filter(function(poi){return poi.selected;}).length;
   var list=pois.map(function(poi,index){
     var routeKm=(Number(poi.routeDistanceM||0)/1000).toFixed(1),offset=Number(poi.offsetM||0),detour=Number(poi.estimatedDetourM||0);
