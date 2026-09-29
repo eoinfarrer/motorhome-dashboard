@@ -13,6 +13,7 @@ const result = encodeCourse({
     {lat: 46.57, lon: 11.91, elevationM: 1700, distanceM: 4000}
   ],
   coursePoints: [
+    {name: 'High wind', coursePointName: 'WIND HIGH WIND', fitType: 'danger', routeDistanceM: 900},
     {name: 'Village Fountain', coursePointName: 'WATER FOUNTAIN', fitType: 'water', routeDistanceM: 1900},
     {name: 'Rifugio', coursePointName: 'SHELTER RIFUGIO', fitType: 'shelter', routeDistanceM: 3500}
   ]
@@ -26,9 +27,9 @@ test('encodes a valid FIT course with route records and course points', () => {
   assert.equal(inspected.messages.fileIdMesgs[0].type, 'course');
   assert.equal(inspected.messages.courseMesgs[0].sport, 'cycling');
   assert.equal(inspected.messages.recordMesgs.length, 3);
-  assert.equal(inspected.messages.coursePointMesgs.length, 2);
-  assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.type), ['water', 'shelter']);
-  assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.name), ['WATER FOUNTAIN', 'SHELTER RIFUGIO']);
+  assert.equal(inspected.messages.coursePointMesgs.length, 3);
+  assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.type), ['danger', 'water', 'shelter']);
+  assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.name), ['WIND HIGH WIND', 'WATER FOUNTAIN', 'SHELTER RIFUGIO']);
   assert.deepEqual(inspected.messageSequence.slice(0, 4), ['fileId', 'course', 'lap', 'event']);
   assert.equal(inspected.messages.eventMesgs.at(-1).eventType, 'stopDisableAll');
 });
@@ -40,7 +41,8 @@ test('uses a device-safe course name unique within the first fifteen characters'
 
 test('places course points on route records in distance order', () => {
   const points = inspected.messages.coursePointMesgs;
-  assert.ok(points[0].distance <= points[1].distance);
-  assert.equal(points[0].positionLat, inspected.messages.recordMesgs[1].positionLat);
-  assert.equal(points[1].positionLat, inspected.messages.recordMesgs[2].positionLat);
+  assert.ok(points[0].distance <= points[1].distance && points[1].distance <= points[2].distance);
+  assert.equal(points[0].positionLat, inspected.messages.recordMesgs[0].positionLat);
+  assert.equal(points[1].positionLat, inspected.messages.recordMesgs[1].positionLat);
+  assert.equal(points[2].positionLat, inspected.messages.recordMesgs[2].positionLat);
 });

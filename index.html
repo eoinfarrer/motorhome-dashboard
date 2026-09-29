@@ -3477,14 +3477,11 @@ function renderCyclingResults(data) {
  
   html += '</div>';
  
-  // Alert GPX download
+  // Garmin export is handled in Do so weather warnings and selected POIs share one FIT course.
   if (hasAlerts) {
     html += '<div class="cycling-gpx-download">'
-      + '<div style="font-size:12px;font-weight:600;color:var(--go);margin-bottom:4px">Alert GPX ready</div>'
-      + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:10px">'
-      + 'Waypoint alerts at risk segments — load to Garmin Connect tonight, syncs overnight.</div>'
-      + '<button onclick="downloadAlertGPX()" style="width:100%;padding:11px;background:var(--go);color:#fff;border:none;border-radius:6px;font-family:var(--ui);font-size:13px;font-weight:700;cursor:pointer">'
-      + 'Download alert GPX</button>'
+      + '<div style="font-size:12px;font-weight:600;color:var(--go);margin-bottom:4px">Weather warnings ready for Garmin</div>'
+      + '<div style="font-size:11px;color:var(--text-dim)">Open this route in Do to combine these warnings with selected useful stops in one FIT course.</div>'
       + '</div>';
   }
  
@@ -4501,11 +4498,28 @@ function toggleRoutePoi(index,checked){
   refreshRouteEnrichmentCard();
 }
 
+function routeWeatherCoursePoints(){
+  if(!actSelectedRoute||!Array.isArray(actSelectedRoute.segments))return[];
+  var analysed=actAnalysisResults&&Array.isArray(actAnalysisResults.segments)?actAnalysisResults.segments:[];
+  return actSelectedRoute.segments.map(function(segment,index){
+    return Object.assign({},segment,analysed[index]||{});
+  }).filter(function(segment){
+    return segment.type!=='start'&&segment.overallRisk&&segment.overallRisk!=='ok';
+  }).map(function(segment){
+    var risk=segment.risks&&segment.risks.length?segment.risks[0]:null;
+    var label=String(risk&&risk.label||'Check conditions').replace(/[^\x00-\x7F]/g,'').replace(/\s+/g,' ').trim();
+    var prefix=String(risk&&risk.type||'alert').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)||'ALERT';
+    return{name:label||'Weather alert',coursePointName:(prefix+' '+(label||'WEATHER')).toUpperCase().slice(0,24),fitType:'danger',
+      routeDistanceM:Math.max(0,Number(segment.distanceKm||0)*1000),source:'weather'};
+  });
+}
+
 function buildSelectedRouteFit(){
   if(!actSelectedRoute||!actSelectedRoute.gpx)throw new Error('Open a route before exporting');
   if(!window.AudreyFit||!window.AudreyFit.encodeCourse)throw new Error('FIT exporter did not load');
   var selected=(actRouteEnrichment&&actRouteEnrichment.pois||[]).filter(function(poi){return poi.selected;});
-  if(!selected.length)throw new Error('Select at least one useful stop');
+  var weatherPoints=routeWeatherCoursePoints(),coursePoints=weatherPoints.concat(selected);
+  if(!coursePoints.length)throw new Error('Select a useful stop or analyse a route with weather warnings');
   var settings=actSelectedRoute.settings||getActivityDefaultSettings(actSelectedRoute.type);
   var result=window.AudreyFit.encodeCourse({
     name:actSelectedRoute.name||actSelectedRoute.gpx.name||'Audrey route',
@@ -4515,10 +4529,12 @@ function buildSelectedRouteFit(){
     points:actSelectedRoute.gpx.points.map(function(point){return{
       lat:point.lat,lon:point.lon,elevationM:point.ele,distanceM:Number(point.distanceKm||0)*1000
     };}),
-    coursePoints:selected
+    coursePoints:coursePoints
   });
   var inspection=window.AudreyFit.inspectCourse(result.bytes);
   if(!inspection.integrity||inspection.errors.length)throw new Error('Generated FIT file failed validation');
+  result.weatherPointCount=weatherPoints.length;
+  result.selectedPoiCount=selected.length;
   return result;
 }
 
@@ -4553,7 +4569,9 @@ function refreshRouteEnrichmentCard(){
 
 function buildRouteEnrichmentCard(){
   var result=actRouteEnrichment||(actSelectedRoute&&actSelectedRoute.enrichment)||null;
-  if(!result)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Useful stops on this route</div><div class="route-enrich-copy">Find water, food, toilets, repair, shelters, viewpoints, summits and mountain passes close to the course.</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Find stops</button></div></section>';
+  var weatherCount=routeWeatherCoursePoints().length;
+  if(!result)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Garmin FIT course</div><div class="route-enrich-copy">'+weatherCount+' weather warning'+(weatherCount===1?'':'s')+' ready. Find and select useful stops if you want them included too.</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Find stops</button></div>'
+    +(weatherCount?'<div class="route-enrich-actions"><button class="route-enrich-btn primary" type="button" onclick="exportRouteFIT(false)">Download Garmin FIT course</button></div>':'')+'</section>';
   if(result.loading)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-title">Finding useful stops…</div><div class="route-enrich-copy">Checking the OpenStreetMap corridor around this route.</div></section>';
   if(result.error)return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Useful stops unavailable</div><div class="route-enrich-error">'+escapeDoHtml(result.error)+'</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Retry</button></div></section>';
   var pois=result.pois||[],selected=pois.filter(function(poi){return poi.selected;}).length;
@@ -4566,10 +4584,10 @@ function buildRouteEnrichmentCard(){
   }).join('');
   return '<section class="route-enrich" id="route-enrichment-card"><div class="route-enrich-head"><div><div class="route-enrich-title">Useful stops on this route</div><div class="route-enrich-copy">'+pois.length+' candidates in route order. Select the points to carry into export.</div></div><button class="route-enrich-btn" type="button" onclick="loadRouteEnrichment()">Refresh</button></div>'
     +(pois.length?'<div class="route-enrich-list">'+list+'</div>':'<div class="route-enrich-copy" style="margin-top:10px">No matching stops were found inside the current corridor.</div>')
-    +(selected?'<div class="route-enrich-actions"><button class="route-enrich-btn primary" type="button" onclick="exportRouteFIT(false)">Download FIT course</button><button class="route-enrich-btn" type="button" onclick="exportRouteFIT(true)">Share FIT</button></div>':'')
+    +(selected||weatherCount?'<div class="route-enrich-actions"><button class="route-enrich-btn primary" type="button" onclick="exportRouteFIT(false)">Download Garmin FIT course</button><button class="route-enrich-btn" type="button" onclick="exportRouteFIT(true)">Share FIT</button></div>':'')
     +(actFitExportStatus?'<div class="route-enrich-status">'+escapeDoHtml(actFitExportStatus)+'</div>':'')
-    +(selected?'<details class="route-enrich-help"><summary>Seeing these points on Garmin</summary><p>Enable Course Points in Garmin Connect map layers. On a compatible device, follow the course to see points on the map and in Next Waypoint. Garmin may remove third-party course points during Connect import.</p></details>':'')
-    +'<div class="route-enrich-foot">'+selected+' selected · exports as genuine FIT course points. '+escapeDoHtml(result.attribution||'')+'</div></section>';
+    +(selected||weatherCount?'<details class="route-enrich-help"><summary>Seeing these points on Garmin</summary><p>Enable Course Points in Garmin Connect map layers. On a compatible device, follow the course to see points on the map and in Next Waypoint. Garmin may remove third-party course points during Connect import.</p></details>':'')
+    +'<div class="route-enrich-foot">'+selected+' selected stop'+(selected===1?'':'s')+' · '+weatherCount+' weather warning'+(weatherCount===1?'':'s')+' · exports together as genuine FIT course points. '+escapeDoHtml(result.attribution||'')+'</div></section>';
 }
 
 function getActivityDefaultSettings(type){
@@ -4771,13 +4789,12 @@ function renderActAnalysis(type, data, segments) {
       + '</div>';
   }
  
-  // Alert GPX
+  // Weather warnings are carried into the combined Garmin FIT export below.
   var hasAlerts = segs.some(function(s){ return s.overallRisk && s.overallRisk !== 'ok'; });
   if (hasAlerts) {
     html += '<div class="act-gpx-card">'
-      + '<div class="act-gpx-title">Alert GPX ready for Garmin</div>'
-      + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">Waypoint alerts at risk segments — sync overnight.</div>'
-      + '<button class="act-btn ' + analyseBtn + '" onclick="actDownloadGPX()">Download alert GPX</button>'
+      + '<div class="act-gpx-title">Weather warnings ready for Garmin</div>'
+      + '<div style="font-size:11px;color:var(--text-dim)">Risk points will be included in the Garmin FIT course below with any useful stops you select.</div>'
       + '</div>';
   } else {
     html += '<div style="padding:10px 14px;font-size:11px;color:var(--go)">No alerts — conditions clear throughout</div>';

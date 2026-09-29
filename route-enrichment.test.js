@@ -180,14 +180,37 @@ test('POI rows separate the name from metadata and avoid duplicate fallback labe
       attribution: 'Map data'
     },
     actSelectedRoute: null,
+    actAnalysisResults: null,
     actFitExportStatus: ''
   };
   vm.createContext(ui);
   vm.runInContext([
     frontendFunctionSource('escapeDoHtml'),
+    frontendFunctionSource('routeWeatherCoursePoints'),
     frontendFunctionSource('buildRouteEnrichmentCard')
   ].join('\n'), ui);
   const html = ui.buildRouteEnrichmentCard();
   assert.match(html, /route-poi-name">Toilets<\/span><span class="route-poi-meta">9m off route/);
   assert.doesNotMatch(html, /Toilets · 9m off route/);
+  assert.doesNotMatch(frontend, /Download alert GPX/);
+});
+
+test('weather risks become Garmin danger course points for the combined FIT', () => {
+  const ui = {
+    actSelectedRoute: {segments: [
+      {type: 'start', distanceKm: 0, overallRisk: 'caution'},
+      {type: 'summit', distanceKm: 4.3, overallRisk: 'caution'}
+    ]},
+    actAnalysisResults: {segments: [
+      {risks: [{type: 'wind', label: '⚠ Strong crosswind'}]},
+      {overallRisk: 'caution', risks: [{type: 'wind', label: '⚠ Strong crosswind'}]}
+    ]}
+  };
+  vm.createContext(ui);
+  vm.runInContext(frontendFunctionSource('routeWeatherCoursePoints'), ui);
+  const points = ui.routeWeatherCoursePoints();
+  assert.equal(points.length, 1);
+  assert.equal(points[0].fitType, 'danger');
+  assert.equal(points[0].routeDistanceM, 4300);
+  assert.match(points[0].coursePointName, /^WIND STRONG CROSSWIND/);
 });
