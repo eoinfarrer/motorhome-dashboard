@@ -29,6 +29,8 @@ test('encodes a valid FIT course with route records and course points', () => {
   assert.equal(inspected.messages.coursePointMesgs.length, 2);
   assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.type), ['water', 'shelter']);
   assert.deepEqual(inspected.messages.coursePointMesgs.map(point => point.name), ['WATER FOUNTAIN', 'SHELTER RIFUGIO']);
+  assert.deepEqual(inspected.messageSequence.slice(0, 4), ['fileId', 'course', 'lap', 'event']);
+  assert.equal(inspected.messages.eventMesgs.at(-1).eventType, 'stopDisableAll');
 });
 
 test('uses a device-safe course name unique within the first fifteen characters', () => {

@@ -4,6 +4,7 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 const source = fs.readFileSync(__dirname + '/../marine-backend/RouteEnrichment.js', 'utf8');
+const frontend = fs.readFileSync(__dirname + '/index.html', 'utf8');
 
 function functionSource(name) {
   const start = source.indexOf('function ' + name + '(');
@@ -15,6 +16,18 @@ function functionSource(name) {
     if (source[i] === '}' && --depth === 0) return source.slice(start, i + 1);
   }
   throw new Error('unterminated function ' + name);
+}
+
+function frontendFunctionSource(name) {
+  const start = frontend.indexOf('function ' + name + '(');
+  assert.ok(start >= 0, 'missing frontend function ' + name);
+  const open = frontend.indexOf('{', start);
+  let depth = 0;
+  for (let i = open; i < frontend.length; i++) {
+    if (frontend[i] === '{') depth++;
+    if (frontend[i] === '}' && --depth === 0) return frontend.slice(start, i + 1);
+  }
+  throw new Error('unterminated frontend function ' + name);
 }
 
 const context = {
@@ -109,6 +122,7 @@ test('Overpass query follows the supplied route corridor', () => {
   assert.match(query, /drinking_water/);
   assert.match(query, /bicycle/);
   assert.match(query, /viewpoint/);
+  assert.equal((query.match(/around:/g) || []).length, 1);
 });
 
 test('long routes are bounded to one eighty-point Overpass corridor', () => {
@@ -117,4 +131,23 @@ test('long routes are bounded to one eighty-point Overpass corridor', () => {
   assert.equal(sampled.length, 80);
   assert.equal(sampled[0].distanceM, 0);
   assert.equal(sampled[79].distanceM, 4990);
+});
+
+test('POI rows separate the name from metadata and avoid duplicate fallback labels', () => {
+  const ui = {
+    actRouteEnrichment: {
+      pois: [{name: 'Toilets', categoryLabel: 'Toilets', routeDistanceM: 8200, offsetM: 9, estimatedDetourM: 17, selected: false}],
+      attribution: 'Map data'
+    },
+    actSelectedRoute: null,
+    actFitExportStatus: ''
+  };
+  vm.createContext(ui);
+  vm.runInContext([
+    frontendFunctionSource('escapeDoHtml'),
+    frontendFunctionSource('buildRouteEnrichmentCard')
+  ].join('\n'), ui);
+  const html = ui.buildRouteEnrichmentCard();
+  assert.match(html, /route-poi-name">Toilets<\/span><span class="route-poi-meta">9m off route/);
+  assert.doesNotMatch(html, /Toilets · 9m off route/);
 });
