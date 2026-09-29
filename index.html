@@ -1305,6 +1305,7 @@ function getVanHealth(d){
   var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
   if(cabin.level==='caution'&&v.cabinTempC!==null&&v.cabinTempC!==undefined)add('caution','Cabin temperature is '+cabin.label.toLowerCase()+'.','cabin');
   if(garage.level!=='go'&&v.garageTempC!==null&&v.garageTempC!==undefined)add(garage.level,'Garage temperature is '+garage.label.toLowerCase()+'.','garage');
+  if(v.habitationDoorClosed===false&&String(v.habitationDoorStatus||'').toUpperCase()==='OK')add('caution','The habitation door is open.','door');
   if(lpg&&(lpg.alert==='CRITICAL'||lpg.alert==='LOW'))add(lpg.alert==='CRITICAL'?'danger':'caution',lpg.statusMsg||'LPG level is low. Consider a refill.','lpg');
   var level=issues.some(function(issue){return issue.level==='danger';})?'danger':issues.length?'caution':unavailable?'context':'go';
   var title=unavailable?'Vehicle telemetry unavailable':'Van&rsquo;s happy',copy=unavailable?'Current vehicle state cannot be confirmed.':'Everything looks normal.';
@@ -1323,6 +1324,9 @@ function buildVanView(d,fc){
   var battery=v.batteryV!==null&&v.batteryV!==undefined?v.batteryV+'V':'—';
   var cabin=vanTemperatureState(v.cabinTempC,'cabin'),garage=vanTemperatureState(v.garageTempC,'garage');
   var cabinHumidity=vanHumidityState(v.cabinHumidityPct),garageHumidity=vanHumidityState(v.garageHumidityPct);
+  var doorKnown=v.habitationDoorClosed===true||v.habitationDoorClosed===false;
+  var doorLabel=doorKnown?(v.habitationDoorClosed?'Closed':'Open'):'Unavailable';
+  var doorColor=doorKnown?(v.habitationDoorClosed?'#8ac59b':'#e2b161'):'#a4a9a0';
   var tank=Number(fc&&fc.tankLitres),litres=lpg&&lpg.litres!==null&&lpg.litres!==undefined?Number(lpg.litres):null;
   var hasTank=isFinite(tank)&&tank>0,pct=hasTank&&litres!==null?Math.max(0,Math.min(100,Math.round(litres/tank*100))):null;
   var lpgLevel=lpg&&lpg.alert==='CRITICAL'?'danger':lpg&&lpg.alert==='LOW'?'caution':'go';
@@ -1350,6 +1354,7 @@ function buildVanView(d,fc){
     +'</section>');
   parts.push('<section class="van-surface"><div class="van-section-label">Fuel</div><div class="van-surface-title">Running costs</div><div class="van-fuel-facts"><div class="van-fuel-fact"><div class="van-fuel-label">Diesel</div><div class="van-fuel-value">'+(fc&&fc.pricePerLitre?'£'+fc.pricePerLitre.toFixed(2)+'/L':'—')+'</div></div><div class="van-fuel-fact"><div class="van-fuel-label">Motorhome MPG</div><div class="van-fuel-value">'+(fc&&fc.mpg?fc.mpg.toFixed(1):'—')+'</div></div>'+(nextDrive?'<div class="van-fuel-fact"><div class="van-fuel-label">Next drive</div><div class="van-fuel-value">£'+nextDrive.cost+'</div></div>':'')+'</div><details class="van-details"><summary>Fuel price settings</summary><div class="van-price-row"><span>Diesel <strong>£'+(fc&&fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'diesel\',\''+(fc&&fc.pricePerLitre||1.182)+'\')">Edit</button></div><div class="van-price-row"><span>LPG <strong>£'+(fc&&fc.lpgPrice?fc.lpgPrice.toFixed(2):'—')+'/L</strong></span><button class="van-edit-btn" type="button" onclick="editPrice(\'lpg\',\''+(fc&&fc.lpgPrice||0.95)+'\')">Edit</button></div></details></section>');
   parts.push('<section class="van-surface"><div class="van-section-label">Vehicle</div><div class="van-surface-title">Vehicle detail</div><div class="van-detail-list"><div class="van-detail-row"><span>Location</span><strong>'+(map?'<a class="van-map-link" href="'+map+'" target="_blank">'+location+' ↗</a>':location)+'</strong></div><div class="van-detail-row"><span>Telemetry</span><strong>'+telemetry.state+' · '+telemetry.age+'</strong></div><div class="van-detail-row"><span>Last poll</span><strong>'+timestamp+'</strong></div><div class="van-detail-row"><span>Odometer</span><strong>'+(v.odometerMiles?v.odometerMiles.toLocaleString()+' mi':'—')+(v.odometerSource?' · '+v.odometerSource:'')+'</strong></div><div class="van-detail-row"><span>Elevation</span><strong>'+(v.vanElevationM!==null&&v.vanElevationM!==undefined?v.vanElevationM.toLocaleString()+'m':'—')+'</strong></div></div></section>');
+  parts.push('<section class="van-surface"><div class="van-surface-head"><div><div class="van-section-label">Access</div><div class="van-surface-title">Habitation door</div></div><div class="van-surface-meta">'+(v.habitationDoorStatus||'UNKNOWN')+'</div></div><div class="van-power-value" style="color:'+doorColor+'">'+doorLabel+'</div><div class="van-power-status">'+(doorKnown&&v.habitationDoorChangedAt?'Changed '+vanReadingAge(v.habitationDoorChangedAt):doorKnown?'Current state from Samsara':'Door sensor is not configured or has no reading')+'</div></section>');
   parts.push('</div></div></div></div>');
   return parts.join('');
 }
