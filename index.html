@@ -4434,24 +4434,29 @@ function routeOverpassQuery(payload){
 }
 
 async function fetchRouteMapFeatures(payload){
-  var controller=typeof AbortController!=='undefined'?new AbortController():null;
-  var timeoutId=controller?setTimeout(function(){controller.abort();},22000):null;
-  try{
-    var response=await fetch('https://overpass-api.de/api/interpreter',{
-      method:'POST',credentials:'omit',
-      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
-      body:'data='+encodeURIComponent(routeOverpassQuery(payload)),
-      signal:controller?controller.signal:undefined
-    });
-    if(!response.ok)throw new Error('OpenStreetMap returned HTTP '+response.status);
-    var data=await response.json(),elements=Array.isArray(data.elements)?data.elements:[];
-    return elements.slice(0,400).map(function(element){
-      var point=element.center||element;
-      return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
-    }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
-  }finally{
-    if(timeoutId)clearTimeout(timeoutId);
+  var body='data='+encodeURIComponent(routeOverpassQuery(payload)),lastError=null;
+  for(var attempt=0;attempt<3;attempt++){
+    var controller=typeof AbortController!=='undefined'?new AbortController():null;
+    var timeoutId=controller?setTimeout(function(){controller.abort();},12000):null;
+    try{
+      var response=await fetch('https://overpass-api.de/api/interpreter',{
+        method:'POST',credentials:'omit',
+        headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
+        body:body,signal:controller?controller.signal:undefined
+      });
+      if(!response.ok){lastError=new Error('OpenStreetMap returned HTTP '+response.status);continue;}
+      var data=await response.json(),elements=Array.isArray(data.elements)?data.elements:[];
+      return elements.slice(0,400).map(function(element){
+        var point=element.center||element;
+        return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
+      }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
+    }catch(error){
+      lastError=error;
+    }finally{
+      if(timeoutId)clearTimeout(timeoutId);
+    }
   }
+  throw lastError||new Error('OpenStreetMap route search is temporarily unavailable');
 }
 
 async function loadRouteEnrichment(){
