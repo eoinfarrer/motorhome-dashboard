@@ -43,7 +43,11 @@ test('SnowSure unavailable values remain null and season metadata is exposed', (
   row[54] = 'https://www.snowsure.ai/resorts/alta-badia';
 
   const snowSheet = {getDataRange: () => ({getValues: () => [headers, row]})};
-  const ss = {getSheetByName: name => name === 'SnowStatus' ? snowSheet : null};
+  const passSheet = {getDataRange: () => ({getValues: () => [
+    ['Pass', 'Status', 'Updated', 'Detail', 'Source URL', 'Source'],
+    ['Gardena Pass', '✅ Open', '2026-12-10 08:00', 'Keine Beschränkungen.', 'https://example.com/pass', 'Official traffic centre']
+  ]})};
+  const ss = {getSheetByName: name => name === 'SnowStatus' ? snowSheet : name === 'PassStatus' ? passSheet : null};
   const context = {console};
   vm.createContext(context);
   vm.runInContext([
@@ -61,6 +65,10 @@ test('SnowSure unavailable values remain null and season metadata is exposed', (
   assert.equal(resort.seasonOpeningDate, '2026-12-05');
   assert.equal(resort.forecastConfidence, 'low');
   assert.match(resort.webcamUrl, /webcam/);
+  const pass = context.buildSnowStatus_(ss).passes[0];
+  assert.equal(pass.name, 'Gardena Pass');
+  assert.match(pass.detail, /Keine/);
+  assert.match(pass.sourceUrl, /^https:/);
 });
 
 test('Snow depth trend stores one sample per day and keeps fourteen days', () => {
