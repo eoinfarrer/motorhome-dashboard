@@ -1238,8 +1238,9 @@ function buildMoreSettingsHtml(d,fc){
     var context=[];
     if(resort.elevationM)context.push(resort.elevationM+'m');
     if(live.statusLabel)context.push(live.statusLabel);
-    if(snowHasNumber(live.snowDepthCm))context.push(live.snowDepthCm+'cm base');
-    if(snowHasNumber(live.snow7dCm))context.push((live.snow7dCm>0?'+':'')+live.snow7dCm+'cm / 7d');
+    var liveDepth=snowBaseDepth(live);
+    if(liveDepth!==null)context.push(liveDepth+'cm base');
+    if(live.isOpen!==false&&snowHasNumber(live.snow7dCm))context.push((live.snow7dCm>0?'+':'')+live.snow7dCm+'cm / 7d');
     html+='<div class="resort-row" id="rr-'+resort.name.replace(/\s/g,'_')+'"><div><div class="resort-name-s'+(active?'':' inactive')+'">'+resort.name+'</div><div class="resort-sub-s">'+context.join(' · ')+'</div></div><div class="resort-row-right"><button class="toggle '+(active?'toggle-on':'toggle-off')+'" onclick="toggleResortActive(this,\''+resort.name+'\')" aria-label="Toggle '+resort.name+'"><div class="toggle-knob"></div></button><span class="toggle-lbl '+(active?'toggle-lbl-on':'toggle-lbl-off')+'">'+(active?'Active':'Off')+'</span><button class="remove-btn" onclick="removeResort(\''+resort.name+'\')" title="Remove resort">✕</button></div></div>';
   });
   var latestSnow=snowResorts.filter(function(resort){return resort.updated;})[0];
@@ -2364,6 +2365,12 @@ function snowHasNumber(value){
   return value!==null&&value!==undefined&&value!==''&&isFinite(Number(value));
 }
 
+function snowBaseDepth(resort){
+  if(!resort)return null;
+  if(Object.prototype.hasOwnProperty.call(resort,'snowDepthCm'))return snowHasNumber(resort.snowDepthCm)?Number(resort.snowDepthCm):null;
+  return snowHasNumber(resort.snowCm)?Number(resort.snowCm):null;
+}
+
 function snowDateLabel(value){
   if(!value)return'';
   var date=new Date(value+'T00:00:00');
@@ -2548,7 +2555,7 @@ function buildSnowSection(snow, meta, itin) {
       +'</div></div></div>'
 
       // Snow history strip
-      +([r.snow24hCm,r.snow7dCm,r.seasonTotalCm].some(snowHasNumber)
+      +(r.isOpen!==false&&[r.snow24hCm,r.snow7dCm,r.seasonTotalCm].some(snowHasNumber)
         ?'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)">'
           +[
             {label:'24h snow',  val:r.snow24hCm,     unit:'cm'},
@@ -3852,7 +3859,7 @@ function getDoSkiDecision(resort){
   var adverse=/\b(closed|closure|unsafe|storm|strong winds?|high winds?|not recommended|road closed|no skiing)\b/.test(text);
   var operationalText=/\b(resort|lifts?|skiing)\s+(?:is\s+)?open\b|\bopen\s+(?:resort|lifts?|skiing)\b/.test(text);
   var positive=/\b(clear|good|excellent|skiing conditions)\b/.test(text);
-  var snowDepth=snowHasNumber(resort.snowDepthCm)?resort.snowDepthCm:(snowHasNumber(resort.snowCm)?resort.snowCm:null);
+  var snowDepth=snowBaseDepth(resort);
   var wind=Number(resort.topWindKh!==undefined?resort.topWindKh:resort.windKmh);
   var hasWind=isFinite(wind)&&wind>0;
   var defaultWhen='Open resort detail for the latest mountain conditions.';
@@ -3874,9 +3881,9 @@ function buildDoSkiOpportunity(resort,index,decision){
   var evidence=[];
   if(snowHasNumber(resort.liftsOpen)&&snowHasNumber(resort.liftsTotal))evidence.push(resort.liftsOpen+'/'+resort.liftsTotal+' lifts');
   if(snowHasNumber(resort.runsOpen)&&snowHasNumber(resort.runsTotal))evidence.push(resort.runsOpen+'/'+resort.runsTotal+' runs');
-  var depth=snowHasNumber(resort.snowDepthCm)?resort.snowDepthCm:(snowHasNumber(resort.snowCm)?resort.snowCm:null);
+  var depth=snowBaseDepth(resort);
   if(depth!==null)evidence.push(depth+'cm base');
-  if(snowHasNumber(resort.snow7dCm))evidence.push((resort.snow7dCm>0?'+':'')+resort.snow7dCm+'cm in 7d');
+  if(resort.isOpen!==false&&snowHasNumber(resort.snow7dCm))evidence.push((resort.snow7dCm>0?'+':'')+resort.snow7dCm+'cm in 7d');
   if(snowHasNumber(resort.ssScore))evidence.push('Score '+resort.ssScore);
   if(resort.surfaceCondition)evidence.push(resort.surfaceCondition);
   return '<button class="do-opportunity do-'+decision.level+'" type="button" onclick="openDoSkiResort('+index+')"><div class="do-opportunity-status">'+decision.status+'</div><div class="do-opportunity-title">'+(resort.name||'Ski area')+'</div>'
@@ -5015,8 +5022,7 @@ function switchSkiResort(idx, el) {
  
 function buildSkiResortDetail(r, meta) {
   if (!r) return '';
-  var hasScore=snowHasNumber(r.ssScore),hasDepth=snowHasNumber(r.snowDepthCm)||snowHasNumber(r.snowCm);
-  var depth=snowHasNumber(r.snowDepthCm)?r.snowDepthCm:r.snowCm;
+  var depth=snowBaseDepth(r),hasScore=snowHasNumber(r.ssScore),hasDepth=depth!==null;
   var scoreColor = !hasScore?'var(--text-muted)':r.ssScore >= 80 ? 'var(--go)' : r.ssScore >= 60 ? 'var(--caution)' : 'var(--danger)';
   var liftText=snowHasNumber(r.liftsOpen)&&snowHasNumber(r.liftsTotal)?r.liftsOpen+'/'+r.liftsTotal:'—';
   var status=r.statusLabel||(r.isOpen===true?'Open':r.isOpen===false?'Out of season':'Status unavailable');
@@ -5032,7 +5038,7 @@ function buildSkiResortDetail(r, meta) {
     + '<div class="do-ski-metric"><span class="do-ski-metric-label">Piste</span><span class="do-ski-metric-value">' + (snowHasNumber(r.midTempC) ? r.midTempC + '°' : '—') + '</span></div>'
     + '<div class="do-ski-metric"><span class="do-ski-metric-label">Summit</span><span class="do-ski-metric-value">' + (snowHasNumber(r.topTempC) ? r.topTempC + '°' : '—') + '</span></div>'
     + '</div>'
-    + (snowHasNumber(r.snow7dCm)?'<div class="do-ski-tagline">'+(r.snow7dCm>0?'+':'')+r.snow7dCm+'cm in the last 7 days'+(r.depthSource?' · '+r.depthSource:'')+'</div>':'')
+    + (r.isOpen!==false&&snowHasNumber(r.snow7dCm)?'<div class="do-ski-tagline">'+(r.snow7dCm>0?'+':'')+r.snow7dCm+'cm in the last 7 days'+(r.depthSource?' · '+r.depthSource:'')+'</div>':'')
     + (r.ssTagline ? '<div class="do-ski-tagline">' + r.ssTagline + '</div>' : '')
     + buildSnowDepthTrend(r)
     + ((snowHasNumber(r.forecastLowCm)||snowHasNumber(r.forecastHighCm)||r.forecastConfidence)?'<div class="do-ski-road">Next '+(r.forecastHorizonDays||7)+' days: <strong>'+(snowHasNumber(r.forecastLowCm)&&snowHasNumber(r.forecastHighCm)?r.forecastLowCm+'–'+r.forecastHighCm+'cm':'range unavailable')+(r.forecastConfidence?' · '+r.forecastConfidence+' confidence':'')+'</strong></div>':'')

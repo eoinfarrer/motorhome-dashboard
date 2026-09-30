@@ -85,6 +85,7 @@ const uiContext = {isFinite, Number, Math, Date};
 vm.createContext(uiContext);
 vm.runInContext([
   functionSource(frontend, 'snowHasNumber'),
+  functionSource(frontend, 'snowBaseDepth'),
   functionSource(frontend, 'snowDateLabel'),
   functionSource(frontend, 'getSkiDisplayMode'),
   functionSource(frontend, 'getDoSkiDecision'),
@@ -112,6 +113,8 @@ test('off-season null operations are not presented as zero open lifts', () => {
     runsOpen: null,
     runsTotal: 95,
     snowDepthCm: null,
+    snowCm: 0,
+    snow7dCm: 0,
     ssScore: null
   };
   const decision = uiContext.getDoSkiDecision(resort);
@@ -119,6 +122,7 @@ test('off-season null operations are not presented as zero open lifts', () => {
   assert.equal(decision.status, 'SEASON WATCH');
   assert.doesNotMatch(html, /0\/53 lifts/);
   assert.doesNotMatch(html, /0cm base/);
+  assert.doesNotMatch(html, /0cm in 7d/);
   assert.match(html, /Closed for the season/);
 });
 
