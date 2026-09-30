@@ -123,4 +123,7 @@ test('Van shows an open habitation door and raises an attention item', () => {
   assert.ok(health.issues.some(issue => issue.key === 'door'));
   assert.match(html, /Habitation door/);
   assert.match(html, />Open</);
+  assert.match(html, /van-power-value van-door-value/);
+  assert.ok(html.indexOf('Habitation door') > html.indexOf('Inside the van'));
+  assert.ok(html.indexOf('Habitation door') < html.indexOf('Running costs'));
 });
