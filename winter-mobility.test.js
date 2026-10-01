@@ -26,6 +26,8 @@ vm.runInContext([
   functionSource(frontend, 'getDoStayLocation'),
   functionSource(frontend, 'winterMobilityDestinations_'),
   functionSource(frontend, 'findWinterPass_'),
+  functionSource(frontend, 'translateWinterPassDetail_'),
+  functionSource(frontend, 'winterPassRestrictionApplies_'),
   functionSource(frontend, 'assessWinterPass_'),
   functionSource(frontend, 'buildExploreFromHere')
 ].join('\n'), context);
@@ -57,13 +59,38 @@ test('rental car profile ignores trailer-only restrictions but respects closures
   assert.equal(closed.level, 'danger');
 });
 
-test('motorhome profile retains official vehicle restrictions', () => {
+test('8m motorhome ignores restrictions for vehicles over 12m', () => {
   const result = context.assessWinterPass_({
     status: '🟠 Restricted',
     detail: 'Fahrverbot für Fahrzeuge mit einer Länge über 12 m.'
   }, 'motorhome');
+  assert.equal(result.level, 'go');
+  assert.equal(result.label, 'OPEN FOR 8M VAN');
+  assert.match(result.copy, /vehicles over 12m are prohibited/);
+  assert.match(result.copy, /does not apply/);
+});
+
+test('8m motorhome retains restrictions that actually apply', () => {
+  const result = context.assessWinterPass_({
+    status: '🟠 Restricted',
+    detail: 'Fahrverbot für Fahrzeuge mit einer Länge über 7,5 m.'
+  }, 'motorhome');
   assert.equal(result.level, 'caution');
   assert.equal(result.label, 'RESTRICTIONS');
+  assert.match(result.copy, /vehicles over 7.5m are prohibited/);
+});
+
+test('current official German pass restrictions do not apply to the 8m motorhome', () => {
+  [
+    'Fahrverbot für alle Fahrzeuge mit Anhänger.',
+    'Fahrverbot für Fahrzeuge mit einem Gewicht über 33 t.',
+    'Verbot für Transporte von verunreinigenden Flüssigkeiten.',
+    'Fahrverbot nur für Sattelschlepper mit einer Höhe über 3,20 m und einer Länge über 13 m.'
+  ].forEach(detail => {
+    const result = context.assessWinterPass_({status: '🟠 Restricted', detail}, 'motorhome');
+    assert.equal(result.level, 'go', detail);
+    assert.equal(result.label, 'OPEN FOR 8M VAN');
+  });
 });
 
 test('Alta Badia winter board offers ad hoc valleys without itinerary drives', () => {

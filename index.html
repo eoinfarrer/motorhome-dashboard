@@ -2040,11 +2040,13 @@ function buildNextDrive(meta,fc,viewId){
           +'<div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px">Passes on route</div>'
           +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
           +passes.map(function(p){
-            var c=p.status.includes('Open')?'var(--go)':p.status.includes('Closed')?'var(--danger)':'var(--caution)';
-            var icon=p.status.includes('Open')?'✅':p.status.includes('Closed')?'❌':'⚠️';
+            var profile=currentData.meta&&currentData.meta.vehicleRelevant===false?'rental-car':'motorhome';
+            var assessed=assessWinterPass_(p,profile);
+            var c=assessed.level==='go'?'var(--go)':assessed.level==='danger'?'var(--danger)':'var(--caution)';
+            var icon=assessed.level==='go'?'✅':assessed.level==='danger'?'❌':'⚠️';
             return'<span style="font-size:11px">'
               +icon+' <span style="color:var(--text-dim)">'+p.name.replace(' Pass','')+'</span>'
-              +' <strong style="color:'+c+'">'+p.status.replace('✅ ','').replace('❌ ','').replace('⚠️ ','')+'</strong>'
+              +' <strong style="color:'+c+'">'+assessed.label+'</strong>'
               +'</span>';
           }).join('<span style="color:var(--border2)">&nbsp;·&nbsp;</span>')
           +'</div></div>';
@@ -3787,15 +3789,44 @@ function findWinterPass_(passes,name){
   return(passes||[]).find(function(pass){return String(pass.name||'').toLowerCase().replace(/\s+/g,'')===wanted;})||null;
 }
 
+function translateWinterPassDetail_(detail){
+  var text=String(detail||'').trim(),lower=text.toLowerCase(),notes=[];
+  if(!text)return'Check the official road report';
+  if(/keine beschränkungen|frei befahrbar/.test(lower))return'No restrictions reported';
+  if(/wintersperre|geschlossen|nicht befahrbar|gesperrt/.test(lower))return'Road closed by the official traffic authority';
+  if(/anhänger/.test(lower))notes.push('trailers are prohibited');
+  var lengthMatch=lower.match(/länge über\s*([\d,.]+)\s*m/);
+  if(lengthMatch)notes.push('vehicles over '+lengthMatch[1].replace(',','.')+'m are prohibited');
+  var weightMatch=lower.match(/gewicht über\s*([\d,.]+)\s*t/);
+  if(weightMatch)notes.push('vehicles over '+weightMatch[1].replace(',','.')+' tonnes are prohibited');
+  if(/sattelschlepper/.test(lower))notes.push('restriction applies to articulated lorries');
+  if(/verunreinigenden flüssigkeiten/.test(lower))notes.push('polluting liquid loads are prohibited');
+  if(/schneeketten|kettenpflicht/.test(lower))notes.push('snow chains are required');
+  return notes.length?notes.join('; '):text;
+}
+
+function winterPassRestrictionApplies_(detail,profile){
+  var lower=String(detail||'').toLowerCase();
+  if(!lower)return true;
+  if(/schnee|winterausrüstung|glatt|\beis\b|schneeketten|kettenpflicht|einbahn|zeitweise|nachtsperre/.test(lower))return true;
+  var vehicleLength=profile==='rental-car'?5:8;
+  var lengthMatches=Array.from(lower.matchAll(/länge über\s*([\d,.]+)\s*m/g));
+  if(lengthMatches.some(function(match){return vehicleLength>Number(match[1].replace(',','.'));}))return true;
+  var knownNonApplicable=/anhänger|sattelschlepper|gewicht über\s*33\s*t|verunreinigenden flüssigkeiten|länge über\s*(?:12|13)(?:[,.]0)?\s*m/.test(lower);
+  var clauses=lower.split(/\.\s*/).filter(function(clause){return /fahrverbot|verbot|beschränkung/.test(clause);});
+  if(clauses.length&&clauses.every(function(clause){return /anhänger|sattelschlepper|gewicht über\s*33\s*t|verunreinigenden flüssigkeiten|länge über\s*(?:12|13)(?:[,.]0)?\s*m/.test(clause);}))return false;
+  return !knownNonApplicable;
+}
+
 function assessWinterPass_(pass,profile){
   if(!pass)return{level:'check',label:'CHECK',copy:'Status not yet available'};
   var status=String(pass.status||'').toLowerCase(),detail=String(pass.detail||'');
   if(/closed|gesperrt|wintersperre|geschlossen/.test(status+' '+detail.toLowerCase()))return{level:'danger',label:'CLOSED',copy:'Official road feed reports a closure'};
   if(/unknown/.test(status))return{level:'check',label:'CHECK',copy:'No current official status'};
   if(/restricted|partial|limited/.test(status)){
-    var carRelevant=/schnee|winter|glatt|eis|ketten|alle fahrzeuge(?! mit anhänger)|einbahn|zeitweise|nachtsperre|sperre/.test(detail.toLowerCase());
-    if(profile==='rental-car'&&!carRelevant)return{level:'go',label:'OPEN FOR CAR',copy:'Restriction applies to larger vehicles or trailers'};
-    return{level:'caution',label:'RESTRICTIONS',copy:detail||'Check the official restriction before setting off'};
+    var applies=winterPassRestrictionApplies_(detail,profile);
+    if(!applies)return{level:'go',label:profile==='rental-car'?'OPEN FOR CAR':'OPEN FOR 8M VAN',copy:translateWinterPassDetail_(detail)+' — does not apply to this vehicle'};
+    return{level:'caution',label:'RESTRICTIONS',copy:translateWinterPassDetail_(detail)};
   }
   if(/open/.test(status))return{level:'go',label:'OPEN',copy:'No restriction reported'};
   return{level:'check',label:'CHECK',copy:detail||'Confirm conditions before setting off'};
@@ -3806,7 +3837,7 @@ function buildExploreFromHere(d){
   if(meta.season!=='winter'||!passes.length)return'';
   var base=getDoStayLocation(d)||'your stay';
   var profile=meta.vehicleRelevant===false?'rental-car':'motorhome';
-  var profileLabel=profile==='rental-car'?'Rental car · winter tyres':'Motorhome · vehicle restrictions apply';
+  var profileLabel=profile==='rental-car'?'Rental car · winter tyres':'8m motorhome · no trailer';
   var destinations=winterMobilityDestinations_(base);
   if(!destinations.length)destinations=passes.map(function(pass){return{name:pass.name,route:'Mountain-road conditions',passes:[pass.name]};});
   var severity={go:0,check:1,caution:2,danger:3};
@@ -3816,7 +3847,8 @@ function buildExploreFromHere(d){
     if(destination.alternate&&worst.level==='danger')worst={level:'caution',label:'ALTERNATE ROUTE'};
     return'<div class="do-mobility-card"><div class="do-mobility-card-head"><div class="do-mobility-destination">'+escapeDoHtml(destination.name)+'</div><div class="do-mobility-state '+worst.level+'">'+escapeDoHtml(worst.label)+'</div></div>'
       +'<div class="do-mobility-route">'+escapeDoHtml(destination.route)+'</div>'
-      +'<div class="do-mobility-pass">'+checks.map(function(item){return escapeDoHtml(item.name)+' · '+escapeDoHtml(item.result.label);}).join(' &nbsp;·&nbsp; ')+'</div></div>';
+      +'<div class="do-mobility-pass">'+checks.map(function(item){return escapeDoHtml(item.name)+' · '+escapeDoHtml(item.result.label);}).join(' &nbsp;·&nbsp; ')+'</div>'
+      +(worst.copy?'<div class="do-mobility-route">'+escapeDoHtml(worst.copy)+'</div>':'')+'</div>';
   }).join('');
   var latest=passes.map(function(pass){return pass.updated||'';}).filter(Boolean).sort().pop()||'';
   var sourcePass=passes.find(function(pass){return safeDoUrl(pass.sourceUrl);});
