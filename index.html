@@ -109,6 +109,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .home-opportunity-copy{margin-top:5px;color:var(--home-glass-muted);font-size:11px;line-height:1.5;}
 .home-opportunity-action{display:inline-block;margin-top:10px;padding:0;border:0;background:none;color:#8ac59b;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;cursor:pointer;}
 .home-opportunity-action:hover{text-decoration:underline;}
+.home-activity{padding:16px 17px;border:1px solid rgba(138,197,155,.34);border-radius:16px;background:rgba(26,43,31,.72);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}.home-activity-head{display:flex;align-items:flex-start;gap:11px;}.home-activity-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:rgba(138,197,155,.14);font-size:18px;}.home-activity-main{min-width:0;flex:1;}.home-activity-title{overflow:hidden;color:var(--home-glass-text);font-family:var(--ui);font-size:16px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.home-activity-meta{margin-top:4px;color:var(--home-glass-muted);font-size:11px;line-height:1.45;}.home-activity-source{margin-top:8px;color:#8ac59b;font-size:9px;letter-spacing:.7px;text-transform:uppercase;}
 .home-calm-status{display:flex;align-items:center;gap:9px;padding:16px 17px;border:1px solid var(--home-glass-border);border-radius:16px;background:var(--home-glass-secondary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);color:var(--home-glass-text);}
 .home-calm-status::before{content:'✓';display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(80,159,103,.2);color:#8ac59b;font-family:var(--display);font-weight:800;}
 .home-calm-status-title{font-family:var(--ui);font-size:14px;font-weight:700;}
@@ -167,6 +168,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .journey-date{padding-top:2px;font-size:9px;color:#9fa198;line-height:1.3;}.journey-date strong{display:block;color:#dedfd8;font-size:11px;font-weight:600;}
 .journey-stop{color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;line-height:1.25;}.journey-stop-meta{margin-top:2px;font-size:9px;color:#a8aaa1;line-height:1.4;}.journey-type{padding:3px 5px;border-radius:5px;background:rgba(255,255,255,.08);color:#b9bbb2;font-size:7px;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;}
 .journey-trip-details{grid-column:2/-1;margin-top:1px;padding-top:2px;border-top:1px solid rgba(255,255,255,.055);}.journey-trip-details summary{font-size:9px;color:#83b9c7;cursor:pointer;}.journey-trip-detail{margin-top:5px;font-size:9px;color:#a8aaa1;line-height:1.45;}.journey-trip-detail a{color:#83b9c7;text-decoration:none;}
+.journey-activity-point::before{border-color:#77b78b;background:#77b78b;}.journey-activity-card{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid rgba(119,183,139,.28);border-radius:12px;background:rgba(28,45,33,.55);box-shadow:0 7px 18px rgba(0,0,0,.13);}.journey-activity-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(138,197,155,.13);font-size:18px;}.journey-activity-name{overflow:hidden;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.journey-activity-meta{margin-top:3px;color:#a8aaa1;font-size:9px;line-height:1.4;}.journey-activity-link{color:#8ec4d5;font-size:9px;text-decoration:none;white-space:nowrap;}
 .more-intro{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim);}
 
 /* ── AUDREY 2.0 MORE ─────────────────────────────────────────
@@ -175,6 +177,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .more-experience{--bg:#171a17;--bg2:#20251f;--bg3:#2a3029;--text:#f4f3ed;--text-dim:#c4c7be;--text-muted:#a4a9a0;--border:rgba(255,255,255,.1);--border2:rgba(255,255,255,.17);min-height:calc(100vh - 74px);padding:14px;color:#f4f3ed;background:linear-gradient(155deg,#171917,#22251f 55%,#191c19);}.more-canvas{width:min(100%,820px);margin:0 auto;}.more-head{padding:19px 6px 16px;}.more-eyebrow,.more-group-label{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}.more-title{margin-top:5px;font-family:var(--ui);font-size:clamp(24px,5.5vw,31px);font-weight:700;letter-spacing:-.65px;line-height:1.12;}.more-subtitle{margin-top:6px;color:#b9bcb3;font-family:var(--ui);font-size:13px;}.more-group{margin-top:22px;}.more-group:first-of-type{margin-top:0;}.more-group-label{margin:0 6px 9px;color:#b7b9b0;}.more-trip-content,.more-config-panel,.more-system-panel{display:grid;gap:10px;}.more-experience .section{overflow:hidden;margin:0;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(23,27,25,.76);box-shadow:0 10px 24px rgba(0,0,0,.18);backdrop-filter:blur(12px);}.more-experience .section-head{padding:12px 14px;background:rgba(255,255,255,.055);}.more-experience .section-head:hover{background:rgba(255,255,255,.09);}.more-experience .section-title{color:#e4e5de;}.more-experience .section-meta{color:#aeb2a9;}.more-experience .section-chevron{color:#cbb88f;}.more-experience .weather-loc-head{background:rgba(8,11,9,.28);border-color:rgba(255,255,255,.08);color:#d7d8d0;}.more-experience .weather-row{border-color:rgba(255,255,255,.08);}.more-experience .weather-row.today{background:rgba(203,184,143,.09);}.more-experience .weather-date,.more-experience .weather-condition,.more-experience .weather-nums{color:#c4c7be;}.more-experience .weather-date strong{color:#f4f3ed;}.more-experience .settings-group{margin:0;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(23,27,25,.76);}.more-experience .settings-group-head{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.08);}.more-experience .settings-group-title{color:#b7b9b0;}.more-experience .settings-row,.more-experience .resort-row{border-color:rgba(255,255,255,.08);}.more-experience .settings-row-label,.more-experience .resort-name-s{color:#e8e8e1;}.more-experience .settings-row-value{color:#f4f3ed;}.more-experience .settings-row-unit,.more-experience .resort-sub-s,.more-experience .settings-note{color:#aeb2a9;}.more-experience .settings-note{background:rgba(8,11,9,.25);border-color:rgba(255,255,255,.08);}.more-experience .trip-select,.more-experience .add-resort-input{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:#f4f3ed;}.more-experience .s-edit-btn,.more-experience .add-resort-btn{border-color:rgba(255,255,255,.18);color:#a9d3df;}.more-experience .toggle{border-color:rgba(255,255,255,.2);}.more-system{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.7);box-shadow:0 8px 20px rgba(0,0,0,.15);}.more-system-summary{padding:13px 14px;color:#a9d3df;font-family:var(--mono);font-size:10px;cursor:pointer;}.more-system-body{padding:0 14px 14px;border-top:1px solid rgba(255,255,255,.08);}.more-system-copy{margin:11px 0;color:#b7b9b0;font-size:11px;line-height:1.45;}.more-system-btn{width:100%;padding:10px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:rgba(255,255,255,.06);color:#d9dad3;font-family:var(--ui);font-size:12px;font-weight:700;cursor:pointer;}.more-system-btn:hover{border-color:#cbb88f;color:#f4f3ed;}.more-system-status{min-height:16px;margin-top:7px;color:#aeb2a9;font-size:10px;text-align:center;}.more-data-note{padding:15px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.65);color:#b7b9b0;font-size:11px;line-height:1.5;}.more-system-meta{padding:13px 14px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.65);color:#b7b9b0;font-size:11px;line-height:1.5;}.more-system-meta strong{color:#f4f3ed;font-weight:600;}
 .more-experience details.settings-group>.settings-group-head{display:block;padding:9px 14px;cursor:pointer;list-style:none;}.more-experience details.settings-group>.settings-group-head::-webkit-details-marker{display:none;}
 .more-experience .weather-empty{padding:15px 14px;color:#b7b9b0;font-size:11px;line-height:1.5;}.more-experience .weather-empty strong{display:block;margin-bottom:3px;color:#e4e5de;font-family:var(--ui);font-size:13px;}
+.more-activity-panel{overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(23,27,25,.72);box-shadow:0 8px 20px rgba(0,0,0,.15);}.more-activity-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(255,255,255,.05);}.more-activity-title{color:#e4e5de;font-family:var(--ui);font-size:14px;font-weight:700;}.more-activity-sync{color:#aeb2a9;font-size:9px;text-align:right;}.more-activity-list{display:grid;}.more-activity-row{display:grid;grid-template-columns:31px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 13px;border-top:1px solid rgba(255,255,255,.07);}.more-activity-row:first-child{border-top:0;}.more-activity-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.06);font-size:15px;}.more-activity-name{overflow:hidden;color:#efefe8;font-family:var(--ui);font-size:12px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.more-activity-meta{margin-top:3px;color:#aeb2a9;font-size:9px;line-height:1.4;}.more-activity-link{color:#a9d3df;font-size:9px;text-decoration:none;}.more-activity-empty{padding:14px;color:#b7b9b0;font-size:11px;line-height:1.5;}
 @media(min-width:800px){.more-experience{min-height:calc(100vh - 63px);padding:clamp(22px,4vw,48px);}.more-head{padding:6px 0 18px;}.more-trip-content{gap:12px;}}
 
 /* ── AUDREY 2.0 VAN ──────────────────────────────────────────
@@ -1217,9 +1220,28 @@ function buildMoreView(d,fc){
   return '<div class="more-experience"><div class="more-canvas">'
     +'<header class="more-head"><div class="more-eyebrow">Audrey · More</div><div class="more-title">Details and settings</div><div class="more-subtitle">Deeper trip evidence, configuration and maintenance.</div></header>'
     +'<section class="more-group"><div class="more-group-label">Trip detail</div><div class="more-trip-content">'+trip.join('')+'</div></section>'
+    +'<section class="more-group"><div class="more-group-label">Activity history</div>'+buildMoreActivityHistory(d.activities)+'</section>'
     +'<section class="more-group"><div class="more-group-label">Configuration</div><div class="more-config-panel" id="settingsPanel">'+buildMoreSettingsHtml(d,fc)+'</div></section>'
     +'<section class="more-group"><div class="more-group-label">System</div><div class="more-system-meta"><strong>Data updated</strong><br>'+timestamp+' · Use the header Refresh for a normal update.</div><details class="more-system"><summary class="more-system-summary">Advanced system</summary><div class="more-system-body"><div class="more-system-copy">Run all backend modules only when you need a manual maintenance refresh.</div><button class="more-system-btn" type="button" onclick="runAllModulesNow()">Run all modules now</button><div class="more-system-status" id="runAllStatus"></div></div></details></section>'
     +'</div></div>';
+}
+
+function buildMoreActivityHistory(state){
+  state=state||{};
+  var items=Array.isArray(state.items)?state.items:[],sync=state.sync||{};
+  var syncText=sync.lastSync&&!isNaN(new Date(sync.lastSync).getTime())
+    ?'Synced '+new Date(sync.lastSync).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+    :'Waiting for first sync';
+  var rows=items.slice(0,30).map(function(activity){
+    var name=escapeDoHtml(activity.name||activity.sportType||'Activity');
+    var date=activity.date?fmtDate(activity.date):'';
+    var meta=[date,escapeDoHtml(activity.category||activity.sportType||'Activity')].concat(activityMetricParts(activity)).filter(Boolean).join(' · ');
+    return '<div class="more-activity-row"><div class="more-activity-icon">'+activityIcon(activity)+'</div>'
+      +'<div><div class="more-activity-name">'+name+'</div><div class="more-activity-meta">'+meta+'</div></div>'
+      +(activity.url?'<a class="more-activity-link" target="_blank" rel="noopener" href="'+escapeDoHtml(activity.url)+'">Strava ↗</a>':'')+'</div>';
+  }).join('');
+  return '<div class="more-activity-panel"><div class="more-activity-head"><div class="more-activity-title">Completed activities</div><div class="more-activity-sync">'+syncText+'<br>'+(sync.count||0)+' imported</div></div>'
+    +(rows?'<div class="more-activity-list">'+rows+'</div>':'<div class="more-activity-empty">Activities will appear after the next successful Strava sync.</div>')+'</div>';
 }
 
 function buildMoreSettingsHtml(d,fc){
@@ -1517,6 +1539,7 @@ function buildJourneyRouteDetails(points){
 
 function buildJourneyTrip(d,fc){
   var meta=d.meta||{},itin=d.itinerary||[],rt=d.runningTotal;
+  var tripActivities=d.activities&&Array.isArray(d.activities.tripItems)?d.activities.tripItems:[];
   var completed=meta.tripStatus==='POST_TRIP';
   var totalKm=rt&&rt.totalKm!==undefined?rt.totalKm:itin.reduce(function(sum,row){return sum+(Number(row.distanceKm)||0);},0);
   var dates=itin.map(function(row){return row.date;}).filter(function(date){return /^\d{4}-\d{2}-\d{2}$/.test(date||'');}).sort();
@@ -1536,7 +1559,13 @@ function buildJourneyTrip(d,fc){
     +'</div></section><div class="journey-section-title">'+(completed?'Completed timeline':'Trip timeline')+'</div>';
   if(!itin.length)return html+'<div class="journey-point-card"><div class="journey-point-title">No itinerary entries available</div></div>';
   html+='<div class="journey-timeline">';
-  itin.forEach(function(row){html+=buildJourneyTripPoint(row,completed,fc);});
+  itin.forEach(function(row,index){
+    html+=buildJourneyTripPoint(row,completed,fc);
+    if(!itin[index+1]||itin[index+1].date!==row.date){
+      tripActivities.filter(function(activity){return (activity.tripDate||activity.date)===row.date;})
+        .forEach(function(activity){html+=buildJourneyActivityPoint(activity);});
+    }
+  });
   return html+'</div>';
 }
 
@@ -1569,6 +1598,16 @@ function buildJourneyTripPoint(row,completed,fc){
     +'<span class="journey-type">'+type+'</span>'
     +(details.length?'<details class="journey-trip-details"><summary>Details</summary>'+details.join('')+'</details>':'')
     +'</div></div>';
+}
+
+function buildJourneyActivityPoint(activity){
+  var name=escapeDoHtml(activity.name||activity.sportType||'Completed activity');
+  var meta=[escapeDoHtml(activity.tripLocation||activity.location||''),activity.sportType?escapeDoHtml(activity.sportType):'']
+    .concat(activityMetricParts(activity)).filter(Boolean).join(' · ');
+  return '<div class="journey-point journey-activity-point is-complete"><div class="journey-activity-card">'
+    +'<div class="journey-activity-icon">'+activityIcon(activity)+'</div><div><div class="journey-activity-name">'+name+'</div>'
+    +'<div class="journey-activity-meta">'+meta+'</div></div>'
+    +(activity.url?'<a class="journey-activity-link" target="_blank" rel="noopener" href="'+escapeDoHtml(activity.url)+'">View ↗</a>':'')+'</div></div>';
 }
 
 function journeyTimelineKind(type){
@@ -1727,6 +1766,9 @@ function buildHomeView(d,fc){
     else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
     else parts.push(buildHomeOpportunity(d,context));
   }
+  if(d.activities&&Array.isArray(d.activities.today)&&d.activities.today.length){
+    parts.push(buildHomeActivityCard(d.activities.today));
+  }
   if(context.mode==='pretrip'){
     var pretripWeather=getHomePretripWeather(d);
     if(pretripWeather.length)parts.push(buildHomePretripWeather(pretripWeather));
@@ -1737,6 +1779,42 @@ function buildHomeView(d,fc){
   if(meta.vehicleRelevant!==false)parts.push(buildHomeVehicleStatus(d.vehicle));
   parts.push('</div></div></div>');
   return parts.join('');
+}
+
+function buildHomeActivityCard(activities){
+  var activity=activities[0]||{};
+  var extra=activities.length>1?' · '+activities.length+' activities today':'';
+  return '<section class="home-activity"><div class="home-section-label">Completed today</div><div class="home-activity-head">'
+    +'<div class="home-activity-icon">'+activityIcon(activity)+'</div><div class="home-activity-main">'
+    +'<div class="home-activity-title">'+escapeDoHtml(activity.name||activity.sportType||'Activity')+'</div>'
+    +'<div class="home-activity-meta">'+activityMetricParts(activity).join(' · ')+extra+'</div>'
+    +'<div class="home-activity-source">Recorded with Strava</div></div></div>'
+    +'<button class="home-opportunity-action" type="button" onclick="switchAppView(\'more\')">View activity history →</button></section>';
+}
+
+function activityMetricParts(activity){
+  var parts=[];
+  if(Number(activity.distanceKm)>0)parts.push(formatActivityNumber(activity.distanceKm,1)+' km');
+  var minutes=Number(activity.movingMinutes)||Number(activity.elapsedMinutes)||0;
+  if(minutes>0)parts.push(fmtDuration(Math.round(minutes)));
+  if(Number(activity.elevationM)>0)parts.push(Math.round(activity.elevationM)+'m climbing');
+  return parts;
+}
+
+function formatActivityNumber(value,decimals){
+  var number=Number(value)||0;
+  return number.toFixed(decimals).replace(/\.0$/,'');
+}
+
+function activityIcon(activity){
+  var type=String(activity&&activity.sportType||'').toLowerCase();
+  if(/ski|snow/.test(type))return'⛷';
+  if(/ride|cycl|bike/.test(type))return'🚴';
+  if(/hike|walk|trail/.test(type))return'🥾';
+  if(/padel|tennis|pickle|squash|badminton|racquet/.test(type))return'🎾';
+  if(/run/.test(type))return'🏃';
+  if(/swim|kayak|canoe|row|surf|sail/.test(type))return'🌊';
+  return'●';
 }
 
 function getHomeContext(d){
