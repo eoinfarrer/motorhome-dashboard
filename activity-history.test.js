@@ -70,6 +70,21 @@ test('More shows import status and activity history', () => {
   assert.match(html, /12 imported/);
   assert.match(html, /Morning hike/);
   assert.match(html, /Walking &amp; hiking/);
+  assert.match(html, /^<details class="more-activity-panel">/);
+  assert.doesNotMatch(html, /<details[^>]+open/);
+});
+
+test('More limits the collapsible history to the latest 20 activities', () => {
+  const items = Array.from({length: 25}, (_, index) => ({
+    name: `Activity ${index + 1}`,
+    sportType: 'Ride',
+    date: `2026-09-${String(30 - index).padStart(2, '0')}`
+  }));
+  const html = context.buildMoreActivityHistory({sync: {count: 25}, items});
+
+  assert.equal((html.match(/class="more-activity-row"/g) || []).length, 20);
+  assert.match(html, /Activity 20/);
+  assert.doesNotMatch(html, /Activity 21/);
 });
 
 test('Journey inserts activities once after the final itinerary row for that day', () => {
