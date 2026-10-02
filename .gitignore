@@ -1,3 +1,5 @@
 node_modules/
 dist-secure/
-.dev.vars*
+.dev.vars
+.dev.vars.*
+!.dev.vars.example

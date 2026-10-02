@@ -1,0 +1,3 @@
+AUDREY_APPS_SCRIPT_URL="https://script.google.com/macros/s/REPLACE_WITH_SECURE_DEPLOYMENT_ID/exec"
+AUDREY_GATEWAY_SECRET="replace-with-a-random-32-byte-secret"
+AUDREY_ALLOWED_EMAILS="local@audrey.test"
