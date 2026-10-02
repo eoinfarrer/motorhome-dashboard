@@ -1,0 +1,67 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
+
+function access(email = 'owner@example.com') {
+  return {access: {getIdentity: async () => ({email})}};
+}
+
+function env(overrides = {}) {
+  return {
+    AUDREY_ALLOWED_EMAILS: 'owner@example.com',
+    AUDREY_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/secure/exec',
+    AUDREY_GATEWAY_SECRET: 'test-secret',
+    ASSETS: {fetch: async () => new Response('asset')},
+    ...overrides
+  };
+}
+
+test('secure Worker rejects requests without a validated Access identity', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/health'), env(), {}, async () => new Response('{}')
+  );
+  assert.equal(response.status, 401);
+});
+
+test('secure Worker enforces its owner allowlist after Access authentication', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/health'), env(), access('other@example.com')
+  );
+  assert.equal(response.status, 403);
+});
+
+test('secure Worker serves assets to its allowed owner', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/'), env(), access()
+  );
+  assert.equal(await response.text(), 'asset');
+});
+
+test('secure Worker signs and forwards query requests to Apps Script', async () => {
+  let forwarded;
+  const response = await handleRequest(
+    new Request('https://audrey.example/api?trip=Italy%20Winter&action=get_trip_draft'),
+    env(), access(), async (url, options) => {
+      forwarded = {url: new URL(url), options};
+      return new Response(JSON.stringify({success: true}), {
+        headers: {'Content-Type': 'application/json'}
+      });
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(forwarded.options.method, 'GET');
+  assert.match(forwarded.url.searchParams.get('gw_sig'), /^[a-f0-9]{64}$/);
+  assert.ok(forwarded.url.searchParams.get('gw_ts'));
+  assert.equal(forwarded.url.searchParams.get('trip'), 'Italy Winter');
+});
+
+test('gateway signatures are deterministic across query ordering', async () => {
+  const left = canonicalQuery(new URLSearchParams('trip=A%20B&action=get_trip_draft'));
+  const right = canonicalQuery(new URLSearchParams('action=get_trip_draft&trip=A+B'));
+  assert.equal(left, right);
+  assert.equal(
+    await signGatewayRequest('secret', 'GET', 123, left),
+    await signGatewayRequest('secret', 'GET', 123, right)
+  );
+});

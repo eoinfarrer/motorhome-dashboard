@@ -3,7 +3,10 @@
   "private": true,
   "scripts": {
     "build:fit": "esbuild src/fit-export.mjs --bundle --minify --format=iife --global-name=AudreyFit --outfile=assets/fit-export.js",
-    "test": "node --test *.test.js *.test.mjs"
+    "build:secure": "node worker/build-secure.mjs",
+    "dev:secure": "npm run build:secure && npx --yes wrangler@4.45.3 dev",
+    "deploy:secure": "npm run build:secure && npx --yes wrangler@4.45.3 deploy",
+    "test": "node --test *.test.js *.test.mjs worker/*.test.mjs"
   },
   "dependencies": {
     "@garmin/fitsdk": "21.217.0"
