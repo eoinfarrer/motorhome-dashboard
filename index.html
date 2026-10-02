@@ -3773,7 +3773,7 @@ var actRouteEnrichment = null;      // POIs projected onto the active route
 var actFitExportStatus = '';        // most recent FIT export result
 var actSelectedRoute   = null;      // route being analysed
 var actAnalysisResults = null;      // weather results
-var actSavedRoutes     = {trail:[],cycle:[],rwgps:[]};
+var actSavedRoutes     = {trail:[],cycle:[],rwgps:[],strava:[]};
 var currentDoSubview   = 'home';
 var doCyclingOverview  = null;
 var doLocalPlacesRequest = 0;
@@ -4105,10 +4105,12 @@ function openDoSavedActivity(source,type,key){
   currentDoSubview='detail';
   if(source==='curated')actSelectCurated(Number(key),type);
   else if(source==='rwgps')actSelectRWGPS(key,type);
+  else if(source==='strava')actSelectStrava(key,type);
 }
 
 function openDoCyclingOverview(source,key){
-  var route=source==='rwgps'?(actSavedRoutes.rwgps||[]).find(function(item){return String(item.id)===String(key);}):(actSavedRoutes.cycle||[])[Number(key)];
+  var external=source==='rwgps'||source==='strava';
+  var route=external?(actSavedRoutes[source]||[]).find(function(item){return String(item.id)===String(key);}):(actSavedRoutes.cycle||[])[Number(key)];
   if(!route)return openDoBrowse('cycle');
   doCyclingOverview={source:source,key:key,route:route};
   currentDoSubview='overview';
@@ -4127,9 +4129,9 @@ function buildDoCyclingOverview(route){
   if(route.distanceKm!==undefined&&route.distanceKm!==null)meta.push(route.distanceKm+' km');
   if(route.elevationM!==undefined&&route.elevationM!==null)meta.push(route.elevationM.toLocaleString()+' m ascent');
   var settings=doCyclingOverview&&doCyclingOverview.settings?doCyclingOverview.settings:getActivityDefaultSettings('cycle');
-  return '<header class="do-head"><button class="do-browse-back" type="button" onclick="showDoHome()">← Back to DO</button><div class="do-eyebrow">Audrey · Cycling</div></header><section class="do-route-card"><div class="do-section-label">Cycling</div><div class="do-route-name">'+(route.name||'Saved ride')+'</div><div class="do-route-meta">'+(meta.join(' · ')||'Route details available after GPX analysis')+'</div>'
-    +(route.difficulty?'<div class="do-route-meta">'+route.difficulty+(route.area?' · '+route.area:'')+'</div>':route.area?'<div class="do-route-meta">'+route.area+'</div>':'')
-    +(route.notes?'<div class="do-route-meta">'+route.notes+'</div>':'')
+  return '<header class="do-head"><button class="do-browse-back" type="button" onclick="showDoHome()">← Back to DO</button><div class="do-eyebrow">Audrey · Cycling</div></header><section class="do-route-card"><div class="do-section-label">Cycling</div><div class="do-route-name">'+escapeDoHtml(route.name||'Saved ride')+'</div><div class="do-route-meta">'+escapeDoHtml(meta.join(' · ')||'Route details available after GPX analysis')+'</div>'
+    +(route.difficulty?'<div class="do-route-meta">'+escapeDoHtml(route.difficulty+(route.area?' · '+route.area:''))+'</div>':route.area?'<div class="do-route-meta">'+escapeDoHtml(route.area)+'</div>':'')
+    +(route.notes?'<div class="do-route-meta">'+escapeDoHtml(route.notes)+'</div>':'')
     +buildDoCyclingSetup(settings,'Analyse ride →','analyseDoCyclingOverview()')+'</section>';
 }
 
@@ -4144,6 +4146,7 @@ function analyseDoCyclingOverview(){
   currentDoSubview='detail';
   var item=doCyclingOverview;
   if(item.source==='rwgps')actSelectRWGPS(item.key,'cycle');
+  else if(item.source==='strava')actSelectStrava(item.key,'cycle');
   else actSelectCurated(Number(item.key),'cycle');
 }
 
@@ -4162,7 +4165,11 @@ function renderDoMyActivities(){
   ['trail','cycle'].forEach(function(type){
     (actSavedRoutes[type]||[]).forEach(function(route,index){items.push({source:'curated',type:type,key:index,route:route});});
   });
-  (actSavedRoutes.rwgps||[]).forEach(function(route){items.push({source:'rwgps',type:'cycle',key:route.id,route:route});});
+  ['rwgps','strava'].forEach(function(source){
+    (actSavedRoutes[source]||[]).forEach(function(route){
+      items.push({source:source,type:route.audreyType||activityTabForRoute(route),key:route.id,route:route});
+    });
+  });
   if(!items.length){container.innerHTML=buildDoSavedPlaceholder();return;}
   container.innerHTML=items.slice(0,6).map(function(item){
     var route=item.route,meta=[];
@@ -4172,15 +4179,15 @@ function renderDoMyActivities(){
     if(route.durationMin)meta.push(fmtDuration(route.durationMin));
     else if(route.difficulty)meta.push(route.difficulty);
     if(route.area)meta.push(route.area);
-    return '<button class="do-activity-item" type="button" data-source="'+escapeDoHtml(item.source)+'" data-type="'+escapeDoHtml(item.type)+'" data-key="'+escapeDoHtml(item.key)+'" onclick="openDoSavedActivity(this.dataset.source,this.dataset.type,this.dataset.key)"><span><span class="do-activity-name">'+(route.name||'Saved route')+'</span><span class="do-activity-meta">'+(meta.join(' · ')||'Saved activity')+'</span></span><span class="do-activity-distance">'+(route.distanceKm!==undefined&&route.distanceKm!==null?route.distanceKm+' km':'Open')+'</span></button>';
+    return '<button class="do-activity-item" type="button" data-source="'+escapeDoHtml(item.source)+'" data-type="'+escapeDoHtml(item.type)+'" data-key="'+escapeDoHtml(item.key)+'" onclick="openDoSavedActivity(this.dataset.source,this.dataset.type,this.dataset.key)"><span><span class="do-activity-name">'+escapeDoHtml(route.name||'Saved route')+'</span><span class="do-activity-meta">'+escapeDoHtml(meta.join(' · ')||'Saved activity')+'</span></span><span class="do-activity-distance">'+(route.distanceKm!==undefined&&route.distanceKm!==null?route.distanceKm+' km':'Open')+'</span></button>';
   }).join('');
 }
 
 function formatDoActivityType(type){
   if(!type)return'';
   var value=String(type).toLowerCase();
-  if(value==='hiking'||value==='trail')return'Hiking';
-  if(value==='cycling'||value==='cycle'||value==='mtb'||value==='gravel')return'Cycling';
+  if(/hiking|walking|trail|foot/.test(value))return'Hiking';
+  if(/cycling|cycle|bicycle|mtb|gravel/.test(value))return'Cycling';
   if(value==='ski'||value==='skiing')return'Skiing';
   if(value==='water')return'Water';
   return String(type);
@@ -4291,6 +4298,7 @@ function buildActDiscovery(type, location, d) {
     html += '<div class="act-filter-bar">'
       + '<span class="act-chip active" onclick="filterAct(this,\'all\',\'cycle\')">All</span>'
       + '<span class="act-chip" onclick="filterAct(this,\'cycling\',\'cycle\')">🚴 Road</span>'
+      + '<span class="act-chip" onclick="filterAct(this,\'mtb\',\'cycle\')">🚵 MTB</span>'
       + '<span class="act-chip" onclick="filterAct(this,\'gravel\',\'cycle\')">🚵 Gravel</span>'
       + '</div>';
   }
@@ -4312,178 +4320,198 @@ function buildActDiscovery(type, location, d) {
 async function loadActRoutes(location, type) {
   var container = document.getElementById('act-routes-' + type);
   if (!container) return;
- 
+
   try {
     // 1. Fetch curated routes from sheet
-        var params = new URLSearchParams({
+    var params = new URLSearchParams({
       action: 'get_routes',
-      area:   '',  // fetch all routes — filter client side
-      type:   type === 'cycle' ? 'cycling' : type === 'trail' ? 'hiking' : '',
-      _:      Date.now()
+      area: '',
+      type: type === 'cycle' ? 'cycling' : type === 'trail' ? 'hiking' : '',
+      _: Date.now()
     });
     var marineUrl = API_URL + '?' + params.toString();
     var r;
     try {
-      r = await fetch(marineUrl, { redirect: 'follow', headers: { 'Accept': 'application/json' } });
+      r = await fetch(marineUrl, {redirect:'follow',headers:{'Accept':'application/json'}});
     } catch(fetchErr) {
-      r = await fetch(marineUrl, { mode: 'cors', credentials: 'omit', redirect: 'follow' });
+      r = await fetch(marineUrl, {mode:'cors',credentials:'omit',redirect:'follow'});
     }
     if (!r.ok) throw new Error('HTTP ' + r.status);
     var data = await r.json();
     var curated = data.routes || [];
- 
-    // 2. Fetch RideWithGPS routes (cycling tab only)
-    var rwgps = [];
-    var rwgpsStatus = '';
-    if (type === 'cycle') {
-      try {
-        var rwParams = new URLSearchParams({
-          action: 'discover_ridewithgps',
-          page: 1,
-          page_size: 200,
-          _:      Date.now()
-        });
-        var rwR    = await fetch(API_URL + '?' + rwParams.toString(), { redirect: 'follow' });
-        var rwData = await rwR.json();
-        if (rwData.success === false || rwData.error) {
-          rwgpsStatus = rwData.error || 'RideWithGPS could not be loaded';
-        } else {
-          rwgps = rwData.routes || [];
-        }
-      } catch(rwErr) {
-        rwgpsStatus = 'RideWithGPS could not be loaded';
-        console.warn('RideWithGPS fetch failed:', rwErr.message);
-      }
-    }
 
-    // Show saved routes as soon as they arrive. Nearby OpenStreetMap routes
-    // are slower and can enrich the same list when their request completes.
-    renderActRouteList(container, curated, [], type, rwgps, rwgpsStatus, true);
+    // 2. Fetch authenticated route libraries in parallel. Each source is
+    // filtered to this tab and capped so large accounts stay usable.
+    var rwgps = [], rwgpsStatus = '';
+    var strava = [], stravaStatus = '';
+    await Promise.all([
+      (async function(){
+        try {
+          var rwParams = new URLSearchParams({
+            action:'discover_ridewithgps',page:1,page_size:200,_:Date.now()
+          });
+          var rwR = await fetch(API_URL + '?' + rwParams.toString(), {redirect:'follow'});
+          var rwData = await rwR.json();
+          if(rwData.success===false||rwData.error){
+            rwgpsStatus=rwData.error||'RideWithGPS could not be loaded';
+          }else{
+            rwgps=trimExternalRoutesForTab(rwData.routes||[],type,10);
+          }
+        }catch(rwErr){
+          rwgpsStatus='RideWithGPS could not be loaded';
+          console.warn('RideWithGPS fetch failed:',rwErr.message);
+        }
+      })(),
+      (async function(){
+        try {
+          var stravaParams = new URLSearchParams({action:'discover_strava_routes',_:Date.now()});
+          var stravaR = await fetch(API_URL + '?' + stravaParams.toString(), {redirect:'follow'});
+          var stravaData = await stravaR.json();
+          if(stravaData.success===false||stravaData.error){
+            stravaStatus=stravaData.error||'Strava routes could not be loaded';
+          }else{
+            strava=trimExternalRoutesForTab(stravaData.routes||[],type,10);
+          }
+        }catch(stravaErr){
+          stravaStatus='Strava routes could not be loaded';
+          console.warn('Strava route fetch failed:',stravaErr.message);
+        }
+      })()
+    ]);
+
+    // Show saved routes before the slower nearby OpenStreetMap lookup.
+    renderActRouteList(container,curated,[],type,rwgps,rwgpsStatus,strava,stravaStatus,true);
 
     // 3. Discover Overpass routes
     var overpass = [];
     var discoveryCoords = getActivityCoordinates(currentData);
     var ovLat = discoveryCoords.lat;
     var ovLon = discoveryCoords.lon;
-
-        if (ovLat) {
-      console.log('Discovering routes at:', ovLat, ovLon);
-      overpass = await discoverOverpassRoutes(
-        ovLat, ovLon,
-        type === 'cycle' ? 'bicycle' : 'hiking'
-      );
-      console.log('Overpass routes found:', overpass.length);
+    if (ovLat) {
+      console.log('Discovering routes at:',ovLat,ovLon);
+      overpass = await discoverOverpassRoutes(ovLat,ovLon,type==='cycle'?'bicycle':'hiking');
+      console.log('Overpass routes found:',overpass.length);
     } else {
       console.log('No coordinates available for discovery');
     }
- 
-    // Render combined list
-    renderActRouteList(container, curated, overpass, type, rwgps, rwgpsStatus, false);
- 
+
+    renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,false);
   } catch(err) {
-    container.innerHTML = '<div class="act-loading">Could not load routes — tap to upload your own GPX</div>';
+    container.innerHTML='<div class="act-loading">Could not load routes — tap to upload your own GPX</div>';
   }
 }
- 
+
+function activityTabForRoute(route){
+  var values=[route&&route.type,route&&route.activityType,route&&route.activityTypes,route&&route.tags]
+    .filter(Boolean).join(' ').toLowerCase();
+  return /walking|hiking|trail|foot/.test(values)?'trail':'cycle';
+}
+
+function trimExternalRoutesForTab(routes,type,limit){
+  return (routes||[]).filter(function(route){return activityTabForRoute(route)===type;})
+    .sort(function(a,b){
+      var aPriority=(a.saved||a.starred)?1:0,bPriority=(b.saved||b.starred)?1:0;
+      if(aPriority!==bPriority)return bPriority-aPriority;
+      return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);
+    }).slice(0,limit||10).map(function(route){
+      return Object.assign({},route,{audreyType:type});
+    });
+}
+
+function storeExternalSavedRoutes(source,type,routes){
+  var retained=(actSavedRoutes[source]||[]).filter(function(route){return route.audreyType!==type;});
+  actSavedRoutes[source]=retained.concat((routes||[]).map(function(route){
+    return Object.assign({},route,{audreyType:type});
+  }));
+}
+
 // ── Render route list ─────────────────────────────────────
-function renderActRouteList(container, curated, overpass, type, rwgps, rwgpsStatus, loadingNearby) {
-  rwgps = rwgps || [];
-  rwgpsStatus = rwgpsStatus || '';
-  // Keep the loaded collections intact: filters only change the visible cards.
-  actRouteCollections[type]={curated:curated,overpass:overpass,rwgps:rwgps};
+function renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,loadingNearby){
+  rwgps=rwgps||[];rwgpsStatus=rwgpsStatus||'';
+  strava=strava||[];stravaStatus=stravaStatus||'';
+  actRouteCollections[type]={curated:curated,overpass:overpass,rwgps:rwgps,strava:strava};
   var filter=(actCurrentFilters&&actCurrentFilters[type])||'all';
   var visibleCurated=curated.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
   var visibleRWGPS=rwgps.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
+  var visibleStrava=strava.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
   var visibleOverpass=overpass.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
-  var html = '';
- 
-  // Curated routes first
-  if (visibleCurated.length) {
-    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Saved routes</div>';
-    visibleCurated.forEach(function(r) {
+  var html='';
+
+  if(visibleCurated.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Saved routes</div>';
+    visibleCurated.forEach(function(r){
       var i=curated.indexOf(r);
-      var icon = r.type === 'cycling' ? '🚴' : r.type === 'mtb' ? '🚵' : r.type === 'gravel' ? '🚵' : '🥾';
-      var diffCls = r.difficulty.toLowerCase() === 'easy' ? 'act-diff-easy'
-                  : r.difficulty.toLowerCase() === 'hard' ? 'act-diff-hard'
-                  : 'act-diff-mod';
-      html += '<div class="act-route-card" onclick="actSelectCurated(' + i + ',\'' + type + '\')">'
-        + '<div class="act-route-icon">' + icon + '</div>'
-        + '<div class="act-route-left">'
-        + '<div class="act-route-name">' + r.name + '</div>'
-        + '<div class="act-route-meta">' + r.notes + '</div>'
-        + '</div>'
-        + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:' + (type==='cycle'?'var(--do-accent)':'#9bd5a8') + '">' + r.distanceKm + 'km</div>'
-        + '<span class="act-diff ' + diffCls + '">' + r.difficulty + '</span>'
-        + '</div></div>';
-    });
-  }
- 
-  if (visibleRWGPS.length) {
-    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your RideWithGPS routes</div>';
-    visibleRWGPS.forEach(function(r) {
-      var icon = /mountain.?bik|cycling:mountain/i.test((r.activityTypes || []).join(' ') + ' ' + (r.activityType || '')) ? '🚵' : '🚴';
-      html += '<div class="act-route-card" onclick="actSelectRWGPS(' + r.id + ',\'' + type + '\')">'
-        + '<div class="act-route-icon">' + icon + '</div>'
-        + '<div class="act-route-left">'
-        + '<div class="act-route-name">' + r.name + '</div>'
-        + '<div class="act-route-meta">' + r.distanceKm + 'km · ' + r.elevationM + 'm · RideWithGPS</div>'
-        + '</div>'
-        + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:var(--do-accent)">' + r.distanceKm + 'km</div>'
-        + '</div></div>';
-    });
-       window._actRWGPS = rwgps;
-  }
-
-  if (type === 'cycle' && rwgpsStatus) {
-    html += '<div class="act-loading" style="padding:8px 14px">' + escapeDoHtml(rwgpsStatus) + '</div>';
-  }
-
-  if (visibleOverpass.length) {
-    html += '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named routes nearby</div>';
-    visibleOverpass.forEach(function(r) {
-      var i=overpass.indexOf(r);
-      var icon = type === 'cycle' ? '🚴' : '🥾';
-      html += '<div class="act-route-card" onclick="actSelectOverpass(' + i + ',\'' + type + '\')">'
-        + '<div class="act-route-icon">' + icon + '</div>'
-        + '<div class="act-route-left">'
-        + '<div class="act-route-name">' + r.name + '</div>'
-        + '<div class="act-route-meta">' + (r.network ? r.network.toUpperCase() + ' · ' : '') + 'OpenStreetMap</div>'
-        + '</div>'
-        + '<div class="act-route-right">'
-        + '<div class="act-route-dist" style="color:var(--do-text-secondary)">' + (r.distanceKm ? r.distanceKm + 'km' : '—') + '</div>'
-        + '</div></div>';
+      var icon=r.type==='cycling'?'🚴':r.type==='mtb'||r.type==='gravel'?'🚵':'🥾';
+      var difficulty=String(r.difficulty||'moderate');
+      var diffCls=difficulty.toLowerCase()==='easy'?'act-diff-easy':difficulty.toLowerCase()==='hard'?'act-diff-hard':'act-diff-mod';
+      html+='<div class="act-route-card" onclick="actSelectCurated('+i+',\''+type+'\')">'
+        +'<div class="act-route-icon">'+icon+'</div><div class="act-route-left">'
+        +'<div class="act-route-name">'+escapeDoHtml(r.name)+'</div>'
+        +'<div class="act-route-meta">'+escapeDoHtml(r.notes||'')+'</div></div>'
+        +'<div class="act-route-right"><div class="act-route-dist" style="color:'+(type==='cycle'?'var(--do-accent)':'#9bd5a8')+'">'+r.distanceKm+'km</div>'
+        +'<span class="act-diff '+diffCls+'">'+escapeDoHtml(difficulty)+'</span></div></div>';
     });
   }
 
-  if (loadingNearby) {
-    html += '<div class="act-loading" style="padding:10px 14px">Finding named routes nearby…</div>';
+  if(visibleRWGPS.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your RideWithGPS routes</div>';
+    visibleRWGPS.forEach(function(r){
+      var icon=type==='trail'?'🥾':/mountain.?bik|cycling:mountain|gravel/i.test((r.activityTypes||[]).join(' ')+' '+(r.activityType||''))?'🚵':'🚴';
+      html+='<div class="act-route-card" onclick="actSelectRWGPS('+r.id+',\''+type+'\')">'
+        +'<div class="act-route-icon">'+icon+'</div><div class="act-route-left">'
+        +'<div class="act-route-name">'+escapeDoHtml(r.name)+'</div>'
+        +'<div class="act-route-meta">'+r.distanceKm+'km · '+r.elevationM+'m · RideWithGPS'+(r.saved?' · Pinned':'')+'</div></div>'
+        +'<div class="act-route-right"><div class="act-route-dist" style="color:var(--do-accent)">'+r.distanceKm+'km</div></div></div>';
+    });
   }
- 
-  if (!html && !loadingNearby) {
-    html = filter==='all'
-      ?'<div class="act-loading">No routes found nearby — upload your own GPX below</div>'
+  if(rwgpsStatus)html+='<div class="act-loading" style="padding:8px 14px">'+escapeDoHtml(rwgpsStatus)+'</div>';
+
+  if(visibleStrava.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your Strava routes</div>';
+    visibleStrava.forEach(function(r){
+      var icon=type==='trail'?'🥾':/mountain|gravel/i.test((r.activityTypes||[]).join(' '))?'🚵':'🚴';
+      html+='<div class="act-route-card" onclick="actSelectStrava(\''+r.id+'\',\''+type+'\')">'
+        +'<div class="act-route-icon">'+icon+'</div><div class="act-route-left">'
+        +'<div class="act-route-name">'+escapeDoHtml(r.name)+'</div>'
+        +'<div class="act-route-meta">'+r.distanceKm+'km · '+r.elevationM+'m · Strava'+(r.starred?' · ★':'')+'</div></div>'
+        +'<div class="act-route-right"><div class="act-route-dist" style="color:var(--do-accent)">'+r.distanceKm+'km</div></div></div>';
+    });
+  }
+  if(stravaStatus)html+='<div class="act-loading" style="padding:8px 14px">'+escapeDoHtml(stravaStatus)+'</div>';
+
+  if(visibleOverpass.length){
+    html+='<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Named routes nearby</div>';
+    visibleOverpass.forEach(function(r){
+      var i=overpass.indexOf(r),icon=type==='cycle'?(r.routeKind==='mtb'?'🚵':'🚴'):'🥾';
+      html+='<div class="act-route-card" onclick="actSelectOverpass('+i+',\''+type+'\')">'
+        +'<div class="act-route-icon">'+icon+'</div><div class="act-route-left">'
+        +'<div class="act-route-name">'+escapeDoHtml(r.name)+'</div>'
+        +'<div class="act-route-meta">'+(r.routeKind==='mtb'?'MTB · ':'')+(r.network?escapeDoHtml(r.network.toUpperCase())+' · ':'')+'OpenStreetMap</div></div>'
+        +'<div class="act-route-right"><div class="act-route-dist" style="color:var(--do-text-secondary)">'+(r.distanceKm?r.distanceKm+'km':'—')+'</div></div></div>';
+    });
+  }
+
+  if(loadingNearby)html+='<div class="act-loading" style="padding:10px 14px">Finding named routes nearby…</div>';
+  if(!html&&!loadingNearby){
+    html=filter==='all'?'<div class="act-loading">No routes found nearby — upload your own GPX below</div>'
       :'<div class="act-loading">No '+activityFilterLabel(filter)+' routes are currently loaded. Try All or upload your own GPX below.</div>';
   }
- 
-  container.innerHTML = html;
- 
-  // Store for reference
-  if (type === 'trail' || type === 'hiking') {
-    window._actCuratedTrail   = curated;
-    window._actOverpassTrail  = overpass;
-    actSavedRoutes.trail      = curated;
-  } else {
-    window._actCuratedCycle   = curated;
-    window._actOverpassCycle  = overpass;
-    actSavedRoutes.cycle      = curated;
-    actSavedRoutes.rwgps      = rwgps;
+  container.innerHTML=html;
+
+  window._actRWGPSByType=window._actRWGPSByType||{};
+  window._actStravaByType=window._actStravaByType||{};
+  window._actRWGPSByType[type]=rwgps;
+  window._actStravaByType[type]=strava;
+  storeExternalSavedRoutes('rwgps',type,rwgps);
+  storeExternalSavedRoutes('strava',type,strava);
+  if(type==='trail'||type==='hiking'){
+    window._actCuratedTrail=curated;window._actOverpassTrail=overpass;actSavedRoutes.trail=curated;
+  }else{
+    window._actCuratedCycle=curated;window._actOverpassCycle=overpass;actSavedRoutes.cycle=curated;
   }
-  // The DO-level list reflects these existing responses; it does not fetch
-  // routes independently or alter selection/analysis behaviour.
   renderDoMyActivities();
 }
+
 
 function routeMatchesActivityFilter(route,filter,type){
   if(filter==='all')return true;
@@ -4500,48 +4528,89 @@ function activityFilterLabel(filter){
   return {hiking:'walking',mtb:'MTB',cycling:'road',gravel:'gravel',easy:'easy',moderate:'moderate'}[filter]||filter;
 }
  
-// ── Discover routes via Overpass ──────────────────────────
-async function discoverOverpassRoutes(lat, lon, osmType) {
-  try {
-        var query = osmType === 'hiking'
-      ? '[out:json][timeout:20];(relation["route"="hiking"](around:25000,' + lat + ',' + lon + ');relation["route"="foot"](around:25000,' + lat + ',' + lon + '););out body;'
-      : '[out:json][timeout:20];relation["route"="' + osmType + '"](around:25000,' + lat + ',' + lon + ');out body;';
-        // Try twice — Overpass occasionally times out
-    var r;
-    try {
-      r = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: 'data=' + encodeURIComponent(query),
-        signal: AbortSignal.timeout(15000)
+async function fetchOverpassJson(query,timeoutMs){
+  var endpoints=[
+    'https://overpass.private.coffee/api/interpreter',
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter'
+  ];
+  var lastError=null;
+  for(var i=0;i<endpoints.length;i++){
+    try{
+      var response=await fetch(endpoints[i],{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+        body:'data='+encodeURIComponent(query),
+        signal:AbortSignal.timeout(timeoutMs||15000)
       });
-    } catch(e) {
-      // Retry once after 2 seconds
-      await new Promise(function(res){ setTimeout(res, 2000); });
-      r = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: 'data=' + encodeURIComponent(query),
-        signal: AbortSignal.timeout(15000)
-      });
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      return await response.json();
+    }catch(error){
+      lastError=error;
+      console.warn('Overpass request failed:',endpoints[i],error.message);
     }
-    if (!r.ok) return [];
-    var data = await r.json();
-    return (data.elements || [])
-      .filter(function(el){ return el.tags && (el.tags.name || el.tags.ref); })
+  }
+  throw lastError||new Error('Overpass unavailable');
+}
+
+function parseOsmDistanceKm(value){
+  if(value===null||value===undefined||value==='')return null;
+  var text=String(value).trim().toLowerCase().replace(',','.');
+  var match=text.match(/-?\d+(?:\.\d+)?/);
+  if(!match)return null;
+  var distance=Number(match[0]);
+  if(!isFinite(distance)||distance<0)return null;
+  if(/\bmi(?:le|les)?\b/.test(text))distance*=1.609344;
+  else if(/\bm\b|met(?:er|re)s?/.test(text)&&!/\bkm\b/.test(text))distance/=1000;
+  return Math.round(distance*10)/10;
+}
+
+function overpassDiscoveryCacheKey(lat,lon,osmType){
+  return 'audrey-overpass-routes-v2-'+osmType+'-'+Number(lat).toFixed(3)+'-'+Number(lon).toFixed(3);
+}
+
+// ── Discover routes via Overpass ──────────────────────────
+async function discoverOverpassRoutes(lat,lon,osmType){
+  var cacheKey=overpassDiscoveryCacheKey(lat,lon,osmType),cached=null;
+  try{cached=JSON.parse(sessionStorage.getItem(cacheKey)||'null');}catch(e){}
+  if(cached&&Date.now()-cached.savedAt<21600000&&Array.isArray(cached.routes))return cached.routes;
+
+  try{
+    var routeValues=osmType==='hiking'?'hiking|foot':'bicycle|mtb';
+    var query='[out:json][timeout:20];relation(around:25000,'+Number(lat)+','+Number(lon)+')'
+      +'["type"~"^(route|superroute)$"]["route"~"^('+routeValues+')$"];out tags center qt;';
+    var data=await fetchOverpassJson(query,15000);
+    var seen={};
+    var routes=(data.elements||[])
+      .filter(function(el){return el.tags&&(el.tags.name||el.tags.ref)&&!seen[el.id]&&(seen[el.id]=true);})
       .map(function(el){
-        return {
-          id:         el.id,
-          name:       el.tags.name || ('Route ' + el.tags.ref),
-          network:    el.tags.network || '',
-          distanceKm: el.tags.distance ? Math.round(parseFloat(el.tags.distance)) : null,
-          source:     'overpass'
+        return{
+          id:el.id,
+          name:el.tags.name||('Route '+el.tags.ref),
+          ref:el.tags.ref||'',
+          network:el.tags.network||'',
+          operator:el.tags.operator||'',
+          from:el.tags.from||'',
+          to:el.tags.to||'',
+          routeKind:el.tags.route||osmType,
+          type:el.tags.route||osmType,
+          tags:[el.tags.route,el.tags.network,el.tags.surface].filter(Boolean).join(' '),
+          distanceKm:parseOsmDistanceKm(el.tags.distance),
+          source:'overpass'
         };
-      })
-      .slice(0, 8);
-  } catch(e) {
-    return [];
+      }).sort(function(a,b){
+        var rank={lwn:0,lcn:0,rwn:1,rcn:1,nwn:2,ncn:2,iwn:3,icn:3};
+        var ar=rank[a.network]===undefined?4:rank[a.network];
+        var br=rank[b.network]===undefined?4:rank[b.network];
+        return ar-br||String(a.name).localeCompare(String(b.name));
+      }).slice(0,10);
+    try{sessionStorage.setItem(cacheKey,JSON.stringify({savedAt:Date.now(),routes:routes}));}catch(e){}
+    return routes;
+  }catch(error){
+    return cached&&Array.isArray(cached.routes)?cached.routes:[];
   }
 }
- 
+
 // ── Select curated route ──────────────────────────────────
 async function actSelectCurated(idx, type) {
   var routes = type === 'cycle' ? window._actCuratedCycle : window._actCuratedTrail;
@@ -4586,63 +4655,70 @@ async function actSelectOverpass(idx, type) {
  
 // ── Fetch + reconstruct GPX from Overpass ─────────────────
 async function fetchOverpassGPX(osmId) {
-  var r = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    body: 'data=' + encodeURIComponent('[out:json];relation(' + osmId + ');out geom;')
+  if(!/^\d+$/.test(String(osmId||'')))throw new Error('Invalid OpenStreetMap relation ID');
+  var data=await fetchOverpassJson('[out:json][timeout:25];relation('+osmId+');out geom;',20000);
+  var el=data.elements&&data.elements[0];
+  if(!el)return null;
+
+  var members=(el.members||[]).filter(function(member){
+    return member.geometry&&member.geometry.length>0&&member.role!=='guideposts';
   });
-  var data = await r.json();
-  var el   = data.elements && data.elements[0];
-  if (!el) return null;
- 
-  var members = (el.members || []).filter(function(m){
-    return m.geometry && m.geometry.length > 0 && m.role !== 'guideposts';
+  var ordered=chainOrderWays(members);
+  if(ordered.length<2)return null;
+
+  var seen=new Set(),points=[];
+  ordered.forEach(function(point){
+    var key=point.lat.toFixed(5)+','+point.lon.toFixed(5);
+    if(!seen.has(key)){seen.add(key);points.push(point);}
   });
- 
-  var ordered = chainOrderWays(members);
- 
-  var seen = new Set();
-  var points = [];
-  ordered.forEach(function(p){
-    var key = p.lat.toFixed(5) + ',' + p.lon.toFixed(5);
-    if (!seen.has(key)){ seen.add(key); points.push(p); }
-  });
- 
-  var name = el.tags && el.tags.name ? el.tags.name : 'Route ' + osmId;
-  var gpx  = '<?xml version="1.0" encoding="UTF-8"?>'
-    + '<gpx version="1.1" creator="Audrey" xmlns="http://www.topografix.com/GPX/1/1">'
-    + '<trk><name>' + name + '</name><trkseg>';
-  points.forEach(function(p){ gpx += '<trkpt lat="' + p.lat + '" lon="' + p.lon + '"></trkpt>'; });
-  gpx += '</trkseg></trk></gpx>';
+
+  var name=el.tags&&el.tags.name?el.tags.name:'Route '+osmId;
+  var gpx='<?xml version="1.0" encoding="UTF-8"?>'
+    +'<gpx version="1.1" creator="Audrey" xmlns="http://www.topografix.com/GPX/1/1">'
+    +'<trk><name>'+escapeXmlText(name)+'</name><trkseg>';
+  points.forEach(function(point){gpx+='<trkpt lat="'+point.lat+'" lon="'+point.lon+'"></trkpt>';});
+  gpx+='</trkseg></trk></gpx>';
   return gpx;
 }
- 
-// ── Chain-order Overpass ways into continuous track ───────
-function chainOrderWays(members) {
-  if (!members.length) return [];
-  var remaining = members.slice();
-  var ordered   = remaining.shift().geometry.slice();
-  var max       = remaining.length * 2;
-  var iter      = 0;
-  while (remaining.length > 0 && iter < max) {
-    iter++;
-    var endPt   = ordered[ordered.length-1];
-    var startPt = ordered[0];
-    var found   = false;
-    for (var i = 0; i < remaining.length; i++) {
-      var way    = remaining[i];
-      var wStart = way.geometry[0];
-      var wEnd   = way.geometry[way.geometry.length-1];
-      if (ptDist(endPt,wStart) < 0.001){ ordered = ordered.concat(way.geometry.slice(1)); remaining.splice(i,1); found=true; break; }
-      if (ptDist(endPt,wEnd)   < 0.001){ ordered = ordered.concat(way.geometry.slice(0,-1).reverse()); remaining.splice(i,1); found=true; break; }
-      if (ptDist(startPt,wEnd) < 0.001){ ordered = way.geometry.concat(ordered.slice(1)); remaining.splice(i,1); found=true; break; }
-      if (ptDist(startPt,wStart) < 0.001){ ordered = way.geometry.slice().reverse().concat(ordered.slice(1)); remaining.splice(i,1); found=true; break; }
-    }
-    if (!found) ordered = ordered.concat(remaining.shift().geometry);
-  }
-  return ordered;
+
+function escapeXmlText(value){
+  return String(value||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
-function ptDist(a,b){ return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2)); }
- 
+
+// Build every connected component and retain the longest. This prevents
+// disconnected relation members being joined by artificial straight lines.
+function chainOrderWays(members){
+  var remaining=(members||[]).filter(function(member){return member.geometry&&member.geometry.length;}).slice();
+  var chains=[];
+  while(remaining.length){
+    var ordered=remaining.shift().geometry.slice(),found=true;
+    while(found&&remaining.length){
+      found=false;
+      var endPt=ordered[ordered.length-1],startPt=ordered[0];
+      for(var i=0;i<remaining.length;i++){
+        var geometry=remaining[i].geometry,wStart=geometry[0],wEnd=geometry[geometry.length-1];
+        if(ptDist(endPt,wStart)<0.001){ordered=ordered.concat(geometry.slice(1));}
+        else if(ptDist(endPt,wEnd)<0.001){ordered=ordered.concat(geometry.slice(0,-1).reverse());}
+        else if(ptDist(startPt,wEnd)<0.001){ordered=geometry.concat(ordered.slice(1));}
+        else if(ptDist(startPt,wStart)<0.001){ordered=geometry.slice().reverse().concat(ordered.slice(1));}
+        else continue;
+        remaining.splice(i,1);found=true;break;
+      }
+    }
+    chains.push(ordered);
+  }
+  chains.sort(function(a,b){return polylineLengthDegrees(b)-polylineLengthDegrees(a);});
+  return chains[0]||[];
+}
+function polylineLengthDegrees(points){
+  var total=0;
+  for(var i=1;i<points.length;i++)total+=ptDist(points[i-1],points[i]);
+  return total;
+}
+function ptDist(a,b){return Math.sqrt(Math.pow(a.lat-b.lat,2)+Math.pow(a.lon-b.lon,2));}
+
+
 // ── Activity GPX analysis state ───────────────────────────
 // Parse raw XML once, then retain the parsed geometry and selected timing.
 // Reanalysis must never feed a parsed object back into parseGPX().
@@ -5159,7 +5235,8 @@ function filterAct(el, filter, type) {
   actCurrentFilter = filter;
   actCurrentFilters[type]=filter;
   var collection=actRouteCollections[type],container=document.getElementById('act-routes-'+type);
-  if(collection&&container)renderActRouteList(container,collection.curated,collection.overpass,type,collection.rwgps,'',false);
+  if(collection&&container)renderActRouteList(container,collection.curated,collection.overpass,type,
+    collection.rwgps,'',collection.strava,'',false);
 }
  
 function actReanalyse(type) {
@@ -5426,10 +5503,32 @@ async function actSelectRWGPS(routeId, type) {
     var data = await r.json();
     if (!data.success || !data.gpx) throw new Error(data.error || 'No GPX');
     var gpxText = await decodeActivityGPX(data.gpx, data.encoding);
-    var route = (window._actRWGPS || []).find(function(r){ return String(r.id) === String(routeId); });
+    var route = ((window._actRWGPSByType || {})[type] || []).find(function(r){ return String(r.id) === String(routeId); });
     actAnalyseGPXContent(gpxText, route ? route.name : 'RideWithGPS route', type);
   } catch(err) {
     showActError(type, 'Could not fetch route: ' + err.message);
+  }
+}
+
+async function actSelectStrava(routeId, type) {
+  showActLoading(type, 'Fetching route from Strava...');
+  try {
+    var params = new URLSearchParams({
+      action: 'get_strava_route_gpx',
+      routeId: routeId,
+      encoding: 'gzip-base64',
+      _: Date.now()
+    });
+    var r = await fetch(API_URL + '?' + params.toString(), {redirect:'follow'});
+    var data = await r.json();
+    if(!data.success||!data.gpx)throw new Error(data.error||'No GPX');
+    var gpxText = await decodeActivityGPX(data.gpx,data.encoding);
+    var route = ((window._actStravaByType || {})[type] || []).find(function(item){
+      return String(item.id)===String(routeId);
+    });
+    actAnalyseGPXContent(gpxText,route?route.name:'Strava route',type);
+  }catch(err){
+    showActError(type,'Could not fetch route: '+err.message);
   }
 }
 
