@@ -2,8 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "audrey-gateway",
   "main": "worker/index.mjs",
-  "compatibility_date": "2026-10-02",
+  "compatibility_date": "2026-10-03",
   "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true
+    }
+  },
   "routes": [
     {
       "pattern": "audrey.eoinfarrer.uk",
