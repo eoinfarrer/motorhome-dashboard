@@ -111,7 +111,10 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
     }
     return proxyApi(request, env, fetchImpl);
   }
-  return env.ASSETS.fetch(request);
+  if (!env.STATIC || typeof env.STATIC.fetch !== 'function') {
+    return json({error: 'Secure static site is not configured'}, 503);
+  }
+  return env.STATIC.fetch(request);
 }
 
 export default {

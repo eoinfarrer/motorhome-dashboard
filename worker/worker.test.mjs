@@ -11,7 +11,7 @@ function env(overrides = {}) {
     AUDREY_ALLOWED_EMAILS: 'owner@example.com',
     AUDREY_APPS_SCRIPT_URL: 'https://script.google.com/macros/s/secure/exec',
     AUDREY_GATEWAY_SECRET: 'test-secret',
-    ASSETS: {fetch: async () => new Response('asset')},
+    STATIC: {fetch: async () => new Response('asset')},
     ...overrides
   };
 }
@@ -30,7 +30,7 @@ test('secure Worker enforces its owner allowlist after Access authentication', a
   assert.equal(response.status, 403);
 });
 
-test('secure Worker serves assets to its allowed owner', async () => {
+test('secure gateway serves the bound static site to its allowed owner', async () => {
   const response = await handleRequest(
     new Request('https://audrey.example/'), env(), access()
   );
