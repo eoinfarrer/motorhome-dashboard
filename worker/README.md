@@ -12,13 +12,15 @@ deployment continue running while this version is tested.
 
 1. Upload `dist-secure` to the `audrey-secure` static Worker.
 2. Deploy `audrey-gateway` and bind `STATIC` to the `audrey-secure` service.
-3. Enable Cloudflare Access for both preview and production gateway URLs.
-4. Add an Allow policy for the owner's exact email address.
-5. Configure these encrypted gateway secrets:
+3. Attach the custom domain `audrey.eoinfarrer.uk` to `audrey-gateway`.
+4. Enable Cloudflare Access for the custom domain and both preview and
+   production gateway URLs.
+5. Add an Allow policy for the owner's exact email address.
+6. Configure these encrypted gateway secrets:
    - `AUDREY_APPS_SCRIPT_URL`
    - `AUDREY_GATEWAY_SECRET`
    - `AUDREY_ALLOWED_EMAILS`
-6. Set the same `AUDREY_GATEWAY_SECRET` value in Apps Script properties.
+7. Set the same `AUDREY_GATEWAY_SECRET` value in Apps Script properties.
 
 Use `.dev.vars.example` as the local configuration template. Never commit
 `.dev.vars` or the gateway secret.
