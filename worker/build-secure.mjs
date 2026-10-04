@@ -21,7 +21,7 @@ await cp(path.join(root, 'assets'), path.join(output, 'assets'), {recursive: tru
 await writeFile(path.join(output, '_headers'), [
   '/*',
   '  Cache-Control: no-store',
-  '  Referrer-Policy: no-referrer',
+  '  Referrer-Policy: strict-origin-when-cross-origin',
   '  X-Content-Type-Options: nosniff',
   '  X-Frame-Options: DENY',
   ''

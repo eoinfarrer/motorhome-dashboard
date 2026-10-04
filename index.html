@@ -4530,8 +4530,8 @@ function activityFilterLabel(filter){
  
 async function fetchOverpassJson(query,timeoutMs){
   var endpoints=[
-    'https://overpass.private.coffee/api/interpreter',
     'https://overpass-api.de/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter'
   ];
   var lastError=null;
@@ -4764,7 +4764,7 @@ function routePointDistanceM(a,b){
 }
 
 function routeOverpassChunks(payload){
-  var points=payload.route.points||[],chunks=[],chunk=[],chunkDistanceM=0,targetDistanceM=18000;
+  var points=payload.route.points||[],chunks=[],chunk=[],chunkDistanceM=0,targetDistanceM=10000;
   if(points.length<2)return points.length?[points.slice()]:[];
   chunk=[points[0]];
   for(var i=1;i<points.length;i++){
@@ -4778,7 +4778,7 @@ function routeOverpassChunks(payload){
   }
   if(chunk.length>1)chunks.push(chunk);
   return chunks.map(function(raw){
-    var maximum=20,step=raw.length>maximum?(raw.length-1)/(maximum-1):1,sampled=[];
+    var maximum=12,step=raw.length>maximum?(raw.length-1)/(maximum-1):1,sampled=[];
     if(raw.length<=maximum)return raw.slice();
     for(var j=0;j<maximum;j++)sampled.push(raw[Math.round(j*step)]);
     sampled[sampled.length-1]=raw[raw.length-1];
@@ -4787,20 +4787,24 @@ function routeOverpassChunks(payload){
 }
 
 function routeOverpassQuery(payload,routePoints){
-  var points=routePoints||payload.route.points||[],maximum=20,step=points.length>maximum?(points.length-1)/(maximum-1):1,sampled=[];
-  if(points.length<=maximum)sampled=points.slice();
-  else{
-    for(var i=0;i<maximum;i++)sampled.push(points[Math.round(i*step)]);
-    sampled[sampled.length-1]=points[points.length-1];
-  }
-  var line=sampled.map(function(point){return Number(point.lat).toFixed(6)+','+Number(point.lon).toFixed(6);}).join(',');
-  var around='(around:'+Math.round(payload.settings.corridorM)+','+line+');';
+  var points=routePoints||payload.route.points||[],south=90,north=-90,west=180,east=-180;
+  points.forEach(function(point){
+    var lat=Number(point.lat),lon=Number(point.lon);
+    if(!isFinite(lat)||!isFinite(lon))return;
+    south=Math.min(south,lat);north=Math.max(north,lat);west=Math.min(west,lon);east=Math.max(east,lon);
+  });
+  var corridorM=Math.max(50,Math.round(payload.settings.corridorM||500));
+  var latitudePad=corridorM/111320;
+  var middleLatitude=(south+north)/2*Math.PI/180;
+  var longitudePad=corridorM/(111320*Math.max(0.2,Math.cos(middleLatitude)));
+  var bounds='('+(south-latitudePad).toFixed(6)+','+(west-longitudePad).toFixed(6)+','
+    +(north+latitudePad).toFixed(6)+','+(east+longitudePad).toFixed(6)+');';
   return '[out:json][timeout:15];('
-    +'nwr["amenity"~"^(drinking_water|restaurant|fast_food|cafe|toilets|bicycle_repair_station|shelter|pharmacy)$"]'+around
-    +'nwr["shop"~"^(supermarket|convenience|bakery|deli|bicycle)$"]'+around
-    +'nwr["tourism"~"^(alpine_hut|viewpoint)$"]'+around
-    +'node["natural"~"^(peak|saddle)$"]'+around
-    +'node["mountain_pass"="yes"]'+around
+    +'nwr["amenity"~"^(drinking_water|restaurant|fast_food|cafe|toilets|bicycle_repair_station|shelter|pharmacy)$"]'+bounds
+    +'nwr["shop"~"^(supermarket|convenience|bakery|deli|bicycle)$"]'+bounds
+    +'nwr["tourism"~"^(alpine_hut|viewpoint)$"]'+bounds
+    +'node["natural"~"^(peak|saddle)$"]'+bounds
+    +'node["mountain_pass"="yes"]'+bounds
     +');out center qt 100;';
 }
 

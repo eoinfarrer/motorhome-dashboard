@@ -5,6 +5,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync(__dirname + '/../marine-backend/RouteEnrichment.js', 'utf8');
 const frontend = fs.readFileSync(__dirname + '/index.html', 'utf8');
+const secureBuilder = fs.readFileSync(__dirname + '/worker/build-secure.mjs', 'utf8');
 
 function functionSource(name) {
   const start = source.indexOf('function ' + name + '(');
@@ -167,8 +168,8 @@ test('browser map search divides long routes into bounded overlapping corridors'
   ].join('\n'), browserChunks);
   const points = Array.from({length: 61}, (_, index) => ({lat: 0, lon: index / 100}));
   const chunks = browserChunks.routeOverpassChunks({route: {points}});
-  assert.ok(chunks.length >= 4);
-  assert.equal(chunks.every(chunk => chunk.length >= 2 && chunk.length <= 20), true);
+  assert.ok(chunks.length >= 6);
+  assert.equal(chunks.every(chunk => chunk.length >= 2 && chunk.length <= 12), true);
   for (let index = 1; index < chunks.length; index++) {
     assert.deepEqual(chunks[index - 1].at(-1), chunks[index][0]);
   }
@@ -186,7 +187,10 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   });
   assert.match(query, /mountain_pass/);
   assert.match(query, /saddle/);
-  assert.equal((query.match(/around:/g) || []).length, 5);
+  assert.equal((query.match(/around:/g) || []).length, 0);
+  assert.equal((query.match(/\(-?\d+\.\d{6},-?\d+\.\d{6},-?\d+\.\d{6},-?\d+\.\d{6}\);/g) || []).length, 5);
+  assert.match(query, /54\.436/);
+  assert.match(query, /-3\.106/);
   assert.doesNotMatch(query, /\[~"\^\(amenity/);
   assert.match(lookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
   assert.match(lookup, /Math\.min\(2,chunks\.length\)/);
@@ -194,6 +198,11 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   assert.match(loader, /credentials:'same-origin'/);
   assert.doesNotMatch(loader, /credentials:'omit'/);
   assert.doesNotMatch(frontend, /maps\.mail\.ru/);
+});
+
+test('secure hosting sends only Audrey origin so Overpass permits browser requests', () => {
+  assert.match(secureBuilder, /Referrer-Policy: strict-origin-when-cross-origin/);
+  assert.doesNotMatch(secureBuilder, /Referrer-Policy: no-referrer/);
 });
 
 test('trip editor POST retains the Cloudflare Access session', () => {
