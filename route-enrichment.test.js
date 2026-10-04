@@ -158,7 +158,7 @@ test('long routes are bounded to one eighty-point Overpass corridor', () => {
   assert.equal(sampled[79].distanceM, 4990);
 });
 
-test('secure route enrichment uses the authenticated gateway and signed ranking backend', () => {
+test('secure route enrichment queries OpenStreetMap directly and uses the signed ranking backend', () => {
   const loader = frontendFunctionSource('loadRouteEnrichment');
   const lookup = frontendFunctionSource('fetchRouteMapFeatures');
   const browserQuery = {};
@@ -171,8 +171,7 @@ test('secure route enrichment uses the authenticated gateway and signed ranking 
   assert.match(query, /mountain_pass/);
   assert.match(query, /saddle/);
   assert.equal((query.match(/around:/g) || []).length, 1);
-  assert.match(lookup, /fetch\(OSM_PROXY_URL/);
-  assert.match(lookup, /credentials:'same-origin'/);
+  assert.match(lookup, /fetchOverpassJson\(query,15000\)/);
   assert.match(loader, /action:'rank_route_pois'/);
   assert.match(loader, /credentials:'same-origin'/);
   assert.doesNotMatch(loader, /credentials:'omit'/);

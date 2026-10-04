@@ -706,7 +706,6 @@ body.trip-editor-open{overflow:hidden;}
 <script src="assets/fit-export.js"></script>
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
-var OSM_PROXY_URL='';
 var currentData=null,currentTrip=null;
 
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
@@ -4771,24 +4770,8 @@ function routeOverpassQuery(payload){
 }
 
 async function fetchRouteMapFeatures(payload){
-  var query=routeOverpassQuery(payload),data;
-  if(OSM_PROXY_URL){
-    var controller=typeof AbortController!=='undefined'?new AbortController():null;
-    var timeoutId=controller?setTimeout(function(){controller.abort();},38000):null;
-    try{
-      var response=await fetch(OSM_PROXY_URL,{
-        method:'POST',credentials:'same-origin',
-        headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
-        body:'data='+encodeURIComponent(query),signal:controller?controller.signal:undefined
-      });
-      if(!response.ok)throw new Error('OpenStreetMap returned HTTP '+response.status);
-      data=await response.json();
-    }finally{
-      if(timeoutId)clearTimeout(timeoutId);
-    }
-  }else{
-    data=await fetchOverpassJson(query,15000);
-  }
+  var query=routeOverpassQuery(payload);
+  var data=await fetchOverpassJson(query,15000);
   var elements=Array.isArray(data.elements)?data.elements:[];
   return elements.slice(0,400).map(function(element){
     var point=element.center||element;
