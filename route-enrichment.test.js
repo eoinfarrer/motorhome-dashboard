@@ -158,6 +158,22 @@ test('long routes are bounded to one eighty-point Overpass corridor', () => {
   assert.equal(sampled[79].distanceM, 4990);
 });
 
+test('browser map search divides long routes into bounded overlapping corridors', () => {
+  const browserChunks = {};
+  vm.createContext(browserChunks);
+  vm.runInContext([
+    frontendFunctionSource('routePointDistanceM'),
+    frontendFunctionSource('routeOverpassChunks')
+  ].join('\n'), browserChunks);
+  const points = Array.from({length: 61}, (_, index) => ({lat: 0, lon: index / 100}));
+  const chunks = browserChunks.routeOverpassChunks({route: {points}});
+  assert.ok(chunks.length >= 4);
+  assert.equal(chunks.every(chunk => chunk.length >= 2 && chunk.length <= 20), true);
+  for (let index = 1; index < chunks.length; index++) {
+    assert.deepEqual(chunks[index - 1].at(-1), chunks[index][0]);
+  }
+});
+
 test('secure route enrichment queries OpenStreetMap directly and uses the signed ranking backend', () => {
   const loader = frontendFunctionSource('loadRouteEnrichment');
   const lookup = frontendFunctionSource('fetchRouteMapFeatures');
@@ -171,7 +187,8 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   assert.match(query, /mountain_pass/);
   assert.match(query, /saddle/);
   assert.equal((query.match(/around:/g) || []).length, 1);
-  assert.match(lookup, /fetchOverpassJson\(query,15000\)/);
+  assert.match(lookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
+  assert.match(lookup, /Math\.min\(2,chunks\.length\)/);
   assert.match(loader, /action:'rank_route_pois'/);
   assert.match(loader, /credentials:'same-origin'/);
   assert.doesNotMatch(loader, /credentials:'omit'/);

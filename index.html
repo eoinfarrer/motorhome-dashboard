@@ -4756,8 +4756,38 @@ function routeEnrichmentPayload(route){
   };
 }
 
-function routeOverpassQuery(payload){
-  var points=payload.route.points||[],maximum=80,step=points.length>maximum?(points.length-1)/(maximum-1):1,sampled=[];
+function routePointDistanceM(a,b){
+  var lat1=Number(a.lat)*Math.PI/180,lat2=Number(b.lat)*Math.PI/180;
+  var dLat=lat2-lat1,dLon=(Number(b.lon)-Number(a.lon))*Math.PI/180;
+  var value=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return 6371000*2*Math.atan2(Math.sqrt(value),Math.sqrt(1-value));
+}
+
+function routeOverpassChunks(payload){
+  var points=payload.route.points||[],chunks=[],chunk=[],chunkDistanceM=0,targetDistanceM=18000;
+  if(points.length<2)return points.length?[points.slice()]:[];
+  chunk=[points[0]];
+  for(var i=1;i<points.length;i++){
+    chunkDistanceM+=routePointDistanceM(points[i-1],points[i]);
+    chunk.push(points[i]);
+    if(chunkDistanceM>=targetDistanceM&&i<points.length-1){
+      chunks.push(chunk);
+      chunk=[points[i]];
+      chunkDistanceM=0;
+    }
+  }
+  if(chunk.length>1)chunks.push(chunk);
+  return chunks.map(function(raw){
+    var maximum=20,step=raw.length>maximum?(raw.length-1)/(maximum-1):1,sampled=[];
+    if(raw.length<=maximum)return raw.slice();
+    for(var j=0;j<maximum;j++)sampled.push(raw[Math.round(j*step)]);
+    sampled[sampled.length-1]=raw[raw.length-1];
+    return sampled;
+  });
+}
+
+function routeOverpassQuery(payload,routePoints){
+  var points=routePoints||payload.route.points||[],maximum=20,step=points.length>maximum?(points.length-1)/(maximum-1):1,sampled=[];
   if(points.length<=maximum)sampled=points.slice();
   else{
     for(var i=0;i<maximum;i++)sampled.push(points[Math.round(i*step)]);
@@ -4766,17 +4796,39 @@ function routeOverpassQuery(payload){
   var line=sampled.map(function(point){return Number(point.lat).toFixed(6)+','+Number(point.lon).toFixed(6);}).join(',');
   var values=['drinking_water','restaurant','fast_food','supermarket','convenience','bakery','deli','cafe','toilets','bicycle_repair_station','bicycle','shelter','alpine_hut','viewpoint','peak','saddle','yes','pharmacy'];
   return '[out:json][timeout:20];nwr[~"^(amenity|shop|tourism|natural|mountain_pass)$"~"^('+values.join('|')+')$"]'
-    +'(around:'+Math.round(payload.settings.corridorM)+','+line+');out center qt 300;';
+    +'(around:'+Math.round(payload.settings.corridorM)+','+line+');out center qt 100;';
 }
 
 async function fetchRouteMapFeatures(payload){
-  var query=routeOverpassQuery(payload);
-  var data=await fetchOverpassJson(query,15000);
-  var elements=Array.isArray(data.elements)?data.elements:[];
-  return elements.slice(0,400).map(function(element){
-    var point=element.center||element;
-    return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
-  }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
+  var chunks=routeOverpassChunks(payload),results=new Array(chunks.length),nextChunk=0,lastError=null;
+  var perChunkLimit=Math.min(100,Math.max(30,Math.floor(400/Math.max(1,chunks.length))));
+  async function worker(){
+    while(nextChunk<chunks.length){
+      var index=nextChunk++;
+      try{
+        var data=await fetchOverpassJson(routeOverpassQuery(payload,chunks[index]),15000);
+        var elements=Array.isArray(data.elements)?data.elements:[];
+        results[index]=elements.slice(0,perChunkLimit).map(function(element){
+          var point=element.center||element;
+          return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
+        }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
+      }catch(error){
+        lastError=error;
+        results[index]=[];
+      }
+    }
+  }
+  var workers=[];
+  for(var i=0;i<Math.min(2,chunks.length);i++)workers.push(worker());
+  await Promise.all(workers);
+  var features=[],seen={};
+  results.forEach(function(chunkFeatures){
+    (chunkFeatures||[]).forEach(function(feature){
+      if(!seen[feature.osmId]&&features.length<400){seen[feature.osmId]=true;features.push(feature);}
+    });
+  });
+  if(!features.length&&lastError)throw lastError;
+  return features;
 }
 
 async function loadRouteEnrichment(){
@@ -4804,7 +4856,7 @@ async function loadRouteEnrichment(){
     actRouteEnrichment=result;
     actSelectedRoute.enrichment=result;
   }catch(error){
-    var message=error&&error.name==='AbortError'
+    var message=error&&(error.name==='AbortError'||error.name==='TimeoutError')
       ?'Map search took too long. Tap Retry to try again.'
       :(error.message||'Route enrichment failed');
     actRouteEnrichment={loading:false,error:message,pois:[]};
