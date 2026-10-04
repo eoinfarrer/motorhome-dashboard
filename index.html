@@ -4794,9 +4794,14 @@ function routeOverpassQuery(payload,routePoints){
     sampled[sampled.length-1]=points[points.length-1];
   }
   var line=sampled.map(function(point){return Number(point.lat).toFixed(6)+','+Number(point.lon).toFixed(6);}).join(',');
-  var values=['drinking_water','restaurant','fast_food','supermarket','convenience','bakery','deli','cafe','toilets','bicycle_repair_station','bicycle','shelter','alpine_hut','viewpoint','peak','saddle','yes','pharmacy'];
-  return '[out:json][timeout:20];nwr[~"^(amenity|shop|tourism|natural|mountain_pass)$"~"^('+values.join('|')+')$"]'
-    +'(around:'+Math.round(payload.settings.corridorM)+','+line+');out center qt 100;';
+  var around='(around:'+Math.round(payload.settings.corridorM)+','+line+');';
+  return '[out:json][timeout:15];('
+    +'nwr["amenity"~"^(drinking_water|restaurant|fast_food|cafe|toilets|bicycle_repair_station|shelter|pharmacy)$"]'+around
+    +'nwr["shop"~"^(supermarket|convenience|bakery|deli|bicycle)$"]'+around
+    +'nwr["tourism"~"^(alpine_hut|viewpoint)$"]'+around
+    +'node["natural"~"^(peak|saddle)$"]'+around
+    +'node["mountain_pass"="yes"]'+around
+    +');out center qt 100;';
 }
 
 async function fetchRouteMapFeatures(payload){

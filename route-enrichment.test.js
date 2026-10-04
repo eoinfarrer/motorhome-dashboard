@@ -186,7 +186,8 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   });
   assert.match(query, /mountain_pass/);
   assert.match(query, /saddle/);
-  assert.equal((query.match(/around:/g) || []).length, 1);
+  assert.equal((query.match(/around:/g) || []).length, 5);
+  assert.doesNotMatch(query, /\[~"\^\(amenity/);
   assert.match(lookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
   assert.match(lookup, /Math\.min\(2,chunks\.length\)/);
   assert.match(loader, /action:'rank_route_pois'/);
