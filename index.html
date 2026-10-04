@@ -945,7 +945,7 @@ async function saveTripEditor(){
   try{
     var payload={action:tripEditorMode==='edit'?'update_trip':'create_trip',tripName:tripEditorDraft.name,items:tripEditorDraft.items};
     if(tripEditorMode==='edit'){payload.originalTripName=tripEditorOriginalName;payload.expectedRevision=tripEditorRevision;}
-    var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'omit',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify(payload)});
+    var response=await fetch(API_URL,{method:'POST',redirect:'follow',credentials:'same-origin',headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},body:JSON.stringify(payload)});
     var result,text;
     if(!response.ok){
       result=response.status===404?await recoverTripEditorSave():null;
@@ -4756,45 +4756,6 @@ function routeEnrichmentPayload(route){
   };
 }
 
-function routeOverpassQuery(payload){
-  var points=payload.route.points||[],maximum=80,step=points.length>maximum?(points.length-1)/(maximum-1):1,sampled=[];
-  if(points.length<=maximum)sampled=points.slice();
-  else{
-    for(var i=0;i<maximum;i++)sampled.push(points[Math.round(i*step)]);
-    sampled[sampled.length-1]=points[points.length-1];
-  }
-  var line=sampled.map(function(point){return Number(point.lat).toFixed(6)+','+Number(point.lon).toFixed(6);}).join(',');
-  var values=['drinking_water','restaurant','fast_food','supermarket','convenience','bakery','deli','cafe','toilets','bicycle_repair_station','bicycle','shelter','alpine_hut','viewpoint','peak','saddle','yes','pharmacy'];
-  return '[out:json][timeout:20];nwr[~"^(amenity|shop|tourism|natural|mountain_pass)$"~"^('+values.join('|')+')$"]'
-    +'(around:'+Math.round(payload.settings.corridorM)+','+line+');out center qt 300;';
-}
-
-async function fetchRouteMapFeatures(payload){
-  var body='data='+encodeURIComponent(routeOverpassQuery(payload)),lastError=null;
-  for(var attempt=0;attempt<3;attempt++){
-    var controller=typeof AbortController!=='undefined'?new AbortController():null;
-    var timeoutId=controller?setTimeout(function(){controller.abort();},12000):null;
-    try{
-      var response=await fetch('https://overpass-api.de/api/interpreter',{
-        method:'POST',credentials:'omit',
-        headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
-        body:body,signal:controller?controller.signal:undefined
-      });
-      if(!response.ok){lastError=new Error('OpenStreetMap returned HTTP '+response.status);continue;}
-      var data=await response.json(),elements=Array.isArray(data.elements)?data.elements:[];
-      return elements.slice(0,400).map(function(element){
-        var point=element.center||element;
-        return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
-      }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
-    }catch(error){
-      lastError=error;
-    }finally{
-      if(timeoutId)clearTimeout(timeoutId);
-    }
-  }
-  throw lastError||new Error('OpenStreetMap route search is temporarily unavailable');
-}
-
 async function loadRouteEnrichment(){
   if(!actSelectedRoute||!actSelectedRoute.gpx)return;
   actFitExportStatus='';
@@ -4802,16 +4763,12 @@ async function loadRouteEnrichment(){
   refreshRouteEnrichmentCard();
   try{
     var payload=routeEnrichmentPayload(actSelectedRoute);
-    var features=await fetchRouteMapFeatures(payload);
     var controller=typeof AbortController!=='undefined'?new AbortController():null;
-    var timeoutId=controller?setTimeout(function(){controller.abort();},15000):null;
+    var timeoutId=controller?setTimeout(function(){controller.abort();},45000):null;
     var response=await fetch(API_URL,{
-      method:'POST',redirect:'follow',credentials:'omit',
+      method:'POST',redirect:'follow',credentials:'same-origin',
       headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},
-      body:JSON.stringify({
-        action:'rank_route_pois',route:payload.route,categories:payload.categories,
-        settings:payload.settings,features:features
-      }),
+      body:JSON.stringify(Object.assign({action:'enrich_route'},payload)),
       signal:controller?controller.signal:undefined
     });
     if(!response.ok)throw new Error('HTTP '+response.status);

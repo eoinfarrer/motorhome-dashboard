@@ -158,19 +158,18 @@ test('long routes are bounded to one eighty-point Overpass corridor', () => {
   assert.equal(sampled[79].distanceM, 4990);
 });
 
-test('browser route lookup uses the approved non-Russian endpoint and mountain tags', () => {
-  const browserQuery = {};
-  vm.createContext(browserQuery);
-  vm.runInContext(frontendFunctionSource('routeOverpassQuery'), browserQuery);
-  const query = browserQuery.routeOverpassQuery({
-    route: {points: [{lat: 54.44, lon: -3.1}, {lat: 54.45, lon: -3.08}]},
-    settings: {corridorM: 400}
-  });
-  assert.match(query, /mountain_pass/);
-  assert.match(query, /saddle/);
-  assert.equal((query.match(/around:/g) || []).length, 1);
-  assert.match(frontend, /https:\/\/overpass-api\.de\/api\/interpreter/);
+test('secure route enrichment keeps OpenStreetMap lookup behind the signed backend', () => {
+  const loader = frontendFunctionSource('loadRouteEnrichment');
+  assert.match(loader, /action:'enrich_route'/);
+  assert.match(loader, /credentials:'same-origin'/);
+  assert.doesNotMatch(loader, /fetchRouteMapFeatures|rank_route_pois|credentials:'omit'/);
   assert.doesNotMatch(frontend, /maps\.mail\.ru/);
+});
+
+test('trip editor POST retains the Cloudflare Access session', () => {
+  const saver = frontendFunctionSource('saveTripEditor');
+  assert.match(saver, /credentials:'same-origin'/);
+  assert.doesNotMatch(saver, /credentials:'omit'/);
 });
 
 test('POI rows separate the name from metadata and avoid duplicate fallback labels', () => {
