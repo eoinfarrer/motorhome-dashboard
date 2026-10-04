@@ -56,6 +56,40 @@ test('secure Worker signs and forwards query requests to Apps Script', async () 
   assert.equal(forwarded.url.searchParams.get('trip'), 'Italy Winter');
 });
 
+test('secure Worker proxies bounded OpenStreetMap queries for its allowed owner', async () => {
+  let forwarded;
+  const body = 'data=' + encodeURIComponent('[out:json][timeout:5];node(0,0,0,0);out;');
+  const response = await handleRequest(
+    new Request('https://audrey.example/osm', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body
+    }),
+    env(), access(), async (url, options) => {
+      forwarded = {url, options};
+      return new Response(JSON.stringify({elements: []}), {
+        headers: {'Content-Type': 'application/json'}
+      });
+    }
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(forwarded.url, 'https://overpass-api.de/api/interpreter');
+  assert.equal(forwarded.options.method, 'POST');
+  assert.equal(forwarded.options.body, body);
+  assert.deepEqual(await response.json(), {elements: []});
+});
+
+test('secure Worker rejects arbitrary OpenStreetMap proxy payloads', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/osm', {method: 'POST', body: 'data=https://example.com'}),
+    env(), access(), async () => {
+      throw new Error('must not fetch');
+    }
+  );
+  assert.equal(response.status, 400);
+});
+
 test('gateway signatures are deterministic across query ordering', async () => {
   const left = canonicalQuery(new URLSearchParams('trip=A%20B&action=get_trip_draft'));
   const right = canonicalQuery(new URLSearchParams('action=get_trip_draft&trip=A+B'));

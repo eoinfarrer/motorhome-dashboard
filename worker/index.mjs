@@ -1,5 +1,11 @@
 const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
+const MAX_OSM_QUERY_BYTES = 96 * 1024;
+const OSM_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
@@ -94,6 +100,47 @@ async function proxyApi(request, env, fetchImpl) {
   });
 }
 
+async function proxyOsm(request, fetchImpl) {
+  if (request.method.toUpperCase() !== 'POST') {
+    return json({error: 'Method not allowed'}, 405);
+  }
+  const body = await request.text();
+  if (!body || encoder.encode(body).byteLength > MAX_OSM_QUERY_BYTES) {
+    return json({error: 'Invalid OpenStreetMap query'}, 400);
+  }
+  const query = new URLSearchParams(body).get('data') || '';
+  if (!query.startsWith('[out:json]') || query.length > MAX_OSM_QUERY_BYTES) {
+    return json({error: 'Invalid OpenStreetMap query'}, 400);
+  }
+
+  let lastStatus = 502;
+  for (const endpoint of OSM_ENDPOINTS) {
+    try {
+      const upstream = await fetchImpl(endpoint, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'User-Agent': 'AudreyRouteEnrichment/1.0'
+        },
+        body,
+        signal: AbortSignal.timeout(12000)
+      });
+      lastStatus = upstream.status;
+      if (!upstream.ok) continue;
+      return new Response(await upstream.arrayBuffer(), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'private, max-age=300',
+          'X-Content-Type-Options': 'nosniff'
+        }
+      });
+    } catch (_) {}
+  }
+  return json({error: 'OpenStreetMap route search is temporarily unavailable', upstreamStatus: lastStatus}, 502);
+}
+
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const email = await authenticatedEmail(ctx);
   const allowlist = allowedEmails(env);
@@ -110,6 +157,9 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
       return json({error: 'Method not allowed'}, 405);
     }
     return proxyApi(request, env, fetchImpl);
+  }
+  if (url.pathname === '/osm') {
+    return proxyOsm(request, fetchImpl);
   }
   if (!env.STATIC || typeof env.STATIC.fetch !== 'function') {
     return json({error: 'Secure static site is not configured'}, 503);

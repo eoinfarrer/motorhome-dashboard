@@ -15,7 +15,9 @@ if (!publicApi.test(source)) {
   throw new Error('The public Apps Script URL declaration could not be found');
 }
 
-const secure = source.replace(publicApi, "var API_URL='/api';");
+const secure = source
+  .replace(publicApi, "var API_URL='/api';")
+  .replace("var OSM_PROXY_URL='';", "var OSM_PROXY_URL='/osm';");
 await writeFile(path.join(output, 'index.html'), secure);
 await cp(path.join(root, 'assets'), path.join(output, 'assets'), {recursive: true});
 await writeFile(path.join(output, '_headers'), [

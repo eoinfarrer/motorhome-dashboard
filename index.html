@@ -706,6 +706,7 @@ body.trip-editor-open{overflow:hidden;}
 <script src="assets/fit-export.js"></script>
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
+var OSM_PROXY_URL='';
 var currentData=null,currentTrip=null;
 
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
@@ -4756,6 +4757,45 @@ function routeEnrichmentPayload(route){
   };
 }
 
+function routeOverpassQuery(payload){
+  var points=payload.route.points||[],maximum=80,step=points.length>maximum?(points.length-1)/(maximum-1):1,sampled=[];
+  if(points.length<=maximum)sampled=points.slice();
+  else{
+    for(var i=0;i<maximum;i++)sampled.push(points[Math.round(i*step)]);
+    sampled[sampled.length-1]=points[points.length-1];
+  }
+  var line=sampled.map(function(point){return Number(point.lat).toFixed(6)+','+Number(point.lon).toFixed(6);}).join(',');
+  var values=['drinking_water','restaurant','fast_food','supermarket','convenience','bakery','deli','cafe','toilets','bicycle_repair_station','bicycle','shelter','alpine_hut','viewpoint','peak','saddle','yes','pharmacy'];
+  return '[out:json][timeout:20];nwr[~"^(amenity|shop|tourism|natural|mountain_pass)$"~"^('+values.join('|')+')$"]'
+    +'(around:'+Math.round(payload.settings.corridorM)+','+line+');out center qt 300;';
+}
+
+async function fetchRouteMapFeatures(payload){
+  var query=routeOverpassQuery(payload),data;
+  if(OSM_PROXY_URL){
+    var controller=typeof AbortController!=='undefined'?new AbortController():null;
+    var timeoutId=controller?setTimeout(function(){controller.abort();},38000):null;
+    try{
+      var response=await fetch(OSM_PROXY_URL,{
+        method:'POST',credentials:'same-origin',
+        headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','Accept':'application/json'},
+        body:'data='+encodeURIComponent(query),signal:controller?controller.signal:undefined
+      });
+      if(!response.ok)throw new Error('OpenStreetMap returned HTTP '+response.status);
+      data=await response.json();
+    }finally{
+      if(timeoutId)clearTimeout(timeoutId);
+    }
+  }else{
+    data=await fetchOverpassJson(query,15000);
+  }
+  var elements=Array.isArray(data.elements)?data.elements:[];
+  return elements.slice(0,400).map(function(element){
+    var point=element.center||element;
+    return{osmId:String(element.type||'item')+'/'+String(element.id||''),lat:Number(point.lat),lon:Number(point.lon),tags:element.tags||{}};
+  }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
+}
+
 async function loadRouteEnrichment(){
   if(!actSelectedRoute||!actSelectedRoute.gpx)return;
   actFitExportStatus='';
@@ -4763,12 +4803,16 @@ async function loadRouteEnrichment(){
   refreshRouteEnrichmentCard();
   try{
     var payload=routeEnrichmentPayload(actSelectedRoute);
+    var features=await fetchRouteMapFeatures(payload);
     var controller=typeof AbortController!=='undefined'?new AbortController():null;
-    var timeoutId=controller?setTimeout(function(){controller.abort();},45000):null;
+    var timeoutId=controller?setTimeout(function(){controller.abort();},20000):null;
     var response=await fetch(API_URL,{
       method:'POST',redirect:'follow',credentials:'same-origin',
       headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},
-      body:JSON.stringify(Object.assign({action:'enrich_route'},payload)),
+      body:JSON.stringify({
+        action:'rank_route_pois',route:payload.route,categories:payload.categories,
+        settings:payload.settings,features:features
+      }),
       signal:controller?controller.signal:undefined
     });
     if(!response.ok)throw new Error('HTTP '+response.status);
