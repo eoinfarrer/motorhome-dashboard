@@ -704,6 +704,7 @@ body.trip-editor-open{overflow:hidden;}
 </div>
 
 <script src="assets/fit-export.js"></script>
+<script src="assets/osm-tile-pois.js"></script>
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
@@ -4786,7 +4787,7 @@ function routeOverpassChunks(payload){
   });
 }
 
-function routeOverpassQuery(payload,routePoints){
+function routeBoundingBox(payload,routePoints){
   var points=routePoints||payload.route.points||[],south=90,north=-90,west=180,east=-180;
   points.forEach(function(point){
     var lat=Number(point.lat),lon=Number(point.lon);
@@ -4797,8 +4798,12 @@ function routeOverpassQuery(payload,routePoints){
   var latitudePad=corridorM/111320;
   var middleLatitude=(south+north)/2*Math.PI/180;
   var longitudePad=corridorM/(111320*Math.max(0.2,Math.cos(middleLatitude)));
-  var bounds='('+(south-latitudePad).toFixed(6)+','+(west-longitudePad).toFixed(6)+','
+  return '('+(south-latitudePad).toFixed(6)+','+(west-longitudePad).toFixed(6)+','
     +(north+latitudePad).toFixed(6)+','+(east+longitudePad).toFixed(6)+');';
+}
+
+function routeOverpassQuery(payload,routePoints){
+  var bounds=routeBoundingBox(payload,routePoints);
   return '[out:json][timeout:15];('
     +'nwr["amenity"~"^(drinking_water|restaurant|fast_food|cafe|toilets|bicycle_repair_station|shelter|pharmacy)$"]'+bounds
     +'nwr["shop"~"^(supermarket|convenience|bakery|deli|bicycle)$"]'+bounds
@@ -4808,7 +4813,7 @@ function routeOverpassQuery(payload,routePoints){
     +');out center qt 100;';
 }
 
-async function fetchRouteMapFeatures(payload){
+async function fetchRouteMapFeaturesOverpass(payload){
   var chunks=routeOverpassChunks(payload),results=new Array(chunks.length),nextChunk=0,lastError=null;
   var perChunkLimit=Math.min(100,Math.max(30,Math.floor(400/Math.max(1,chunks.length))));
   async function worker(){
@@ -4838,6 +4843,64 @@ async function fetchRouteMapFeatures(payload){
   });
   if(!features.length&&lastError)throw lastError;
   return features;
+}
+
+function routeOverpassSummitQuery(payload){
+  var chunks=routeOverpassChunks(payload),parts=[];
+  chunks.forEach(function(chunk){
+    var bounds=routeBoundingBox(payload,chunk);
+    parts.push('node["natural"~"^(peak|saddle)$"]'+bounds);
+    parts.push('node["mountain_pass"="yes"]'+bounds);
+  });
+  return '[out:json][timeout:7];('+parts.join('')+');out qt 100;';
+}
+
+async function fetchRouteSummitFeatures(payload){
+  var response=await fetch('https://overpass-api.de/api/interpreter',{
+    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body:'data='+encodeURIComponent(routeOverpassSummitQuery(payload)),signal:AbortSignal.timeout(7000)
+  });
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  var data=await response.json();
+  return (Array.isArray(data.elements)?data.elements:[]).map(function(element){
+    return{osmId:'node/'+String(element.id||''),lat:Number(element.lat),lon:Number(element.lon),tags:element.tags||{}};
+  }).filter(function(feature){return isFinite(feature.lat)&&isFinite(feature.lon);});
+}
+
+function routeFeatureDistanceM(feature,points){
+  var closest=Infinity,latScale=111320,featureLat=Number(feature.lat),featureLon=Number(feature.lon);
+  for(var i=1;i<points.length;i++){
+    var a=points[i-1],b=points[i],middleLat=(Number(a.lat)+Number(b.lat)+featureLat)/3*Math.PI/180;
+    var lonScale=latScale*Math.max(0.2,Math.cos(middleLat));
+    var ax=Number(a.lon)*lonScale,ay=Number(a.lat)*latScale,bx=Number(b.lon)*lonScale,by=Number(b.lat)*latScale;
+    var px=featureLon*lonScale,py=featureLat*latScale,dx=bx-ax,dy=by-ay,lengthSquared=dx*dx+dy*dy;
+    var ratio=lengthSquared?Math.max(0,Math.min(1,((px-ax)*dx+(py-ay)*dy)/lengthSquared)):0;
+    var distance=Math.sqrt(Math.pow(px-(ax+ratio*dx),2)+Math.pow(py-(ay+ratio*dy),2));
+    if(distance<closest)closest=distance;
+  }
+  return closest;
+}
+
+async function fetchRouteMapFeatures(payload){
+  if(!window.AudreyOsmTiles||!window.AudreyOsmTiles.fetchRoutePoiFeatures)return fetchRouteMapFeaturesOverpass(payload);
+  try{
+    var settled=await Promise.allSettled([
+      window.AudreyOsmTiles.fetchRoutePoiFeatures(payload.route.points,payload.settings.corridorM),
+      fetchRouteSummitFeatures(payload)
+    ]);
+    if(settled[0].status!=='fulfilled')throw settled[0].reason;
+    var features=settled[0].value.features.slice();
+    if(settled[1].status==='fulfilled')features=features.concat(settled[1].value);
+    var seen={};
+    return features.filter(function(feature){
+      if(seen[feature.osmId])return false;
+      seen[feature.osmId]=true;
+      return routeFeatureDistanceM(feature,payload.route.points)<=payload.settings.corridorM*1.15;
+    }).slice(0,400);
+  }catch(error){
+    console.warn('OpenStreetMap tile lookup failed; trying Overpass:',error.message);
+    return fetchRouteMapFeaturesOverpass(payload);
+  }
 }
 
 async function loadRouteEnrichment(){

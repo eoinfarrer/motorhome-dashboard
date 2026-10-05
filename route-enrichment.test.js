@@ -178,9 +178,10 @@ test('browser map search divides long routes into bounded overlapping corridors'
 test('secure route enrichment queries OpenStreetMap directly and uses the signed ranking backend', () => {
   const loader = frontendFunctionSource('loadRouteEnrichment');
   const lookup = frontendFunctionSource('fetchRouteMapFeatures');
+  const fallbackLookup = frontendFunctionSource('fetchRouteMapFeaturesOverpass');
   const browserQuery = {};
   vm.createContext(browserQuery);
-  vm.runInContext(frontendFunctionSource('routeOverpassQuery'), browserQuery);
+  vm.runInContext([frontendFunctionSource('routeBoundingBox'), frontendFunctionSource('routeOverpassQuery')].join('\n'), browserQuery);
   const query = browserQuery.routeOverpassQuery({
     route: {points: [{lat: 54.44, lon: -3.1}, {lat: 54.45, lon: -3.08}]},
     settings: {corridorM: 400}
@@ -192,8 +193,11 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   assert.match(query, /54\.436/);
   assert.match(query, /-3\.106/);
   assert.doesNotMatch(query, /\[~"\^\(amenity/);
-  assert.match(lookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
-  assert.match(lookup, /Math\.min\(2,chunks\.length\)/);
+  assert.match(lookup, /AudreyOsmTiles\.fetchRoutePoiFeatures/);
+  assert.match(lookup, /fetchRouteSummitFeatures/);
+  assert.match(lookup, /fetchRouteMapFeaturesOverpass/);
+  assert.match(fallbackLookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
+  assert.match(fallbackLookup, /Math\.min\(2,chunks\.length\)/);
   assert.match(loader, /action:'rank_route_pois'/);
   assert.match(loader, /credentials:'same-origin'/);
   assert.doesNotMatch(loader, /credentials:'omit'/);

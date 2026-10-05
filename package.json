@@ -3,13 +3,16 @@
   "private": true,
   "scripts": {
     "build:fit": "esbuild src/fit-export.mjs --bundle --minify --format=iife --global-name=AudreyFit --outfile=assets/fit-export.js",
-    "build:secure": "node worker/build-secure.mjs",
+    "build:osm": "esbuild src/osm-tile-pois.mjs --bundle --minify --format=iife --global-name=AudreyOsmTiles --outfile=assets/osm-tile-pois.js",
+    "build:secure": "npm run build:osm && node worker/build-secure.mjs",
     "dev:secure": "npm run build:secure && npx --yes wrangler@4.45.3 dev",
     "deploy:secure": "npm run build:secure && npx --yes wrangler@4.45.3 deploy",
     "test": "node --test *.test.js *.test.mjs worker/*.test.mjs"
   },
   "dependencies": {
-    "@garmin/fitsdk": "21.217.0"
+    "@garmin/fitsdk": "21.217.0",
+    "@mapbox/vector-tile": "3.0.0",
+    "pbf": "5.1.2"
   },
   "devDependencies": {
     "esbuild": "0.25.10"
