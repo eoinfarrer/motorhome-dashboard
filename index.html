@@ -1022,18 +1022,48 @@ function makeSection(id,title,meta,rightHtml,bodyHtml){
 }
 
 // ── FETCH ─────────────────────────────────────────────────────
+async function fetchAudreyJson(url,options){
+  options=Object.assign({},options||{});
+  var method=String(options.method||'GET').toUpperCase();
+  var suppliedHeaders=options.headers||{};
+  options.headers=Object.assign({'Accept':'application/json'},suppliedHeaders);
+  options.credentials='same-origin';
+  options.redirect='follow';
+  var attempts=method==='GET'?2:1,lastError;
+  for(var attempt=1;attempt<=attempts;attempt++){
+    try{
+      var response=await fetch(url,options);
+      var text=await response.text(),data;
+      try{data=JSON.parse(text);}catch(parseErr){
+        throw new Error('Invalid response from Audrey');
+      }
+      if(!response.ok){
+        var httpError=new Error(data.error||('HTTP '+response.status));
+        httpError.status=response.status;
+        throw httpError;
+      }
+      return data;
+    }catch(error){
+      lastError=error;
+      var retryable=!error.status||error.status===429||error.status>=500;
+      if(attempt<attempts&&retryable){await tripEditorWait(250);continue;}
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
 async function fetchData(trip){
   var params=new URLSearchParams();
   if(trip)params.set('trip',trip);
   params.set('_',Date.now());
   var url=API_URL+'?'+params.toString();
-  var r;
-  try{r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
-  catch(e){r=await fetch(url,{mode:'cors',credentials:'omit',redirect:'follow'});}
-  if(r.status===404){await tripEditorWait(800);r=await fetch(url,{redirect:'follow',headers:{'Accept':'application/json'}});}
-  if(!r.ok)throw new Error('HTTP '+r.status);
-  var text=await r.text();
-  try{return JSON.parse(text);}catch(e){throw new Error('Invalid response from server');}
+  try{return await fetchAudreyJson(url);}
+  catch(error){
+    if(error.status!==404)throw error;
+    await tripEditorWait(800);
+    return fetchAudreyJson(url);
+  }
 }
 
 async function loadTrip(name){currentTrip=name||null;await refresh();}
@@ -4322,8 +4352,12 @@ async function loadActRoutes(location, type) {
   var container = document.getElementById('act-routes-' + type);
   if (!container) return;
 
+  var curated = [], curatedStatus = '';
+  var rwgps = [], rwgpsStatus = '';
+  var strava = [], stravaStatus = '';
   try {
-    // 1. Fetch curated routes from sheet
+    // 1. Fetch curated routes from sheet. A failure here must not hide the
+    // authenticated route libraries or nearby OpenStreetMap routes.
     var params = new URLSearchParams({
       action: 'get_routes',
       area: '',
@@ -4331,28 +4365,23 @@ async function loadActRoutes(location, type) {
       _: Date.now()
     });
     var marineUrl = API_URL + '?' + params.toString();
-    var r;
     try {
-      r = await fetch(marineUrl, {redirect:'follow',headers:{'Accept':'application/json'}});
-    } catch(fetchErr) {
-      r = await fetch(marineUrl, {mode:'cors',credentials:'omit',redirect:'follow'});
+      var data = await fetchAudreyJson(marineUrl);
+      curated = data.routes || [];
+    } catch(curatedErr) {
+      curatedStatus = 'Saved routes could not be loaded';
+      console.warn('Saved route fetch failed:',curatedErr.message);
     }
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    var data = await r.json();
-    var curated = data.routes || [];
 
     // 2. Fetch authenticated route libraries in parallel. Each source is
     // filtered to this tab and capped so large accounts stay usable.
-    var rwgps = [], rwgpsStatus = '';
-    var strava = [], stravaStatus = '';
     await Promise.all([
       (async function(){
         try {
           var rwParams = new URLSearchParams({
             action:'discover_ridewithgps',page:1,page_size:200,_:Date.now()
           });
-          var rwR = await fetch(API_URL + '?' + rwParams.toString(), {redirect:'follow'});
-          var rwData = await rwR.json();
+          var rwData = await fetchAudreyJson(API_URL + '?' + rwParams.toString());
           if(rwData.success===false||rwData.error){
             rwgpsStatus=rwData.error||'RideWithGPS could not be loaded';
           }else{
@@ -4366,8 +4395,7 @@ async function loadActRoutes(location, type) {
       (async function(){
         try {
           var stravaParams = new URLSearchParams({action:'discover_strava_routes',_:Date.now()});
-          var stravaR = await fetch(API_URL + '?' + stravaParams.toString(), {redirect:'follow'});
-          var stravaData = await stravaR.json();
+          var stravaData = await fetchAudreyJson(API_URL + '?' + stravaParams.toString());
           if(stravaData.success===false||stravaData.error){
             stravaStatus=stravaData.error||'Strava routes could not be loaded';
           }else{
@@ -4381,7 +4409,7 @@ async function loadActRoutes(location, type) {
     ]);
 
     // Show saved routes before the slower nearby OpenStreetMap lookup.
-    renderActRouteList(container,curated,[],type,rwgps,rwgpsStatus,strava,stravaStatus,true);
+    renderActRouteList(container,curated,[],type,rwgps,rwgpsStatus,strava,stravaStatus,true,curatedStatus);
 
     // 3. Discover Overpass routes
     var overpass = [];
@@ -4390,15 +4418,20 @@ async function loadActRoutes(location, type) {
     var ovLon = discoveryCoords.lon;
     if (ovLat) {
       console.log('Discovering routes at:',ovLat,ovLon);
-      overpass = await discoverOverpassRoutes(ovLat,ovLon,type==='cycle'?'bicycle':'hiking');
-      console.log('Overpass routes found:',overpass.length);
+      try{
+        overpass = await discoverOverpassRoutes(ovLat,ovLon,type==='cycle'?'bicycle':'hiking');
+        console.log('Overpass routes found:',overpass.length);
+      }catch(overpassErr){
+        console.warn('Nearby route discovery failed:',overpassErr.message);
+      }
     } else {
       console.log('No coordinates available for discovery');
     }
 
-    renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,false);
+    renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,false,curatedStatus);
   } catch(err) {
-    container.innerHTML='<div class="act-loading">Could not load routes — tap to upload your own GPX</div>';
+    console.warn('Route list rendering failed:',err.message);
+    container.innerHTML='<div class="act-loading">Routes are temporarily unavailable — tap the selected tab to try again</div>';
   }
 }
 
@@ -4427,10 +4460,11 @@ function storeExternalSavedRoutes(source,type,routes){
 }
 
 // ── Render route list ─────────────────────────────────────
-function renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,loadingNearby){
+function renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,strava,stravaStatus,loadingNearby,curatedStatus){
   rwgps=rwgps||[];rwgpsStatus=rwgpsStatus||'';
   strava=strava||[];stravaStatus=stravaStatus||'';
-  actRouteCollections[type]={curated:curated,overpass:overpass,rwgps:rwgps,strava:strava};
+  curatedStatus=curatedStatus||'';
+  actRouteCollections[type]={curated:curated,overpass:overpass,rwgps:rwgps,strava:strava,curatedStatus:curatedStatus,rwgpsStatus:rwgpsStatus,stravaStatus:stravaStatus};
   var filter=(actCurrentFilters&&actCurrentFilters[type])||'all';
   var visibleCurated=curated.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
   var visibleRWGPS=rwgps.filter(function(route){return routeMatchesActivityFilter(route,filter,type);});
@@ -4453,6 +4487,7 @@ function renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,st
         +'<span class="act-diff '+diffCls+'">'+escapeDoHtml(difficulty)+'</span></div></div>';
     });
   }
+  if(curatedStatus)html+='<div class="act-loading" style="padding:8px 14px">'+escapeDoHtml(curatedStatus)+'</div>';
 
   if(visibleRWGPS.length){
     html+='<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);padding:8px 14px 4px">Your RideWithGPS routes</div>';
@@ -5344,7 +5379,7 @@ function filterAct(el, filter, type) {
   actCurrentFilters[type]=filter;
   var collection=actRouteCollections[type],container=document.getElementById('act-routes-'+type);
   if(collection&&container)renderActRouteList(container,collection.curated,collection.overpass,type,
-    collection.rwgps,'',collection.strava,'',false);
+    collection.rwgps,collection.rwgpsStatus,collection.strava,collection.stravaStatus,false,collection.curatedStatus);
 }
  
 function actReanalyse(type) {

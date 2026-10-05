@@ -65,3 +65,31 @@ test('gateway signatures are deterministic across query ordering', async () => {
     await signGatewayRequest('secret', 'GET', 123, right)
   );
 });
+
+test('secure gateway retries a transient invalid GET response', async () => {
+  let attempts = 0;
+  const response = await handleRequest(
+    new Request('https://audrey.example/api?action=get_routes'),
+    env(), access(), async () => {
+      attempts++;
+      if (attempts === 1) return new Response('<!doctype html><title>Temporary error</title>');
+      return new Response(JSON.stringify({success: true, routes: []}), {
+        headers: {'Content-Type': 'application/json'}
+      });
+    }
+  );
+  assert.equal(attempts, 2);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('X-Audrey-Upstream-Attempts'), '2');
+  assert.deepEqual(await response.json(), {success: true, routes: []});
+});
+
+test('secure gateway returns JSON when the upstream remains invalid', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/api?action=get_routes'),
+    env(), access(), async () => new Response('<!doctype html><title>Bad gateway</title>')
+  );
+  assert.equal(response.status, 502);
+  assert.equal(response.headers.get('Content-Type'), 'application/json; charset=utf-8');
+  assert.equal((await response.json()).code, 'UPSTREAM_INVALID_RESPONSE');
+});

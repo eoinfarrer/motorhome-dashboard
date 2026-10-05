@@ -77,21 +77,41 @@ async function proxyApi(request, env, fetchImpl) {
     headers['Content-Type'] = request.headers.get('Content-Type') || 'text/plain;charset=utf-8';
   }
 
-  const upstream = await fetchImpl(target.toString(), {
-    method,
-    headers,
-    body: method === 'POST' ? body : undefined,
-    redirect: 'follow'
-  });
-  const responseBody = await upstream.arrayBuffer();
-  return new Response(responseBody, {
-    status: upstream.status,
-    headers: {
-      'Content-Type': upstream.headers.get('Content-Type') || 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store',
-      'X-Content-Type-Options': 'nosniff'
+  const attempts = method === 'GET' ? 2 : 1;
+  let lastError;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const upstream = await fetchImpl(target.toString(), {
+        method,
+        headers,
+        body: method === 'POST' ? body : undefined,
+        redirect: 'follow'
+      });
+      const responseBody = await upstream.arrayBuffer();
+      const contentType = upstream.headers.get('Content-Type') || '';
+      const preview = new TextDecoder().decode(responseBody.slice(0, 80)).trim();
+      const looksJson = /json/i.test(contentType) || preview.startsWith('{') || preview.startsWith('[');
+      const retryable = method === 'GET' && (upstream.status === 429 || upstream.status >= 500 || !looksJson);
+      if (retryable && attempt < attempts) continue;
+      if (!looksJson) {
+        return json({error: 'Backend returned an invalid response', code: 'UPSTREAM_INVALID_RESPONSE'}, 502);
+      }
+      return new Response(responseBody, {
+        status: upstream.status,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Cache-Control': 'no-store',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Audrey-Upstream-Attempts': String(attempt)
+        }
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) continue;
     }
-  });
+  }
+  console.error('Audrey backend request failed', lastError);
+  return json({error: 'Backend is temporarily unavailable', code: 'UPSTREAM_UNAVAILABLE'}, 502);
 }
 
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {

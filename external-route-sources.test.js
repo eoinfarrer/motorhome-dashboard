@@ -55,6 +55,35 @@ test('wires both authenticated route sources and their GPX actions', () => {
   assert.match(frontend, /trimExternalRoutesForTab\(stravaData\.routes\|\|\[\],type,10\)/);
 });
 
+test('keeps route sources independent behind the authenticated JSON helper', () => {
+  assert.match(frontend, /var curated = \[\], curatedStatus = ''/);
+  assert.match(frontend, /Saved route fetch failed:/);
+  assert.match(frontend, /await fetchAudreyJson\(API_URL \+ '\?' \+ rwParams\.toString\(\)\)/);
+  assert.match(frontend, /await fetchAudreyJson\(API_URL \+ '\?' \+ stravaParams\.toString\(\)\)/);
+  assert.doesNotMatch(functionSource('loadActRoutes'), /credentials:'omit'/);
+});
+
+test('authenticated JSON helper retries an invalid gateway response', async () => {
+  let attempts = 0;
+  let requestOptions;
+  const fetchContext = {
+    fetch: async (_url, options) => {
+      attempts++;
+      requestOptions = options;
+      return attempts === 1
+        ? new Response('<!doctype html><title>Temporary error</title>')
+        : new Response(JSON.stringify({success:true}), {headers:{'Content-Type':'application/json'}});
+    },
+    tripEditorWait: async () => {}
+  };
+  vm.createContext(fetchContext);
+  vm.runInContext('async ' + functionSource('fetchAudreyJson'), fetchContext);
+  const result = await fetchContext.fetchAudreyJson('/api?action=get_routes');
+  assert.equal(attempts, 2);
+  assert.equal(requestOptions.credentials, 'same-origin');
+  assert.equal(result.success, true);
+});
+
 test('normalises OSM route distances with common units', () => {
   assert.equal(context.parseOsmDistanceKm('12.4 km'), 12.4);
   assert.equal(context.parseOsmDistanceKm('6 mi'), 9.7);
