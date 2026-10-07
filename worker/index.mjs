@@ -1,5 +1,7 @@
 const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
+let accessJwks = null;
+let accessJwksExpiresAt = 0;
 
 function json(payload, status = 200) {
   return new Response(JSON.stringify(payload), {
@@ -23,6 +25,26 @@ export function canonicalQuery(searchParams) {
     .join('&');
 }
 
+function canonicalJsonValue(value) {
+  if (Array.isArray(value)) return value.map(canonicalJsonValue);
+  if (value && typeof value === 'object') {
+    return Object.keys(value).sort().reduce((result, key) => {
+      result[key] = canonicalJsonValue(value[key]);
+      return result;
+    }, {});
+  }
+  if (typeof value === 'string') return value.normalize('NFC');
+  return value;
+}
+
+export function canonicalJsonBody(body) {
+  try {
+    return JSON.stringify(canonicalJsonValue(JSON.parse(body)));
+  } catch (_error) {
+    return String(body || '');
+  }
+}
+
 function bytesToHex(bytes) {
   return Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('');
 }
@@ -35,7 +57,53 @@ export async function signGatewayRequest(secret, method, timestamp, payload) {
   return bytesToHex(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(canonical))));
 }
 
-async function authenticatedEmail(ctx) {
+function decodeJwtPart(value) {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+  return JSON.parse(atob(padded));
+}
+
+function jwtSignatureBytes(value) {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
+  return Uint8Array.from(atob(padded), character => character.charCodeAt(0));
+}
+
+async function accessSigningKeys(env) {
+  if (accessJwks && Date.now() < accessJwksExpiresAt) return accessJwks;
+  const team = String(env.AUDREY_ACCESS_TEAM_DOMAIN || '').trim();
+  if (!team) return [];
+  const response = await fetch('https://' + team + '/cdn-cgi/access/certs');
+  if (!response.ok) return [];
+  const document = await response.json();
+  accessJwks = Array.isArray(document.keys) ? document.keys : [];
+  accessJwksExpiresAt = Date.now() + 5 * 60 * 1000;
+  return accessJwks;
+}
+
+async function authenticatedEmail(request, env, ctx) {
+  const token = request.headers.get('cf-access-jwt-assertion');
+  const team = String(env.AUDREY_ACCESS_TEAM_DOMAIN || '').trim();
+  const audience = String(env.AUDREY_ACCESS_AUD || '').trim();
+  if (token && team && audience) {
+    try {
+      const [encodedHeader, encodedClaims, encodedSignature, extra] = token.split('.');
+      if (!encodedHeader || !encodedClaims || !encodedSignature || extra) return '';
+      const header = decodeJwtPart(encodedHeader);
+      const claims = decodeJwtPart(encodedClaims);
+      if (header.alg !== 'RS256' || !header.kid || claims.iss !== 'https://' + team) return '';
+      const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+      if (!audiences.includes(audience) || !claims.exp || Number(claims.exp) <= Date.now() / 1000) return '';
+      const key = (await accessSigningKeys(env)).find(candidate => candidate.kid === header.kid && candidate.kty === 'RSA');
+      if (!key) return '';
+      const cryptoKey = await crypto.subtle.importKey('jwk', key, {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['verify']);
+      const verified = await crypto.subtle.verify(
+        'RSASSA-PKCS1-v1_5', cryptoKey, jwtSignatureBytes(encodedSignature), encoder.encode(encodedHeader + '.' + encodedClaims)
+      );
+      return verified ? String(claims.email || '').trim().toLowerCase() : '';
+    } catch (_error) {
+      return '';
+    }
+  }
+  // Retain the runtime API fallback for local tests and compatible Workers.
   if (!ctx || !ctx.access) return '';
   const identity = await ctx.access.getIdentity();
   return String(identity && identity.email || '').trim().toLowerCase();
@@ -65,7 +133,7 @@ async function proxyApi(request, env, fetchImpl) {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const payload = method === 'GET' ? canonicalQuery(target.searchParams) : body;
+  const payload = method === 'GET' ? canonicalQuery(target.searchParams) : canonicalJsonBody(body);
   const signature = await signGatewayRequest(
     env.AUDREY_GATEWAY_SECRET, method, timestamp, payload
   );
@@ -77,7 +145,12 @@ async function proxyApi(request, env, fetchImpl) {
     headers['Content-Type'] = request.headers.get('Content-Type') || 'text/plain;charset=utf-8';
   }
 
-  const attempts = method === 'GET' ? 2 : 1;
+  let postAction = '';
+  if (method === 'POST') {
+    try { postAction = String(JSON.parse(body).action || ''); } catch (_error) {}
+  }
+  const safeToRetry = method === 'GET' || postAction === 'rank_route_pois' || postAction === 'enrich_route';
+  const attempts = safeToRetry ? 3 : 1;
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
@@ -89,10 +162,14 @@ async function proxyApi(request, env, fetchImpl) {
       });
       const responseBody = await upstream.arrayBuffer();
       const contentType = upstream.headers.get('Content-Type') || '';
-      const preview = new TextDecoder().decode(responseBody.slice(0, 80)).trim();
+      const decodedBody = new TextDecoder().decode(responseBody);
+      const preview = decodedBody.slice(0, 80).trim();
       const looksJson = /json/i.test(contentType) || preview.startsWith('{') || preview.startsWith('[');
-      const retryable = method === 'GET' && (upstream.status === 429 || upstream.status >= 500 || !looksJson);
-      if (retryable && attempt < attempts) continue;
+      const retryable = safeToRetry && (upstream.status === 429 || upstream.status >= 500 || !looksJson);
+      if (retryable && attempt < attempts) {
+        await new Promise(resolve => setTimeout(resolve, attempt * 200));
+        continue;
+      }
       if (!looksJson) {
         return json({error: 'Backend returned an invalid response', code: 'UPSTREAM_INVALID_RESPONSE'}, 502);
       }
@@ -107,7 +184,10 @@ async function proxyApi(request, env, fetchImpl) {
       });
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) continue;
+      if (attempt < attempts) {
+        await new Promise(resolve => setTimeout(resolve, attempt * 200));
+        continue;
+      }
     }
   }
   console.error('Audrey backend request failed', lastError);
@@ -115,7 +195,7 @@ async function proxyApi(request, env, fetchImpl) {
 }
 
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
-  const email = await authenticatedEmail(ctx);
+  const email = await authenticatedEmail(request, env, ctx);
   const allowlist = allowedEmails(env);
   if (!email || !allowlist.includes(email)) {
     return json({error: 'Access required'}, email ? 403 : 401);

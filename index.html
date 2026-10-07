@@ -707,6 +707,10 @@ body.trip-editor-open{overflow:hidden;}
 <script src="assets/osm-tile-pois.js"></script>
 <script>
 var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
+// Route POI ranking is deliberately kept on the established direct endpoint.
+// It is read-only, has no user or vehicle data, and avoids putting a large
+// route payload through the protected gateway before it reaches Apps Script.
+var ROUTE_ENRICHMENT_API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
 
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
@@ -4948,7 +4952,7 @@ async function loadRouteEnrichment(){
     var features=await fetchRouteMapFeatures(payload);
     var controller=typeof AbortController!=='undefined'?new AbortController():null;
     var timeoutId=controller?setTimeout(function(){controller.abort();},20000):null;
-    var response=await fetch(API_URL,{
+    var response=await fetch(ROUTE_ENRICHMENT_API_URL,{
       method:'POST',redirect:'follow',credentials:'same-origin',
       headers:{'Content-Type':'text/plain;charset=utf-8','Accept':'application/json'},
       body:JSON.stringify({

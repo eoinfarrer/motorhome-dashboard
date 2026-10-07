@@ -175,7 +175,7 @@ test('browser map search divides long routes into bounded overlapping corridors'
   }
 });
 
-test('secure route enrichment queries OpenStreetMap directly and uses the signed ranking backend', () => {
+test('route enrichment queries OpenStreetMap directly and sends read-only ranking to its direct backend', () => {
   const loader = frontendFunctionSource('loadRouteEnrichment');
   const lookup = frontendFunctionSource('fetchRouteMapFeatures');
   const fallbackLookup = frontendFunctionSource('fetchRouteMapFeaturesOverpass');
@@ -199,6 +199,7 @@ test('secure route enrichment queries OpenStreetMap directly and uses the signed
   assert.match(fallbackLookup, /fetchOverpassJson\(routeOverpassQuery\(payload,chunks\[index\]\),15000\)/);
   assert.match(fallbackLookup, /Math\.min\(2,chunks\.length\)/);
   assert.match(loader, /action:'rank_route_pois'/);
+  assert.match(loader, /fetch\(ROUTE_ENRICHMENT_API_URL/);
   assert.match(loader, /credentials:'same-origin'/);
   assert.doesNotMatch(loader, /credentials:'omit'/);
   assert.doesNotMatch(frontend, /maps\.mail\.ru/);

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
+import {canonicalJsonBody, canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
 
 function access(email = 'owner@example.com') {
   return {access: {getIdentity: async () => ({email})}};
@@ -19,6 +19,15 @@ function env(overrides = {}) {
 test('secure Worker rejects requests without a validated Access identity', async () => {
   const response = await handleRequest(
     new Request('https://audrey.example/health'), env(), {}, async () => new Response('{}')
+  );
+  assert.equal(response.status, 401);
+});
+
+test('secure Worker does not trust an unsigned Access email header', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/health', {
+      headers: {'cf-access-authenticated-user-email': 'owner@example.com'}
+    }), env(), {}, async () => new Response('{}')
   );
   assert.equal(response.status, 401);
 });
@@ -66,6 +75,12 @@ test('gateway signatures are deterministic across query ordering', async () => {
   );
 });
 
+test('POST signatures use stable JSON regardless of formatting and key order', () => {
+  const left = canonicalJsonBody('{"route":{"name":"Albanyà","points":[{"lon":2,"lat":1}]},"action":"rank_route_pois"}');
+  const right = canonicalJsonBody('{\n  "action": "rank_route_pois", "route": {"points": [{"lat": 1, "lon": 2}], "name": "Albanyà"}\n}');
+  assert.equal(left, right);
+});
+
 test('secure gateway retries a transient invalid GET response', async () => {
   let attempts = 0;
   const response = await handleRequest(
@@ -82,6 +97,34 @@ test('secure gateway retries a transient invalid GET response', async () => {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get('X-Audrey-Upstream-Attempts'), '2');
   assert.deepEqual(await response.json(), {success: true, routes: []});
+});
+
+test('secure gateway retries a read-only route POST but not a trip mutation', async () => {
+  let routeAttempts = 0;
+  const routeResponse = await handleRequest(
+    new Request('https://audrey.example/api', {
+      method: 'POST', body: JSON.stringify({action:'rank_route_pois',features:[]})
+    }), env(), access(), async () => {
+      routeAttempts++;
+      return routeAttempts === 1
+        ? new Response('<!doctype html><title>Temporary error</title>')
+        : new Response(JSON.stringify({success:true,pois:[]}), {headers:{'Content-Type':'application/json'}});
+    }
+  );
+  assert.equal(routeAttempts, 2);
+  assert.equal(routeResponse.status, 200);
+
+  let mutationAttempts = 0;
+  const mutationResponse = await handleRequest(
+    new Request('https://audrey.example/api', {
+      method: 'POST', body: JSON.stringify({action:'update_trip',tripName:'Test'})
+    }), env(), access(), async () => {
+      mutationAttempts++;
+      return new Response('<!doctype html><title>Temporary error</title>');
+    }
+  );
+  assert.equal(mutationAttempts, 1);
+  assert.equal(mutationResponse.status, 502);
 });
 
 test('secure gateway returns JSON when the upstream remains invalid', async () => {
