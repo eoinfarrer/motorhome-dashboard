@@ -87,13 +87,13 @@ test('More limits the collapsible history to the latest 20 activities', () => {
   assert.doesNotMatch(html, /Activity 21/);
 });
 
-test('Journey inserts activities once after the final itinerary row for that day', () => {
+test('Journey inserts the Daily Story once after the final itinerary row for that day', () => {
   const tripContext = {
     Date,
     Object,
     Number,
     buildJourneyTripPoint: row => '<stop>' + row.location + '</stop>',
-    buildJourneyActivityPoint: activity => '<activity>' + activity.name + '</activity>',
+    buildDailyStoryPoint: (data, date) => '<story>' + date + ':' + data.activities.tripItems[0].name + '</story>',
     journeyOverview: () => '',
   };
   vm.createContext(tripContext);
@@ -108,6 +108,6 @@ test('Journey inserts activities once after the final itinerary row for that day
     activities: {tripItems: [{tripDate: '2026-09-21', name: 'Evening walk'}]}
   });
 
-  assert.equal((html.match(/<activity>/g) || []).length, 1);
-  assert.ok(html.indexOf('White Rocks Hotel</stop><activity>') > -1);
+  assert.equal((html.match(/<story>/g) || []).length, 2);
+  assert.ok(html.indexOf('White Rocks Hotel</stop><story>2026-09-21:Evening walk') > -1);
 });

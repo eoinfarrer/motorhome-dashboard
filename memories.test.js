@@ -4,9 +4,10 @@ const test = require('node:test');
 
 const frontend = fs.readFileSync(__dirname + '/index.html', 'utf8');
 
-test('Moments has a Home action, persistent quick action and dedicated deep link', () => {
-  assert.match(frontend, /♥ Save Moment/);
+test('Moments uses one Home-only heart action and retains the dedicated deep link', () => {
   assert.match(frontend, /id="momentFab"/);
+  assert.match(frontend, /classList\.toggle\('is-ready',currentAppView==='home'/);
+  assert.doesNotMatch(frontend, /function buildHomeMoments/);
   assert.match(frontend, /get\('capture'\)==='moment'/);
 });
 
