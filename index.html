@@ -114,6 +114,23 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .home-calm-status::before{content:'✓';display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(80,159,103,.2);color:#8ac59b;font-family:var(--display);font-weight:800;}
 .home-calm-status-title{font-family:var(--ui);font-size:14px;font-weight:700;}
 .home-calm-status-copy{margin-top:1px;font-size:10px;color:var(--home-glass-muted);}
+.home-moments{padding:17px;border:1px solid rgba(224,119,137,.3);border-radius:16px;background:rgba(48,29,35,.78);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);color:var(--home-glass-text);}
+.home-moments-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.home-moments-title{font-family:var(--ui);font-size:17px;font-weight:750;}
+.home-moments-copy{margin-top:3px;color:var(--home-glass-muted);font-size:10px;}
+.home-moment-save{min-height:42px;padding:10px 13px;border:1px solid rgba(255,255,255,.16);border-radius:11px;background:#d8667c;color:#fff;font-family:var(--ui);font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap;}
+.home-moment-list{display:grid;gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1);}
+.home-moment-row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;}
+.home-moment-icon{font-size:17px;text-align:center;}.home-moment-name{overflow:hidden;font-family:var(--ui);font-size:12px;font-weight:650;text-overflow:ellipsis;white-space:nowrap;}.home-moment-meta{color:var(--home-glass-muted);font-size:9px;}.home-moment-stars{color:#e8bd68;font-size:10px;letter-spacing:-1px;}
+.moment-fab{position:fixed;right:15px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:149;display:none;width:48px;height:48px;border:1px solid rgba(255,255,255,.22);border-radius:50%;background:#d8667c;color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.34);font-size:21px;cursor:pointer;}
+.moment-fab.is-ready{display:block;}
+.moment-overlay{position:fixed;inset:0;z-index:220;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(7,9,8,.7);backdrop-filter:blur(9px);}
+.moment-overlay.open{display:flex;}.moment-sheet{width:min(100%,520px);max-height:92vh;overflow:auto;padding:19px;border:1px solid rgba(255,255,255,.13);border-radius:22px 22px 14px 14px;background:#191d1a;color:#f5f3ed;box-shadow:0 24px 60px rgba(0,0,0,.46);}
+.moment-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}.moment-eyebrow{color:#dc9aa7;font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;}.moment-title{margin-top:4px;font-family:var(--ui);font-size:24px;font-weight:750;}.moment-close{border:0;background:transparent;color:#afb3ab;font-size:13px;cursor:pointer;}
+.moment-label{margin:17px 0 8px;color:#afb3ab;font-size:9px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;}.moment-types{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}.moment-type{min-height:43px;padding:9px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#222723;color:#d8d9d3;font-family:var(--mono);font-size:11px;text-align:left;cursor:pointer;}.moment-type.selected{border-color:#dc8797;background:rgba(216,102,124,.18);color:#fff;}
+.moment-rating{display:flex;gap:7px;}.moment-star{width:43px;height:43px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#222723;color:#777;font-size:21px;cursor:pointer;}.moment-star.selected{border-color:#d7a957;color:#efc46e;background:rgba(215,169,87,.12);}
+.moment-comment{width:100%;min-height:82px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#222723;color:#fff;font-family:var(--ui);font-size:15px;resize:vertical;}.moment-comment::placeholder{color:#777;}.moment-location{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 11px;border-radius:10px;background:#202520;color:#afb3ab;font-size:10px;}.moment-location button{border:0;background:none;color:#8ac59b;font-family:var(--mono);font-size:10px;cursor:pointer;}.moment-status{min-height:18px;margin-top:10px;color:#efa99e;font-size:10px;}.moment-save{width:100%;min-height:49px;margin-top:7px;border:0;border-radius:12px;background:#d8667c;color:#fff;font-family:var(--ui);font-size:15px;font-weight:750;cursor:pointer;}.moment-save:disabled{opacity:.55;cursor:wait;}
+@media(min-width:800px){.moment-fab{right:22px;bottom:22px}.moment-overlay{align-items:center}.moment-sheet{border-radius:20px}.moment-types{grid-template-columns:repeat(3,1fr)}}
 
 /* ── AUDREY 2.0 JOURNEY ────────────────────────────────────── */
 .journey-experience{--journey-scene-image:none;--journey-scene-position:center;--journey-scene-position-tablet:center;--journey-scene-position-wide:center;min-height:calc(100vh - 74px);padding:14px;background-image:linear-gradient(180deg,rgba(8,10,9,.44),rgba(8,10,9,.78)),var(--journey-scene-image),radial-gradient(ellipse 80% 45% at 15% -10%,rgba(164,143,94,.16),transparent 72%),radial-gradient(ellipse 60% 45% at 100% 25%,rgba(75,112,105,.16),transparent 70%),linear-gradient(155deg,#171917,#22251f 55%,#191c19);background-size:cover,cover,auto,auto,cover;background-position:center,var(--journey-scene-position),center,center,center;}
@@ -678,6 +695,7 @@ body.trip-editor-open{overflow:hidden;}
   <button class="primary-nav-btn" type="button" data-view="van" onclick="switchAppView('van')">Van</button>
   <button class="primary-nav-btn" type="button" data-view="more" onclick="switchAppView('more')">More</button>
 </nav>
+<button class="moment-fab" id="momentFab" type="button" onclick="openMomentCapture(true)" aria-label="Save a moment">♥</button>
 </div>
 
 <!-- Cycling modal — outside footer -->
@@ -703,6 +721,12 @@ body.trip-editor-open{overflow:hidden;}
   </section>
 </div>
 
+<div class="moment-overlay" id="momentOverlay" onclick="closeMomentCaptureIfOutside(event)">
+  <section class="moment-sheet" role="dialog" aria-modal="true" aria-labelledby="momentTitle">
+    <div id="momentEditor"></div>
+  </section>
+</div>
+
 <script src="assets/fit-export.js"></script>
 <script src="assets/osm-tile-pois.js"></script>
 <script>
@@ -712,6 +736,7 @@ var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZ
 // route payload through the protected gateway before it reaches Apps Script.
 var ROUTE_ENRICHMENT_API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
+var momentDraft=null,momentSaving=false,momentDeepLinkPending=new URLSearchParams(location.search).get('capture')==='moment';
 
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
 // This is intentionally separate from dashboard data state. Switching views
@@ -1181,6 +1206,9 @@ function render(d){
   applyCollapsed();
   applyAppView();
   applyJourneyMode();
+  var momentFab=document.getElementById('momentFab');
+  if(momentFab)momentFab.classList.add('is-ready');
+  if(momentDeepLinkPending){momentDeepLinkPending=false;setTimeout(function(){openMomentCapture(false);},0);}
   if(isSettingsPanelOpen&&currentAppView==='more'){
     var settingsPanel=document.getElementById('settingsPanel');
     var settingsBtn=document.getElementById('settingsBtn');
@@ -1801,6 +1829,7 @@ function buildHomeView(d,fc){
     else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
     else parts.push(buildHomeOpportunity(d,context));
   }
+  parts.push(buildHomeMoments(d.memories));
   if(d.activities&&Array.isArray(d.activities.today)&&d.activities.today.length){
     parts.push(buildHomeActivityCard(d.activities.today));
   }
@@ -1814,6 +1843,85 @@ function buildHomeView(d,fc){
   if(meta.vehicleRelevant!==false)parts.push(buildHomeVehicleStatus(d.vehicle));
   parts.push('</div></div></div>');
   return parts.join('');
+}
+
+function momentTypeInfo(type){
+  return ({food:['🍽','Food'],pub:['🍺','Pub'],walk:['🥾','Walk'],ride:['🚴','Ride'],ski:['⛷','Ski Day'],viewpoint:['📸','Viewpoint'],campsite:['🚐','Campsite'],accommodation:['🛏','Accommodation'],favourite:['♥','Favourite Moment'],note:['✎','Note']})[type]||['♥','Moment'];
+}
+
+function buildHomeMoments(state){
+  state=state||{};var items=Array.isArray(state.items)?state.items:[];
+  var rows=items.slice(0,3).map(function(memory){
+    var info=momentTypeInfo(memory.type),when=memory.timestamp?new Date(memory.timestamp):null;
+    var date=when&&!isNaN(when.getTime())?when.toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+    var title=memory.title||memory.comment||info[1],meta=[memory.locationName,date].filter(Boolean).join(' · ');
+    return '<div class="home-moment-row"><div class="home-moment-icon">'+info[0]+'</div><div><div class="home-moment-name">'+escapeDoHtml(title)+'</div><div class="home-moment-meta">'+escapeDoHtml(meta)+'</div></div><div class="home-moment-stars">'+'★'.repeat(Number(memory.rating)||0)+'</div></div>';
+  }).join('');
+  return '<section class="home-moments"><div class="home-moments-head"><div><div class="home-moments-title">Moments</div><div class="home-moments-copy">'+(items.length?items.length+' saved on this trip':'Capture something worth remembering')+'</div></div><button class="home-moment-save" type="button" onclick="openMomentCapture(true)">♥ Save Moment</button></div>'+(rows?'<div class="home-moment-list">'+rows+'</div>':'')+'</section>';
+}
+
+function initialMomentDraft(){
+  var meta=currentData&&currentData.meta||{},coords=meta.currentLocationCoords||{};
+  return{type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:''};
+}
+
+function openMomentCapture(requestPhoneLocation){
+  if(!currentData)return;
+  momentDraft=initialMomentDraft();momentSaving=false;
+  document.getElementById('momentOverlay').classList.add('open');document.body.classList.add('trip-editor-open');
+  renderMomentEditor();
+  if(requestPhoneLocation!==false)requestMomentLocation();
+}
+
+function closeMomentCapture(){
+  var overlay=document.getElementById('momentOverlay');if(overlay)overlay.classList.remove('open');
+  document.body.classList.remove('trip-editor-open');momentDraft=null;momentSaving=false;
+  if(new URLSearchParams(location.search).get('capture')==='moment')history.replaceState({},'',location.pathname);
+}
+
+function closeMomentCaptureIfOutside(event){if(event.target&&event.target.id==='momentOverlay')closeMomentCapture();}
+
+function selectMomentType(type){if(!momentDraft)return;momentDraft.type=type;renderMomentEditor();}
+function selectMomentRating(rating){if(!momentDraft)return;momentDraft.rating=rating;renderMomentEditor();}
+
+function renderMomentEditor(){
+  var root=document.getElementById('momentEditor');if(!root||!momentDraft)return;
+  var types=['food','pub','walk','ride','ski','viewpoint','campsite','accommodation','favourite','note'];
+  root.innerHTML='<div class="moment-head"><div><div class="moment-eyebrow">Audrey · Capture</div><div class="moment-title" id="momentTitle">Save Moment</div></div><button class="moment-close" type="button" onclick="closeMomentCapture()">Close</button></div>'
+    +'<div class="moment-label">Type</div><div class="moment-types">'+types.map(function(type){var info=momentTypeInfo(type);return'<button class="moment-type'+(momentDraft.type===type?' selected':'')+'" type="button" onclick="selectMomentType(\''+type+'\')">'+info[0]+' '+info[1]+'</button>';}).join('')+'</div>'
+    +'<div class="moment-label">Rating</div><div class="moment-rating">'+[1,2,3,4,5].map(function(rating){return'<button class="moment-star'+(rating<=momentDraft.rating?' selected':'')+'" type="button" onclick="selectMomentRating('+rating+')" aria-label="'+rating+' star'+(rating===1?'':'s')+'">★</button>';}).join('')+'</div>'
+    +'<div class="moment-label">Comment <span style="opacity:.6">· optional</span></div><textarea class="moment-comment" id="momentComment" maxlength="2000" placeholder="What made this worth remembering?">'+escapeDoHtml(momentDraft.comment)+'</textarea>'
+    +'<div class="moment-location"><span>⌖ '+escapeDoHtml(momentDraft.locationState+(momentDraft.locationName?' · '+momentDraft.locationName:''))+'</span><button type="button" onclick="requestMomentLocation()">Use phone GPS</button></div>'
+    +'<div class="moment-status">'+escapeDoHtml(momentDraft.error||'')+'</div><button class="moment-save" type="button" onclick="saveMoment()"'+(momentSaving?' disabled':'')+'>'+(momentSaving?'Saving…':'Save Moment')+'</button>';
+}
+
+function requestMomentLocation(){
+  if(!momentDraft)return;
+  if(!navigator.geolocation){momentDraft.locationState='Trip location fallback';renderMomentEditor();return;}
+  momentDraft.locationState='Finding phone location…';momentDraft.error='';renderMomentEditor();
+  navigator.geolocation.getCurrentPosition(function(position){
+    if(!momentDraft)return;momentDraft.lat=position.coords.latitude;momentDraft.lng=position.coords.longitude;momentDraft.accuracyM=Math.round(position.coords.accuracy||0);momentDraft.locationState='Phone location'+(momentDraft.accuracyM?' · ±'+momentDraft.accuracyM+'m':'');renderMomentEditor();
+  },function(){if(!momentDraft)return;momentDraft.locationState=momentDraft.lat!==null?'Trip location fallback':'Saved without GPS';renderMomentEditor();},{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+}
+
+function currentMomentWeather(){
+  var weather=getHomeWeather(currentData&&currentData.weather),parts=[];if(!weather)return'';
+  if(weather.condition||weather.risk)parts.push(weather.condition||weather.risk);
+  if(weather.maxTempC!==null&&weather.maxTempC!==undefined)parts.push(weather.maxTempC+'°C');
+  if(weather.gustKmh)parts.push('gusts '+weather.gustKmh+' km/h');return parts.join(' · ');
+}
+
+async function saveMoment(){
+  if(!momentDraft||momentSaving)return;
+  var comment=document.getElementById('momentComment');momentDraft.comment=comment?comment.value.trim():'';momentSaving=true;momentDraft.error='';renderMomentEditor();
+  var activity=currentData&&currentData.activities&&currentData.activities.today&&currentData.activities.today[0];
+  var payload={action:'save_memory',tripName:currentData.meta&&currentData.meta.tripName,type:momentDraft.type,rating:momentDraft.rating,comment:momentDraft.comment,lat:momentDraft.lat,lng:momentDraft.lng,locationName:momentDraft.locationName,weatherSummary:currentMomentWeather(),activityId:activity&&activity.id||'',favourite:momentDraft.type==='favourite'};
+  try{
+    var result=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+    if(!result.success)throw new Error(result.error||'Moment could not be saved');
+    currentData.memories=currentData.memories||{items:[],count:0,favourites:0};currentData.memories.items.unshift(result.memory);currentData.memories.count=currentData.memories.items.length;if(result.memory.favourite)currentData.memories.favourites++;
+    closeMomentCapture();render(currentData);
+  }catch(error){momentSaving=false;momentDraft.error=error.message||'Moment could not be saved';renderMomentEditor();}
 }
 
 function buildHomeActivityCard(activities){
