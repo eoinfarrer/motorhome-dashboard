@@ -88,7 +88,11 @@ async function authenticatedEmail(request, env, ctx) {
       const identity = await ctx.access.getIdentity();
       const email = String(identity && identity.email || '').trim().toLowerCase();
       if (email) return email;
-    } catch (_error) {
+    } catch (error) {
+      console.warn('Audrey Access runtime identity failed', {
+        name: String(error && error.name || 'Error'),
+        message: String(error && error.message || '').slice(0, 160)
+      });
       // Fall through to manual JWT validation for compatible runtimes.
     }
   }
@@ -112,10 +116,20 @@ async function authenticatedEmail(request, env, ctx) {
         'RSASSA-PKCS1-v1_5', cryptoKey, jwtSignatureBytes(encodedSignature), encoder.encode(encodedHeader + '.' + encodedClaims)
       );
       return verified ? String(claims.email || '').trim().toLowerCase() : '';
-    } catch (_error) {
+    } catch (error) {
+      console.warn('Audrey Access JWT validation failed', {
+        name: String(error && error.name || 'Error'),
+        message: String(error && error.message || '').slice(0, 160)
+      });
       return '';
     }
   }
+  console.warn('Audrey Access identity missing', {
+    path: new URL(request.url).pathname,
+    hasRuntimeIdentity: Boolean(ctx && ctx.access),
+    hasJwt: Boolean(token),
+    hasEmailHeader: Boolean(request.headers.get('cf-access-authenticated-user-email'))
+  });
   return '';
 }
 
