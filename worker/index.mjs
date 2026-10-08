@@ -268,7 +268,10 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const allowlist = allowedEmails(env);
   if (!email || !allowlist.includes(email)) {
     const reason = email ? 'email_not_allowed' : authFailureReason(request, env, ctx);
-    return json({error: 'Access required (' + reason + ')', code: reason}, email ? 403 : 401);
+    const domain = email.includes('@') ? email.split('@').pop() : '';
+    const domainClass = domain === 'gmail.com' ? 'gmail' : domain === 'googlemail.com' ? 'googlemail' : 'other';
+    const detail = email ? reason + '_domain_' + domainClass : reason;
+    return json({error: 'Access required (' + detail + ')', code: reason}, email ? 403 : 401);
   }
 
   const url = new URL(request.url);
