@@ -26,6 +26,7 @@
   "vars": {
     "AUDREY_ACCESS_TEAM_DOMAIN": "delicate-hill-df88.cloudflareaccess.com",
     "AUDREY_ACCESS_AUD": "0506e07c394075743e8495d20e0fda62acb4a830dc7c211329692dcede1ef72b",
-    "AUDREY_ALLOWED_EMAIL_HASHES": "afd76a0e454d2edbc591115d0cff9a72c6683e4c169e0c97014c74525bb2a27b"
+    "AUDREY_ALLOWED_EMAIL_HASHES": "afd76a0e454d2edbc591115d0cff9a72c6683e4c169e0c97014c74525bb2a27b",
+    "AUDREY_APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec"
   }
 }
