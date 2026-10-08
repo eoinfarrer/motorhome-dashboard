@@ -59,6 +59,25 @@ test('secure Worker treats Gmail and Googlemail aliases as the same mailbox', as
   assert.equal(response.status, 200);
 });
 
+test('secure Worker can enforce a deployment-stable hashed owner allowlist', async () => {
+  const allowed = await handleRequest(
+    new Request('https://audrey.example/health'),
+    env({
+      AUDREY_ALLOWED_EMAILS: 'stale@example.com',
+      AUDREY_ALLOWED_EMAIL_HASHES: 'afd76a0e454d2edbc591115d0cff9a72c6683e4c169e0c97014c74525bb2a27b'
+    }),
+    access('eoinfarrer@gmail.com')
+  );
+  assert.equal(allowed.status, 200);
+
+  const denied = await handleRequest(
+    new Request('https://audrey.example/health'),
+    env({AUDREY_ALLOWED_EMAIL_HASHES: 'afd76a0e454d2edbc591115d0cff9a72c6683e4c169e0c97014c74525bb2a27b'}),
+    access('other@gmail.com')
+  );
+  assert.equal(denied.status, 403);
+});
+
 test('secure gateway serves the bound static site to its allowed owner', async () => {
   const response = await handleRequest(
     new Request('https://audrey.example/'), env(), access()

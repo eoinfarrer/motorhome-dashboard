@@ -177,6 +177,17 @@ function allowedEmails(env) {
     .split(',').map(canonicalAccessEmail).filter(Boolean);
 }
 
+async function emailAllowed(email, env) {
+  const canonical = canonicalAccessEmail(email);
+  const hashes = String(env.AUDREY_ALLOWED_EMAIL_HASHES || '')
+    .split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
+  if (hashes.length) {
+    const digest = await crypto.subtle.digest('SHA-256', encoder.encode(canonical));
+    return hashes.includes(bytesToHex(new Uint8Array(digest)));
+  }
+  return allowedEmails(env).includes(canonical);
+}
+
 async function proxyApi(request, env, fetchImpl) {
   if (!env.AUDREY_APPS_SCRIPT_URL || !env.AUDREY_GATEWAY_SECRET) {
     return json({error: 'Secure backend is not configured'}, 503);
@@ -259,8 +270,7 @@ async function proxyApi(request, env, fetchImpl) {
 
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const email = await authenticatedEmail(request, env, ctx);
-  const allowlist = allowedEmails(env);
-  if (!email || !allowlist.includes(canonicalAccessEmail(email))) {
+  if (!email || !(await emailAllowed(email, env))) {
     return json({error: 'Access required'}, email ? 403 : 401);
   }
 
