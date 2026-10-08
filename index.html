@@ -136,7 +136,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .journey-eyebrow{font-size:9px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#cbb88f;}
 .journey-title{margin-top:5px;font-family:var(--ui);font-size:clamp(25px,6vw,34px);font-weight:700;letter-spacing:-.7px;line-height:1.12;}
 .journey-subtitle{margin-top:6px;font-family:var(--ui);font-size:13px;color:#b7b9b0;}
-.journey-mode-switch{display:inline-grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:17px;padding:3px;border-radius:10px;background:rgba(255,255,255,.08);}
+.journey-mode-switch{display:inline-grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:17px;padding:3px;border-radius:10px;background:rgba(255,255,255,.08);}
 .journey-mode-btn{min-width:86px;padding:8px 12px;border:0;border-radius:7px;background:transparent;color:#b9bbb2;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.2px;cursor:pointer;}
 .journey-mode-btn.is-active{background:rgba(255,255,255,.13);color:#f6f4ed;}
 .journey-mode-btn:disabled{opacity:.45;cursor:default;}
@@ -184,6 +184,8 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .journey-trip-details{grid-column:2/-1;margin-top:1px;padding-top:2px;border-top:1px solid rgba(255,255,255,.055);}.journey-trip-details summary{font-size:9px;color:#83b9c7;cursor:pointer;}.journey-trip-detail{margin-top:5px;font-size:9px;color:#a8aaa1;line-height:1.45;}.journey-trip-detail a{color:#83b9c7;text-decoration:none;}
 .journey-activity-point::before{border-color:#77b78b;background:#77b78b;}.journey-activity-card{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid rgba(119,183,139,.28);border-radius:12px;background:rgba(28,45,33,.55);box-shadow:0 7px 18px rgba(0,0,0,.13);}.journey-activity-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(138,197,155,.13);font-size:18px;}.journey-activity-name{overflow:hidden;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.journey-activity-meta{margin-top:3px;color:#a8aaa1;font-size:9px;line-height:1.4;}.journey-activity-link{color:#8ec4d5;font-size:9px;text-decoration:none;white-space:nowrap;}
 .journey-story-point::before{border-color:#d8667c;background:#d8667c;}.journey-story{overflow:hidden;border:1px solid rgba(216,102,124,.28);border-radius:13px;background:rgba(43,29,34,.68);box-shadow:0 8px 20px rgba(0,0,0,.14);}.journey-story summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;list-style:none;cursor:pointer;}.journey-story summary::-webkit-details-marker{display:none;}.journey-story summary::after{content:'＋';color:#d9909e;font-size:14px;}.journey-story[open] summary::after{content:'−';}.journey-story-day{color:#d9909e;font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;}.journey-story-title{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;}.journey-story-body{padding:0 13px 13px;border-top:1px solid rgba(255,255,255,.07);}.journey-story-copy{padding-top:11px;color:#c9cac3;font-size:11px;line-height:1.55;}.journey-story-list{display:grid;gap:7px;margin-top:11px;}.journey-story-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:7px;align-items:center;color:#dedfd8;font-size:10px;}.journey-story-item-icon{text-align:center;font-size:15px;}.journey-story-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.journey-story-item-rating{color:#e8bd68;font-size:9px;letter-spacing:-1px;}
+.trip-review{display:grid;gap:12px}.trip-review-hero,.trip-review-section{padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(23,27,25,.78);box-shadow:0 10px 24px rgba(0,0,0,.18);backdrop-filter:blur(12px)}.trip-review-heading{margin-top:4px;color:#f4f3ed;font-family:var(--ui);font-size:19px;font-weight:750}.trip-review-copy{margin-top:5px;color:#b7b9b0;font-size:11px;line-height:1.5}.trip-review-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px}.trip-review-stat{padding:10px;border-radius:10px;background:rgba(255,255,255,.055)}.trip-review-stat-value{color:#f4f3ed;font-family:var(--ui);font-size:17px;font-weight:750}.trip-review-stat-label{margin-top:2px;color:#9fa39a;font-size:8px;letter-spacing:1.1px;text-transform:uppercase}.trip-review-list{display:grid;gap:8px;margin-top:11px}.trip-review-memory,.trip-review-activity,.trip-review-place,.trip-review-insight{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.045)}.trip-review-icon{font-size:17px;text-align:center}.trip-review-item-title{color:#f0efe8;font-family:var(--ui);font-size:12px;font-weight:700;line-height:1.3}.trip-review-item-meta{margin-top:3px;color:#aeb1a8;font-size:9px;line-height:1.4}.trip-review-rating{color:#e8bd68;font-size:9px;letter-spacing:-1px;white-space:nowrap}.trip-review-edit{border:0;background:none;color:#a9d3df;font-family:var(--mono);font-size:9px;cursor:pointer}.trip-review-empty{margin-top:10px;color:#aeb1a8;font-size:11px;line-height:1.5}.moment-actions{display:grid;grid-template-columns:1fr auto;gap:8px}.moment-delete{min-height:49px;margin-top:7px;padding:0 14px;border:1px solid rgba(225,111,96,.35);border-radius:12px;background:rgba(94,39,34,.45);color:#efa99e;font-family:var(--ui);font-size:13px;font-weight:700;cursor:pointer}.moment-delete:disabled{opacity:.55;cursor:wait}
+@media(min-width:700px){.trip-review-stats{grid-template-columns:repeat(5,1fr)}.trip-review{grid-template-columns:repeat(2,minmax(0,1fr))}.trip-review-hero{grid-column:1/-1}.trip-review-section.trip-review-wide{grid-column:1/-1}}
 .more-intro{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim);}
 
 /* ── AUDREY 2.0 MORE ─────────────────────────────────────────
@@ -776,7 +778,7 @@ function applyAppView(){
 // ── JOURNEY VIEW STATE ───────────────────────────────────────
 // TODAY/TRIP is local presentation state only; it never fetches dashboard data.
 function switchJourneyMode(mode){
-  if(mode!=='today'&&mode!=='trip')return;
+  if(mode!=='today'&&mode!=='trip'&&mode!=='review')return;
   if(mode==='today'&&!hasJourneyDrive(currentData))return;
   currentJourneyMode=mode;
   applyJourneyMode();
@@ -1468,7 +1470,8 @@ function buildJourneyView(d,fc){
   var title=meta.tripName||'Journey';
   var subtitle=completed?'Trip complete':hasDrive?'Your next move, clearly briefed':'Your trip, at a glance';
   var todayClass=currentJourneyMode==='today'&&hasDrive?' is-active':'';
-  var tripClass=currentJourneyMode==='trip'||!hasDrive?' is-active':'';
+  var tripClass=currentJourneyMode==='trip'||(!hasDrive&&currentJourneyMode!=='review')?' is-active':'';
+  var reviewClass=currentJourneyMode==='review'?' is-active':'';
   return '<div class="journey-experience" data-scene="'+scene.key+'" data-scene-time="'+scene.time+'" style="'+journeySceneStyle(scene)+'"><div class="journey-canvas">'
     +'<header class="journey-head"><div class="journey-eyebrow">Audrey · Journey</div>'
     +'<div class="journey-title">'+title+'</div><div class="journey-subtitle">'+subtitle+'</div>'
@@ -1476,9 +1479,11 @@ function buildJourneyView(d,fc){
     +'<div class="journey-mode-switch" role="tablist" aria-label="Journey view">'
     +'<button class="journey-mode-btn'+todayClass+'" type="button" data-journey-mode="today" onclick="switchJourneyMode(\'today\')"'+(hasDrive?'':' disabled')+'>Today</button>'
     +'<button class="journey-mode-btn'+tripClass+'" type="button" data-journey-mode="trip" onclick="switchJourneyMode(\'trip\')">Trip</button>'
+    +'<button class="journey-mode-btn'+reviewClass+'" type="button" data-journey-mode="review" onclick="switchJourneyMode(\'review\')">Review</button>'
     +'</div></header>'
     +'<section class="journey-mode'+todayClass+'" data-journey-mode="today">'+(hasDrive?buildJourneyToday(meta,d.master,fc):'')+'</section>'
     +'<section class="journey-mode'+tripClass+'" data-journey-mode="trip">'+buildJourneyTrip(d,fc)+'</section>'
+    +'<section class="journey-mode'+reviewClass+'" data-journey-mode="review">'+buildTripReview(d)+'</section>'
     +'</div></div>';
 }
 
@@ -1627,6 +1632,79 @@ function buildJourneyTrip(d,fc){
     }
   });
   return html+'</div>';
+}
+
+function tripReviewActivityCategory(activity){
+  var source=[activity&&activity.sportType,activity&&activity.category,activity&&activity.name].filter(Boolean).join(' ').toLowerCase();
+  if(/ski|snowboard/.test(source))return{key:'ski',label:'Ski days',icon:'⛷'};
+  if(/ride|cycl|bike/.test(source))return{key:'ride',label:'Rides',icon:'🚴'};
+  if(/hike|walk|trail/.test(source))return{key:'walk',label:'Walks & hikes',icon:'🥾'};
+  if(/swim|surf|kayak|sail|water/.test(source))return{key:'water',label:'Water activities',icon:'🌊'};
+  if(/padel/.test(source))return{key:'padel',label:'Padel',icon:'🎾'};
+  return{key:'other',label:'Other activities',icon:'●'};
+}
+
+function tripReviewModel(d){
+  d=d||{};
+  var memories=d.memories&&Array.isArray(d.memories.items)?d.memories.items.slice():[];
+  var activities=d.activities&&Array.isArray(d.activities.tripItems)?d.activities.tripItems.slice():[];
+  var itinerary=Array.isArray(d.itinerary)?d.itinerary:[];
+  var distanceKm=d.runningTotal&&d.runningTotal.totalKm!==undefined?Number(d.runningTotal.totalKm)||0:itinerary.reduce(function(sum,row){return sum+(Number(row.distanceKm)||0);},0);
+  var ratings=memories.map(function(memory){return Number(memory.rating)||0;}).filter(Boolean);
+  var averageRating=ratings.length?ratings.reduce(function(sum,value){return sum+value;},0)/ratings.length:0;
+  var favourites=memories.filter(function(memory){return memory.favourite===true||String(memory.favourite).toLowerCase()==='true'||Number(memory.rating)>=5;}).sort(function(a,b){return(Number(b.rating)||0)-(Number(a.rating)||0)||new Date(b.timestamp)-new Date(a.timestamp);}).slice(0,6);
+  var categoryMap={};
+  activities.forEach(function(activity){
+    var category=tripReviewActivityCategory(activity),entry=categoryMap[category.key]||(categoryMap[category.key]={key:category.key,label:category.label,icon:category.icon,count:0,distanceKm:0,movingMinutes:0});
+    entry.count++;entry.distanceKm+=Number(activity.distanceKm)||0;entry.movingMinutes+=Number(activity.movingMinutes)||0;
+  });
+  var activityCategories=Object.keys(categoryMap).map(function(key){return categoryMap[key];}).sort(function(a,b){return b.count-a.count;});
+  var returnTypes={food:true,pub:true,campsite:true,accommodation:true,viewpoint:true};
+  var placeSeen={};
+  var places=memories.filter(function(memory){return returnTypes[String(memory.type||'').toLowerCase()]&&Number(memory.rating)>=4;}).sort(function(a,b){return(Number(b.rating)||0)-(Number(a.rating)||0);}).filter(function(memory){
+    var key=String(memory.locationName||memory.accommodation||memory.title||'').trim().toLowerCase();
+    if(!key||placeSeen[key])return false;placeSeen[key]=true;return true;
+  }).slice(0,8);
+  var insights=[];
+  if(memories.length){
+    var momentGroups={};
+    memories.forEach(function(memory){var key=String(memory.type||'note'),group=momentGroups[key]||(momentGroups[key]={key:key,count:0,total:0});group.count++;group.total+=Number(memory.rating)||0;});
+    var topMoment=Object.keys(momentGroups).map(function(key){var group=momentGroups[key];group.average=group.total/group.count;return group;}).sort(function(a,b){return b.average-a.average||b.count-a.count;})[0];
+    if(topMoment)insights.push({icon:momentTypeInfo(topMoment.key)[0],title:'Highest rated category',copy:momentTypeInfo(topMoment.key)[1]+' · '+topMoment.average.toFixed(1)+' average'});
+  }
+  if(activityCategories.length)insights.push({icon:activityCategories[0].icon,title:'Most common activity',copy:activityCategories[0].label+' · '+activityCategories[0].count+' recorded'});
+  if(places.length)insights.push({icon:'↩',title:'Strongest return signal',copy:places[0].locationName||places[0].title||places[0].accommodation});
+  var highDays={};memories.forEach(function(memory){if(Number(memory.rating)>=5&&memory.tripDay)highDays[Number(memory.tripDay)]=true;});
+  var shortHighDays=Object.keys(highDays).filter(function(day){
+    var dateRows=itinerary.filter(function(row){return tripDayNumber(d,row.date)===Number(day);});
+    return dateRows.reduce(function(sum,row){return sum+(Number(row.durationMin)||0);},0)<=180;
+  }).length;
+  if(shortHighDays)insights.push({icon:'✓',title:'Best-day pattern',copy:shortHighDays+' top-rated day'+(shortHighDays===1?'':'s')+' involved no more than 3 hours driving'});
+  return{distanceKm:distanceKm,memories:memories,activities:activities,averageRating:averageRating,photoCount:memories.reduce(function(sum,memory){return sum+(Number(memory.photoCount)||0);},0),favourites:favourites,activityCategories:activityCategories,places:places,insights:insights};
+}
+
+function tripReviewMemoryRow(memory,editable){
+  var info=momentTypeInfo(memory.type),title=memory.title||memory.comment||info[1],meta=[memory.locationName||memory.accommodation||'',memory.comment&&memory.comment!==title?memory.comment:''].filter(Boolean).join(' · ');
+  var id=encodeURIComponent(String(memory.memoryId||''));
+  return '<div class="trip-review-memory"><div class="trip-review-icon">'+info[0]+'</div><div><div class="trip-review-item-title">'+escapeDoHtml(title)+'</div>'+(meta?'<div class="trip-review-item-meta">'+escapeDoHtml(meta)+'</div>':'')+'</div>'+(editable?'<button class="trip-review-edit" type="button" onclick="openMomentEdit(\''+id+'\')">Edit</button>':'<span class="trip-review-rating">'+'★'.repeat(Number(memory.rating)||0)+'</span>')+'</div>';
+}
+
+function buildTripReview(d){
+  var review=tripReviewModel(d),meta=d.meta||{},name=meta.tripName||'This trip';
+  var stats=[
+    [Math.round(review.distanceKm).toLocaleString()+' km','Trip distance'],
+    [review.activities.length,'Activities'],
+    [review.memories.length,'Moments'],
+    [review.averageRating?review.averageRating.toFixed(1)+' ★':'—','Average rating'],
+    [review.photoCount,'Photos']
+  ];
+  var html='<div class="trip-review"><section class="trip-review-hero"><div class="journey-kicker">Trip Review</div><div class="trip-review-heading">'+escapeDoHtml(name)+'</div><div class="trip-review-copy">A deterministic summary built from your itinerary, activities and Moments. It will become richer as the trip progresses.</div><div class="trip-review-stats">'+stats.map(function(stat){return'<div class="trip-review-stat"><div class="trip-review-stat-value">'+stat[0]+'</div><div class="trip-review-stat-label">'+stat[1]+'</div></div>';}).join('')+'</div></section>';
+  html+='<section class="trip-review-section"><div class="journey-kicker">Favourite Moments</div>'+(review.favourites.length?'<div class="trip-review-list">'+review.favourites.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Your five-star and favourite Moments will appear here.</div>')+'</section>';
+  html+='<section class="trip-review-section"><div class="journey-kicker">Activities</div>'+(review.activityCategories.length?'<div class="trip-review-list">'+review.activityCategories.map(function(category){var meta=[category.distanceKm?formatActivityNumber(category.distanceKm,1)+' km':'',category.movingMinutes?fmtDuration(category.movingMinutes):''].filter(Boolean).join(' · ');return'<div class="trip-review-activity"><div class="trip-review-icon">'+category.icon+'</div><div><div class="trip-review-item-title">'+category.label+'</div><div class="trip-review-item-meta">'+category.count+' recorded'+(meta?' · '+meta:'')+'</div></div></div>';}).join('')+'</div>':'<div class="trip-review-empty">Completed trip activities will be summarised here.</div>')+'</section>';
+  html+='<section class="trip-review-section"><div class="journey-kicker">Places worth returning to</div>'+(review.places.length?'<div class="trip-review-list">'+review.places.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Highly rated food, pubs, stays and viewpoints will build this list.</div>')+'</section>';
+  html+='<section class="trip-review-section"><div class="journey-kicker">Audrey Insights</div>'+(review.insights.length?'<div class="trip-review-list">'+review.insights.map(function(insight){return'<div class="trip-review-insight"><div class="trip-review-icon">'+insight.icon+'</div><div><div class="trip-review-item-title">'+escapeDoHtml(insight.title)+'</div><div class="trip-review-item-meta">'+escapeDoHtml(insight.copy)+'</div></div></div>';}).join('')+'</div>':'<div class="trip-review-empty">Insights will appear after a few Moments or activities have been recorded.</div>')+'</section>';
+  html+='<section class="trip-review-section trip-review-wide"><div class="journey-kicker">Manage Moments</div>'+(review.memories.length?'<div class="trip-review-list">'+review.memories.slice().sort(function(a,b){return new Date(b.timestamp)-new Date(a.timestamp);}).slice(0,20).map(function(memory){return tripReviewMemoryRow(memory,true);}).join('')+'</div>':'<div class="trip-review-empty">Save your first Moment from the heart button on Home.</div>')+'</section></div>';
+  return html;
 }
 
 function journeyOverview(value,label){
@@ -1931,7 +2009,7 @@ function buildHomeDailyStory(d){
 
 function initialMomentDraft(){
   var meta=currentData&&currentData.meta||{},coords=meta.currentLocationCoords||{};
-  return{type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:''};
+  return{editing:false,memoryId:'',type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:''};
 }
 
 function openMomentCapture(requestPhoneLocation){
@@ -1940,6 +2018,15 @@ function openMomentCapture(requestPhoneLocation){
   document.getElementById('momentOverlay').classList.add('open');document.body.classList.add('trip-editor-open');
   renderMomentEditor();
   if(requestPhoneLocation!==false)requestMomentLocation();
+}
+
+function openMomentEdit(encodedId){
+  if(!currentData||!currentData.memories||!Array.isArray(currentData.memories.items))return;
+  var memoryId=decodeURIComponent(String(encodedId||''));
+  var memory=currentData.memories.items.find(function(item){return String(item.memoryId||'')===memoryId;});
+  if(!memory)return;
+  momentDraft={editing:true,memoryId:memoryId,type:memory.type||'note',rating:Number(memory.rating)||3,comment:memory.comment||'',lat:memory.lat,lng:memory.lng,accuracyM:null,locationName:memory.locationName||'',locationState:'Saved location',error:''};
+  momentSaving=false;document.getElementById('momentOverlay').classList.add('open');document.body.classList.add('trip-editor-open');renderMomentEditor();
 }
 
 function closeMomentCapture(){
@@ -1956,12 +2043,12 @@ function selectMomentRating(rating){if(!momentDraft)return;momentDraft.rating=ra
 function renderMomentEditor(){
   var root=document.getElementById('momentEditor');if(!root||!momentDraft)return;
   var types=['food','pub','walk','ride','ski','viewpoint','campsite','accommodation','favourite','note'];
-  root.innerHTML='<div class="moment-head"><div><div class="moment-eyebrow">Audrey · Capture</div><div class="moment-title" id="momentTitle">Save Moment</div></div><button class="moment-close" type="button" onclick="closeMomentCapture()">Close</button></div>'
+  root.innerHTML='<div class="moment-head"><div><div class="moment-eyebrow">Audrey · '+(momentDraft.editing?'Reflect':'Capture')+'</div><div class="moment-title" id="momentTitle">'+(momentDraft.editing?'Edit Moment':'Save Moment')+'</div></div><button class="moment-close" type="button" onclick="closeMomentCapture()">Close</button></div>'
     +'<div class="moment-label">Type</div><div class="moment-types">'+types.map(function(type){var info=momentTypeInfo(type);return'<button class="moment-type'+(momentDraft.type===type?' selected':'')+'" type="button" onclick="selectMomentType(\''+type+'\')">'+info[0]+' '+info[1]+'</button>';}).join('')+'</div>'
     +'<div class="moment-label">Rating</div><div class="moment-rating">'+[1,2,3,4,5].map(function(rating){return'<button class="moment-star'+(rating<=momentDraft.rating?' selected':'')+'" type="button" onclick="selectMomentRating('+rating+')" aria-label="'+rating+' star'+(rating===1?'':'s')+'">★</button>';}).join('')+'</div>'
     +'<div class="moment-label">Comment <span style="opacity:.6">· optional</span></div><textarea class="moment-comment" id="momentComment" maxlength="2000" placeholder="What made this worth remembering?">'+escapeDoHtml(momentDraft.comment)+'</textarea>'
-    +'<div class="moment-location"><span>⌖ '+escapeDoHtml(momentDraft.locationState+(momentDraft.locationName?' · '+momentDraft.locationName:''))+'</span><button type="button" onclick="requestMomentLocation()">Use phone GPS</button></div>'
-    +'<div class="moment-status">'+escapeDoHtml(momentDraft.error||'')+'</div><button class="moment-save" type="button" onclick="saveMoment()"'+(momentSaving?' disabled':'')+'>'+(momentSaving?'Saving…':'Save Moment')+'</button>';
+    +'<div class="moment-location"><span>⌖ '+escapeDoHtml(momentDraft.locationState+(momentDraft.locationName?' · '+momentDraft.locationName:''))+'</span>'+(momentDraft.editing?'':'<button type="button" onclick="requestMomentLocation()">Use phone GPS</button>')+'</div>'
+    +'<div class="moment-status">'+escapeDoHtml(momentDraft.error||'')+'</div><div class="moment-actions"><button class="moment-save" type="button" onclick="saveMoment()"'+(momentSaving?' disabled':'')+'>'+(momentSaving?'Saving…':momentDraft.editing?'Update Moment':'Save Moment')+'</button>'+(momentDraft.editing?'<button class="moment-delete" type="button" onclick="deleteMoment()"'+(momentSaving?' disabled':'')+'>Delete</button>':'')+'</div>';
 }
 
 function requestMomentLocation(){
@@ -1984,13 +2071,28 @@ async function saveMoment(){
   if(!momentDraft||momentSaving)return;
   var comment=document.getElementById('momentComment');momentDraft.comment=comment?comment.value.trim():'';momentSaving=true;momentDraft.error='';renderMomentEditor();
   var activity=currentData&&currentData.activities&&currentData.activities.today&&currentData.activities.today[0];
-  var payload={action:'save_memory',tripName:currentData.meta&&currentData.meta.tripName,type:momentDraft.type,rating:momentDraft.rating,comment:momentDraft.comment,lat:momentDraft.lat,lng:momentDraft.lng,locationName:momentDraft.locationName,weatherSummary:currentMomentWeather(),activityId:activity&&activity.id||'',favourite:momentDraft.type==='favourite'};
+  var payload={action:momentDraft.editing?'update_memory':'save_memory',memoryId:momentDraft.memoryId,tripName:currentData.meta&&currentData.meta.tripName,type:momentDraft.type,rating:momentDraft.rating,comment:momentDraft.comment,lat:momentDraft.lat,lng:momentDraft.lng,locationName:momentDraft.locationName,weatherSummary:currentMomentWeather(),activityId:activity&&activity.id||'',favourite:momentDraft.type==='favourite'};
   try{
     var result=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     if(!result.success)throw new Error(result.error||'Moment could not be saved');
-    currentData.memories=currentData.memories||{items:[],count:0,favourites:0};currentData.memories.items.unshift(result.memory);currentData.memories.count=currentData.memories.items.length;if(result.memory.favourite)currentData.memories.favourites++;
+    currentData.memories=currentData.memories||{items:[],count:0,favourites:0};
+    if(momentDraft.editing){currentData.memories.items=currentData.memories.items.map(function(memory){return memory.memoryId===result.memory.memoryId?result.memory:memory;});}
+    else currentData.memories.items.unshift(result.memory);
+    currentData.memories.count=currentData.memories.items.length;currentData.memories.favourites=currentData.memories.items.filter(function(memory){return memory.favourite===true||String(memory.favourite).toLowerCase()==='true';}).length;
     closeMomentCapture();render(currentData);
   }catch(error){momentSaving=false;momentDraft.error=error.message||'Moment could not be saved';renderMomentEditor();}
+}
+
+async function deleteMoment(){
+  if(!momentDraft||!momentDraft.editing||momentSaving)return;
+  if(!window.confirm('Delete this Moment?'))return;
+  momentSaving=true;momentDraft.error='';renderMomentEditor();
+  try{
+    var result=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'delete_memory',memoryId:momentDraft.memoryId,tripName:currentData.meta&&currentData.meta.tripName})});
+    if(!result.success)throw new Error(result.error||'Moment could not be deleted');
+    currentData.memories.items=currentData.memories.items.filter(function(memory){return memory.memoryId!==result.memoryId;});currentData.memories.count=currentData.memories.items.length;currentData.memories.favourites=currentData.memories.items.filter(function(memory){return memory.favourite===true||String(memory.favourite).toLowerCase()==='true';}).length;
+    closeMomentCapture();render(currentData);
+  }catch(error){momentSaving=false;momentDraft.error=error.message||'Moment could not be deleted';renderMomentEditor();}
 }
 
 function buildHomeActivityCard(activities){

@@ -18,8 +18,15 @@ test('Moment capture requests phone GPS but preserves an itinerary fallback', ()
 });
 
 test('Moment save carries trip, weather and activity context automatically', () => {
-  assert.match(frontend, /action:'save_memory'/);
+  assert.match(frontend, /'update_memory':'save_memory'/);
   assert.match(frontend, /tripName:currentData\.meta/);
   assert.match(frontend, /weatherSummary:currentMomentWeather\(\)/);
   assert.match(frontend, /activityId:activity&&activity\.id/);
+});
+
+test('Journey Review can edit and delete an existing Moment', () => {
+  assert.match(frontend, /action:momentDraft\.editing\?'update_memory':'save_memory'/);
+  assert.match(frontend, /action:'delete_memory'/);
+  assert.match(frontend, /function openMomentEdit\(/);
+  assert.match(frontend, /function deleteMoment\(/);
 });
