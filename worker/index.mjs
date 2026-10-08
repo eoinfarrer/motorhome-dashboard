@@ -164,6 +164,25 @@ function allowedEmails(env) {
     .split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
 }
 
+function authFailureReason(request, env, ctx) {
+  if (ctx && ctx.access) return 'runtime_identity_unavailable';
+  const token = request.headers.get('cf-access-jwt-assertion');
+  if (!token) return 'missing_access_token';
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return 'invalid_access_token';
+    const claims = decodeJwtPart(parts[1]);
+    const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+    if (claims.iss !== 'https://' + String(env.AUDREY_ACCESS_TEAM_DOMAIN || '').trim()) return 'access_issuer_mismatch';
+    if (!audiences.includes(String(env.AUDREY_ACCESS_AUD || '').trim())) return 'access_audience_mismatch';
+    if (!claims.exp || Number(claims.exp) <= Date.now() / 1000) return 'access_token_expired';
+    if (!claims.email) return 'access_email_missing';
+    return 'access_verification_failed';
+  } catch (_error) {
+    return 'invalid_access_token';
+  }
+}
+
 async function proxyApi(request, env, fetchImpl) {
   if (!env.AUDREY_APPS_SCRIPT_URL || !env.AUDREY_GATEWAY_SECRET) {
     return json({error: 'Secure backend is not configured'}, 503);
@@ -248,7 +267,8 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const email = await authenticatedEmail(request, env, ctx);
   const allowlist = allowedEmails(env);
   if (!email || !allowlist.includes(email)) {
-    return json({error: 'Access required'}, email ? 403 : 401);
+    const reason = email ? 'email_not_allowed' : authFailureReason(request, env, ctx);
+    return json({error: 'Access required (' + reason + ')', code: reason}, email ? 403 : 401);
   }
 
   const url = new URL(request.url);
