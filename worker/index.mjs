@@ -103,19 +103,45 @@ async function authenticatedEmail(request, env, ctx) {
   if (token && team && audience) {
     try {
       const [encodedHeader, encodedClaims, encodedSignature, extra] = token.split('.');
-      if (!encodedHeader || !encodedClaims || !encodedSignature || extra) return '';
+      if (!encodedHeader || !encodedClaims || !encodedSignature || extra) {
+        console.warn('Audrey Access JWT rejected', {reason: 'token_shape'});
+        return '';
+      }
       const header = decodeJwtPart(encodedHeader);
       const claims = decodeJwtPart(encodedClaims);
-      if (header.alg !== 'RS256' || !header.kid || claims.iss !== 'https://' + team) return '';
+      if (header.alg !== 'RS256' || !header.kid) {
+        console.warn('Audrey Access JWT rejected', {reason: 'header'});
+        return '';
+      }
+      if (claims.iss !== 'https://' + team) {
+        console.warn('Audrey Access JWT rejected', {reason: 'issuer'});
+        return '';
+      }
       const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-      if (!audiences.includes(audience) || !claims.exp || Number(claims.exp) <= Date.now() / 1000) return '';
+      if (!audiences.includes(audience)) {
+        console.warn('Audrey Access JWT rejected', {reason: 'audience'});
+        return '';
+      }
+      if (!claims.exp || Number(claims.exp) <= Date.now() / 1000) {
+        console.warn('Audrey Access JWT rejected', {reason: 'expired'});
+        return '';
+      }
       const key = (await accessSigningKeys(env)).find(candidate => candidate.kid === header.kid && candidate.kty === 'RSA');
-      if (!key) return '';
+      if (!key) {
+        console.warn('Audrey Access JWT rejected', {reason: 'signing_key'});
+        return '';
+      }
       const cryptoKey = await crypto.subtle.importKey('jwk', key, {name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'}, false, ['verify']);
       const verified = await crypto.subtle.verify(
         'RSASSA-PKCS1-v1_5', cryptoKey, jwtSignatureBytes(encodedSignature), encoder.encode(encodedHeader + '.' + encodedClaims)
       );
-      return verified ? String(claims.email || '').trim().toLowerCase() : '';
+      if (!verified) {
+        console.warn('Audrey Access JWT rejected', {reason: 'signature'});
+        return '';
+      }
+      const email = String(claims.email || '').trim().toLowerCase();
+      if (!email) console.warn('Audrey Access JWT rejected', {reason: 'email'});
+      return email;
     } catch (error) {
       console.warn('Audrey Access JWT validation failed', {
         name: String(error && error.name || 'Error'),
