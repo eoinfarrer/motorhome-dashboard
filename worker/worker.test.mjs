@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {canonicalJsonBody, canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
+import {canonicalAccessEmail, canonicalJsonBody, canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
 
 function access(email = 'owner@example.com') {
   return {access: {getIdentity: async () => ({email})}};
@@ -47,6 +47,16 @@ test('secure Worker enforces its owner allowlist after Access authentication', a
     new Request('https://audrey.example/health'), env(), access('other@example.com')
   );
   assert.equal(response.status, 403);
+});
+
+test('secure Worker treats Gmail and Googlemail aliases as the same mailbox', async () => {
+  assert.equal(canonicalAccessEmail('Eoin.Farrer+audrey@googlemail.com'), 'eoinfarrer@gmail.com');
+  const response = await handleRequest(
+    new Request('https://audrey.example/health'),
+    env({AUDREY_ALLOWED_EMAILS: 'eoinfarrer@gmail.com'}),
+    access('Eoin.Farrer+audrey@googlemail.com')
+  );
+  assert.equal(response.status, 200);
 });
 
 test('secure gateway serves the bound static site to its allowed owner', async () => {

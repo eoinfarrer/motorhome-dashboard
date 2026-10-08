@@ -159,28 +159,22 @@ async function authenticatedEmail(request, env, ctx) {
   return '';
 }
 
-function allowedEmails(env) {
-  return String(env.AUDREY_ALLOWED_EMAILS || '')
-    .split(',').map(value => value.trim().toLowerCase()).filter(Boolean);
+export function canonicalAccessEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  const separator = email.lastIndexOf('@');
+  if (separator <= 0) return email;
+  let local = email.slice(0, separator);
+  let domain = email.slice(separator + 1);
+  if (domain === 'googlemail.com') domain = 'gmail.com';
+  if (domain === 'gmail.com') {
+    local = local.split('+')[0].replace(/\./g, '');
+  }
+  return local + '@' + domain;
 }
 
-function authFailureReason(request, env, ctx) {
-  if (ctx && ctx.access) return 'runtime_identity_unavailable';
-  const token = request.headers.get('cf-access-jwt-assertion');
-  if (!token) return 'missing_access_token';
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return 'invalid_access_token';
-    const claims = decodeJwtPart(parts[1]);
-    const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (claims.iss !== 'https://' + String(env.AUDREY_ACCESS_TEAM_DOMAIN || '').trim()) return 'access_issuer_mismatch';
-    if (!audiences.includes(String(env.AUDREY_ACCESS_AUD || '').trim())) return 'access_audience_mismatch';
-    if (!claims.exp || Number(claims.exp) <= Date.now() / 1000) return 'access_token_expired';
-    if (!claims.email) return 'access_email_missing';
-    return 'access_verification_failed';
-  } catch (_error) {
-    return 'invalid_access_token';
-  }
+function allowedEmails(env) {
+  return String(env.AUDREY_ALLOWED_EMAILS || '')
+    .split(',').map(canonicalAccessEmail).filter(Boolean);
 }
 
 async function proxyApi(request, env, fetchImpl) {
@@ -266,12 +260,8 @@ async function proxyApi(request, env, fetchImpl) {
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const email = await authenticatedEmail(request, env, ctx);
   const allowlist = allowedEmails(env);
-  if (!email || !allowlist.includes(email)) {
-    const reason = email ? 'email_not_allowed' : authFailureReason(request, env, ctx);
-    const domain = email.includes('@') ? email.split('@').pop() : '';
-    const domainClass = domain === 'gmail.com' ? 'gmail' : domain === 'googlemail.com' ? 'googlemail' : 'other';
-    const detail = email ? reason + '_domain_' + domainClass : reason;
-    return json({error: 'Access required (' + detail + ')', code: reason}, email ? 403 : 401);
+  if (!email || !allowlist.includes(canonicalAccessEmail(email))) {
+    return json({error: 'Access required'}, email ? 403 : 401);
   }
 
   const url = new URL(request.url);
