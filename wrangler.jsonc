@@ -4,9 +4,11 @@
   "main": "worker/index.mjs",
   "compatibility_date": "2026-10-03",
   "keep_vars": true,
-  "secrets": [
-    "AUDREY_GATEWAY_SECRET"
-  ],
+  "secrets": {
+    "required": [
+      "AUDREY_GATEWAY_SECRET"
+    ]
+  },
   "workers_dev": true,
   "observability": {
     "enabled": true,
