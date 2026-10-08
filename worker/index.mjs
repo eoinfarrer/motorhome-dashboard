@@ -80,6 +80,19 @@ async function accessSigningKeys(env) {
 }
 
 async function authenticatedEmail(request, env, ctx) {
+  // Cloudflare's Workers Access integration exposes a verified identity on
+  // ctx.access. Prefer it so the gateway does not duplicate Access's token
+  // validation or reject a token that the platform has already accepted.
+  if (ctx && ctx.access && typeof ctx.access.getIdentity === 'function') {
+    try {
+      const identity = await ctx.access.getIdentity();
+      const email = String(identity && identity.email || '').trim().toLowerCase();
+      if (email) return email;
+    } catch (_error) {
+      // Fall through to manual JWT validation for compatible runtimes.
+    }
+  }
+
   const token = request.headers.get('cf-access-jwt-assertion');
   const team = String(env.AUDREY_ACCESS_TEAM_DOMAIN || '').trim();
   const audience = String(env.AUDREY_ACCESS_AUD || '').trim();
@@ -103,10 +116,7 @@ async function authenticatedEmail(request, env, ctx) {
       return '';
     }
   }
-  // Retain the runtime API fallback for local tests and compatible Workers.
-  if (!ctx || !ctx.access) return '';
-  const identity = await ctx.access.getIdentity();
-  return String(identity && identity.email || '').trim().toLowerCase();
+  return '';
 }
 
 function allowedEmails(env) {

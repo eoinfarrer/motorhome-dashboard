@@ -32,6 +32,16 @@ test('secure Worker does not trust an unsigned Access email header', async () =>
   assert.equal(response.status, 401);
 });
 
+test('secure Worker prefers the identity already verified by Workers Access', async () => {
+  const response = await handleRequest(
+    new Request('https://audrey.example/health', {
+      headers: {'cf-access-jwt-assertion': 'not.a.valid-jwt'}
+    }), env(), access(), async () => new Response('{}')
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {ok: true, authenticated: true});
+});
+
 test('secure Worker enforces its owner allowlist after Access authentication', async () => {
   const response = await handleRequest(
     new Request('https://audrey.example/health'), env(), access('other@example.com')
