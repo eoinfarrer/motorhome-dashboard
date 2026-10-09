@@ -28,8 +28,22 @@ vm.createContext(backendContext);
 vm.runInContext([
   functionSource(backend, 'deriveTripTransport_'),
   functionSource(backend, 'selectCurrentItineraryRow_'),
-  functionSource(backend, 'buildWeatherLocationByDate_')
+  functionSource(backend, 'buildWeatherLocationByDate_'),
+  functionSource(backend, 'deriveNextDriveEndpoints_')
 ].join('\n'), backendContext);
+
+test('a departure row describes the outbound leg to the first destination', () => {
+  const itinerary = [
+    { date: '2026-12-24', type: 'DEPART', location: 'Boston Spa', distanceKm: 384 },
+    { date: '2026-12-24', type: 'ARRIVE', location: 'Horsham' },
+    { date: '2026-12-24', type: 'STAY', location: 'Horsham' },
+    { date: '2026-12-25', type: 'RETURN', location: 'Boston Spa', distanceKm: 384 }
+  ];
+  const outbound = backendContext.deriveNextDriveEndpoints_(itinerary, itinerary[0], itinerary[2]);
+  const inbound = backendContext.deriveNextDriveEndpoints_(itinerary, itinerary[3], itinerary[2]);
+  assert.deepEqual(JSON.parse(JSON.stringify(outbound)), { origin: 'Boston Spa', destination: 'Horsham' });
+  assert.deepEqual(JSON.parse(JSON.stringify(inbound)), { origin: 'Horsham', destination: 'Boston Spa' });
+});
 
 test('Kefalonia is classified as a flight trip', () => {
   assert.equal(backendContext.deriveTripTransport_([
@@ -69,7 +83,47 @@ const uiContext = {
   homeTelemetryConfidence: () => ({state: 'current', copy: ''})
 };
 vm.createContext(uiContext);
-vm.runInContext(functionSource(frontend, 'getHomeContext'), uiContext);
+vm.runInContext([
+  functionSource(frontend, 'isSkiSeason'),
+  functionSource(frontend, 'isSkiTrip'),
+  functionSource(frontend, 'getHomeContext')
+].join('\n'), uiContext);
+
+const christmasRoadTrip = {
+  meta: {
+    tripName: 'Christmas Eve in Horsham',
+    departDate: '2026-12-24',
+    tripStatus: 'PRE_TRIP',
+    vehicleRelevant: true
+  },
+  itinerary: [
+    { type: 'DEPART', location: 'Boston Spa' },
+    { type: 'ARRIVE', location: 'Horsham', address: '7 Station Road, Warnham, Horsham, RH12 3SR' },
+    { type: 'STAY', location: 'Horsham', address: '7 Station Road, Warnham, Horsham, RH12 3SR' },
+    { type: 'RETURN', location: 'Boston Spa' }
+  ],
+  snowStatus: { resorts: [{ name: 'Alta Badia' }] }
+};
+
+test('a December UK road trip is not treated as a ski trip', () => {
+  assert.equal(uiContext.isSkiTrip(christmasRoadTrip), false);
+});
+
+test('an explicitly winter trip remains a ski trip', () => {
+  assert.equal(uiContext.isSkiTrip({
+    meta: { tripName: 'Italy Winter 2027', departDate: '2027-01-22' },
+    itinerary: [{ location: 'San Cassiano' }],
+    snowStatus: { resorts: [{ name: 'Alta Badia' }] }
+  }), true);
+});
+
+const sceneContext = {};
+vm.createContext(sceneContext);
+vm.runInContext(functionSource(frontend, 'isLocalUkRoadTrip'), sceneContext);
+
+test('the Christmas trip uses the local road-trip presentation', () => {
+  assert.equal(sceneContext.isLocalUkRoadTrip(christmasRoadTrip), true);
+});
 
 test('active flight stay is described without motorhome language', () => {
   const result = uiContext.getHomeContext({

@@ -1276,7 +1276,7 @@ function buildMoreView(d,fc){
   // An array with no rows is an expected forecast-horizon absence, not a
   // broken Weather screen. An omitted weather payload remains distinguishable.
   if(Array.isArray(d.weather))trip.push(buildWeatherSection(d.weather,{allowUnavailable:true}));
-  if(d.snowStatus&&meta.season==='winter')trip.push(buildSnowSection(d.snowStatus,meta,d.itinerary));
+  if(d.snowStatus&&isSkiTrip(d))trip.push(buildSnowSection(d.snowStatus,meta,d.itinerary));
   if(d.budget)trip.push(buildBudgetSection(d.budget));
   if(!trip.length)trip.push('<div class="more-data-note">Detailed trip information will appear here when forecast, snow or budget data is available.</div>');
   var timestamp=d.timestamp&&!isNaN(new Date(d.timestamp).getTime())?new Date(d.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
@@ -1492,8 +1492,15 @@ function buildJourneyView(d,fc){
 // unless the existing payload identifies a supported scene with confidence.
 function getJourneyScene(d){
   var meta=d.meta||{};
-  var mode=hasJourneyDrive(d)?'drive':meta.tripStatus==='POST_TRIP'?'returned':'unknown';
+  var mode=hasJourneyDrive(d)?(isLocalUkRoadTrip(d)?'local-road':'drive'):meta.tripStatus==='POST_TRIP'?'returned':'unknown';
   return getHomeScene(d,{mode:mode});
+}
+
+function isLocalUkRoadTrip(d){
+  d=d||{};var meta=d.meta||{},rows=Array.isArray(d.itinerary)?d.itinerary:[];
+  if(meta.vehicleRelevant===false||rows.some(function(row){return /^(FLIGHT|FERRY)$/i.test(String(row.type||''));}))return false;
+  var text=[meta.tripName].concat(rows.map(function(row){return [row.location,row.address,row.notes].join(' ');})).join(' ');
+  return /\b[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}\b/i.test(text)||/\b(england|scotland|wales|united kingdom|yorkshire)\b/i.test(text);
 }
 
 function journeySceneStyle(scene){
@@ -2138,7 +2145,7 @@ function getHomeContext(d){
   var telemetry=vehicleRelevant?homeTelemetryConfidence(vehicle):{state:'not-applicable',copy:''};
   var dayType=meta.todayType||'';
   var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(dayType)>=0;
-  var hasSki=meta.tripStatus==='ACTIVE'&&meta.season==='winter'&&snow.resorts&&snow.resorts.length;
+  var hasSki=meta.tripStatus==='ACTIVE'&&isSkiTrip(d)&&snow.resorts&&snow.resorts.length;
   var hour=(new Date()).getHours();
   var evening=hour>=18||hour<6;
   var result={tone:'calm',eyebrow:'Your motorhome co-pilot',stateLabel:'All good',message:'Here when you need a clear view of the road ahead.',meta:''};
@@ -2422,7 +2429,7 @@ function buildNextDrive(meta,fc,viewId){
  
   // Pass strip — winter trips, drive days only
   var passHtml='';
-  if(currentData&&currentData.snowStatus&&currentData.snowStatus.passes&&currentData.meta&&currentData.meta.season==='winter'){
+  if(currentData&&isSkiTrip(currentData)&&currentData.snowStatus&&currentData.snowStatus.passes){
     var isDrive=['DRIVE','DEPART','ARRIVE','RETURN'].indexOf(meta.todayType)>=0;
     var isTmrw=nd.date===fmtDateISO(new Date(Date.now()+86400000));
     if(isDrive||isTmrw){
@@ -4119,6 +4126,20 @@ function isSkiSeason(meta){
   return month===12||month<=4;
 }
 
+function isSkiTrip(d){
+  d=d||{};var meta=d.meta||{};
+  if(!isSkiSeason(meta))return false;
+  var rows=Array.isArray(d.itinerary)?d.itinerary:[];
+  var text=[meta.tripName,meta.currentLocation,meta.activity,meta.todayActivity]
+    .concat(rows.map(function(row){return [row.location,row.address,row.notes].join(' ');})).filter(Boolean).join(' ').toLowerCase();
+  if(/\b(ski|skiing|snow|winter|alps|alpine|dolomites|dolomiti)\b/.test(text))return true;
+  var resorts=d.snowStatus&&Array.isArray(d.snowStatus.resorts)?d.snowStatus.resorts:[];
+  return resorts.some(function(resort){
+    var name=String(resort.name||'').trim().toLowerCase();
+    return name.length>3&&text.indexOf(name)>=0;
+  });
+}
+
 function getSkiDisplayMode(meta,snow){
   var resorts=snow&&snow.resorts?snow.resorts:[];
   var hasOpen=resorts.some(function(resort){return resort.isOpen===true;});
@@ -4128,7 +4149,7 @@ function getSkiDisplayMode(meta,snow){
 
 function getDoScene(d){
   var snow=d&&d.snowStatus;
-  var mode=isSkiSeason(d&&d.meta)&&snow&&snow.resorts&&snow.resorts.length?'ski':'unknown';
+  var mode=isSkiTrip(d)&&snow&&snow.resorts&&snow.resorts.length?'ski':'unknown';
   return getHomeScene(d||{},{mode:mode});
 }
 
@@ -4140,7 +4161,7 @@ function doSceneStyle(scene){
 
 function buildDoOpportunities(d){
   var meta=d&&d.meta||{},snow=d&&d.snowStatus,resorts=snow&&snow.resorts?snow.resorts:[];
-  if(!isSkiSeason(meta))return '<div class="do-local-heading"><div class="do-ski-heading">Around your itinerary</div><div class="do-opportunity-status" id="do-local-context">PLANNING</div></div>'
+  if(!isSkiTrip(d))return '<div class="do-local-heading"><div class="do-ski-heading">Around your itinerary</div><div class="do-opportunity-status" id="do-local-context">PLANNING</div></div>'
     +'<div class="do-context-switch" role="group" aria-label="Place suggestions for itinerary stops">'
     +'<button class="do-context-button'+(currentDoPlaceContext==='now'?' is-active':'')+'" type="button" data-do-context="now" aria-pressed="'+(currentDoPlaceContext==='now')+'" onclick="setDoLocalContext(\'now\')">This stop</button>'
     +'<button class="do-context-button'+(currentDoPlaceContext==='next'?' is-active':'')+'" type="button" data-do-context="next" aria-pressed="'+(currentDoPlaceContext==='next')+'" onclick="setDoLocalContext(\'next\')">Next stop</button></div>'
@@ -4512,7 +4533,7 @@ function buildActivitiesSection(d) {
   var meta     = d && d.meta     ? d.meta     : {};
   var snow     = d && d.snowStatus ? d.snowStatus : null;
   var location = meta.currentLocation || '';
-  var skiSeason = isSkiSeason(meta);
+  var skiSeason = isSkiTrip(d);
  
   // Default tab — ski during the configured December-April window, else trail
   var defaultTab = (skiSeason && snow && snow.resorts && snow.resorts.length)
