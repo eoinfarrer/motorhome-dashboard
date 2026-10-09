@@ -4247,7 +4247,7 @@ function assessWinterPass_(pass,profile){
 
 function buildExploreFromHere(d){
   var meta=d&&d.meta||{},snow=d&&d.snowStatus||{},passes=snow.passes||[];
-  if(meta.season!=='winter'||!passes.length)return'';
+  if(!isSkiTrip(d)||!passes.length)return'';
   var base=getDoStayLocation(d)||'your stay';
   var profile=meta.vehicleRelevant===false?'rental-car':'motorhome';
   var profileLabel=profile==='rental-car'?'Rental car · winter tyres':'8m motorhome · no trailer';
@@ -4273,7 +4273,7 @@ function buildExploreFromHere(d){
 
 async function loadDoLocalPlaces(d){
   var meta=d&&d.meta||{};
-  if(isSkiSeason(meta))return;
+  if(isSkiTrip(d))return;
   var container=document.getElementById('do-local-opportunities');
   if(!container)return;
   var requestId=++doLocalPlacesRequest;

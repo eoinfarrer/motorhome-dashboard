@@ -86,6 +86,7 @@ vm.createContext(uiContext);
 vm.runInContext([
   functionSource(frontend, 'isSkiSeason'),
   functionSource(frontend, 'isSkiTrip'),
+  functionSource(frontend, 'buildExploreFromHere'),
   functionSource(frontend, 'getHomeContext')
 ].join('\n'), uiContext);
 
@@ -107,6 +108,11 @@ const christmasRoadTrip = {
 
 test('a December UK road trip is not treated as a ski trip', () => {
   assert.equal(uiContext.isSkiTrip(christmasRoadTrip), false);
+  assert.equal(uiContext.buildExploreFromHere(christmasRoadTrip), '');
+});
+
+test('local itinerary suggestions are gated by trip purpose rather than month', () => {
+  assert.match(frontend, /async function loadDoLocalPlaces\(d\)[\s\S]*?if\(isSkiTrip\(d\)\)return;/);
 });
 
 test('an explicitly winter trip remains a ski trip', () => {

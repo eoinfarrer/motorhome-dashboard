@@ -23,6 +23,8 @@ vm.createContext(context);
 vm.runInContext([
   functionSource(frontend, 'escapeDoHtml'),
   functionSource(frontend, 'safeDoUrl'),
+  functionSource(frontend, 'isSkiSeason'),
+  functionSource(frontend, 'isSkiTrip'),
   functionSource(frontend, 'getDoStayLocation'),
   functionSource(frontend, 'winterMobilityDestinations_'),
   functionSource(frontend, 'findWinterPass_'),
@@ -104,7 +106,7 @@ test('Alta Badia winter board offers ad hoc valleys without itinerary drives', (
     {name: 'Sella Pass', status: '✅ Open', updated: '2026-12-15 08:00'}
   ];
   const html = context.buildExploreFromHere({
-    meta: {season: 'winter', currentLocation: 'Alta Badia', vehicleRelevant: false},
+    meta: {tripName: 'Italy Winter 2027', departDate: '2027-01-22', season: 'winter', currentLocation: 'Alta Badia', vehicleRelevant: false},
     snowStatus: {passes}
   });
   assert.match(html, /Explore from here/);
