@@ -39,7 +39,15 @@ function canonicalJsonValue(value) {
 
 export function canonicalJsonBody(body) {
   try {
-    return JSON.stringify(canonicalJsonValue(JSON.parse(body)));
+    const parsed = JSON.parse(body);
+    // POST authentication fields are carried in the JSON envelope as well as
+    // the query string. Exclude them from the signed payload so the signature
+    // does not depend on where Google exposes those fields to Apps Script.
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      delete parsed.gw_ts;
+      delete parsed.gw_sig;
+    }
+    return JSON.stringify(canonicalJsonValue(parsed));
   } catch (_error) {
     return String(body || '');
   }
@@ -214,6 +222,20 @@ async function proxyApi(request, env, fetchImpl) {
   target.searchParams.set('gw_ts', String(timestamp));
   target.searchParams.set('gw_sig', signature);
 
+  let upstreamBody = body;
+  if (method === 'POST') {
+    try {
+      const envelope = JSON.parse(body);
+      if (envelope && typeof envelope === 'object' && !Array.isArray(envelope)) {
+        envelope.gw_ts = String(timestamp);
+        envelope.gw_sig = signature;
+        upstreamBody = JSON.stringify(envelope);
+      }
+    } catch (_error) {
+      // Non-JSON requests retain query-string authentication for compatibility.
+    }
+  }
+
   const headers = {'Accept': 'application/json'};
   if (method === 'POST') {
     headers['Content-Type'] = request.headers.get('Content-Type') || 'text/plain;charset=utf-8';
@@ -231,7 +253,7 @@ async function proxyApi(request, env, fetchImpl) {
       const upstream = await fetchImpl(target.toString(), {
         method,
         headers,
-        body: method === 'POST' ? body : undefined,
+        body: method === 'POST' ? upstreamBody : undefined,
         redirect: 'follow'
       });
       const responseBody = await upstream.arrayBuffer();

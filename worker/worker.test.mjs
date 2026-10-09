@@ -166,6 +166,30 @@ test('secure gateway retries a read-only route POST but not a trip mutation', as
   assert.equal(mutationResponse.status, 502);
 });
 
+test('secure gateway carries POST authentication in the JSON envelope', async () => {
+  let forwarded;
+  const response = await handleRequest(
+    new Request('https://audrey.example/api', {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({action:'create_trip',tripName:'Christmas Eve in Horsham',items:[]})
+    }),
+    env(), access(), async (url, options) => {
+      forwarded = {url, body: JSON.parse(options.body)};
+      return new Response(JSON.stringify({success:true,tripName:'Christmas Eve in Horsham'}), {
+        headers:{'Content-Type':'application/json'}
+      });
+    }
+  );
+  assert.equal(response.status, 200);
+  const target = new URL(forwarded.url);
+  assert.match(target.searchParams.get('gw_ts'), /^\d+$/);
+  assert.match(target.searchParams.get('gw_sig'), /^[a-f0-9]{64}$/);
+  assert.equal(forwarded.body.gw_ts, target.searchParams.get('gw_ts'));
+  assert.equal(forwarded.body.gw_sig, target.searchParams.get('gw_sig'));
+  assert.equal(forwarded.body.action, 'create_trip');
+});
+
 test('secure gateway returns JSON when the upstream remains invalid', async () => {
   const response = await handleRequest(
     new Request('https://audrey.example/api?action=get_routes'),
