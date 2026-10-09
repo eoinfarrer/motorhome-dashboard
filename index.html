@@ -127,6 +127,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .moment-label{margin:17px 0 8px;color:#afb3ab;font-size:9px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;}.moment-types{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}.moment-type{min-height:43px;padding:9px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#222723;color:#d8d9d3;font-family:var(--mono);font-size:11px;text-align:left;cursor:pointer;}.moment-type.selected{border-color:#dc8797;background:rgba(216,102,124,.18);color:#fff;}
 .moment-rating{display:flex;gap:7px;}.moment-star{width:43px;height:43px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:#222723;color:#777;font-size:21px;cursor:pointer;}.moment-star.selected{border-color:#d7a957;color:#efc46e;background:rgba(215,169,87,.12);}
 .moment-comment{width:100%;min-height:82px;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#222723;color:#fff;font-family:var(--ui);font-size:15px;resize:vertical;}.moment-comment::placeholder{color:#777;}.moment-location{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:10px 11px;border-radius:10px;background:#202520;color:#afb3ab;font-size:10px;}.moment-location button{border:0;background:none;color:#8ac59b;font-family:var(--mono);font-size:10px;cursor:pointer;}.moment-status{min-height:18px;margin-top:10px;color:#efa99e;font-size:10px;}.moment-save{width:100%;min-height:49px;margin-top:7px;border:0;border-radius:12px;background:#d8667c;color:#fff;font-family:var(--ui);font-size:15px;font-weight:750;cursor:pointer;}.moment-save:disabled{opacity:.55;cursor:wait;}
+.moment-photo-input{display:none}.moment-photo-picker{display:flex;align-items:center;gap:11px;padding:10px;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:#202520}.moment-photo-preview{width:70px;height:70px;flex:0 0 70px;border-radius:9px;object-fit:cover;background:#151815}.moment-photo-placeholder{display:grid;place-items:center;color:#777d75;font-size:23px}.moment-photo-copy{min-width:0;flex:1}.moment-photo-title{color:#f2f0e9;font-family:var(--ui);font-size:12px;font-weight:700}.moment-photo-note{margin-top:4px;color:#999e96;font-size:9px;line-height:1.45}.moment-photo-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}.moment-photo-button{min-height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:#2a302b;color:#dfe2db;font-family:var(--mono);font-size:9px;cursor:pointer}.moment-photo-button.remove{color:#efa99e}.moment-photo-button:disabled{opacity:.55;cursor:wait}
 @media(min-width:800px){.moment-fab{right:22px;bottom:22px}.moment-overlay{align-items:center}.moment-sheet{border-radius:20px}.moment-types{grid-template-columns:repeat(3,1fr)}}
 
 /* ── AUDREY 2.0 JOURNEY ────────────────────────────────────── */
@@ -185,6 +186,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .journey-activity-point::before{border-color:#77b78b;background:#77b78b;}.journey-activity-card{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid rgba(119,183,139,.28);border-radius:12px;background:rgba(28,45,33,.55);box-shadow:0 7px 18px rgba(0,0,0,.13);}.journey-activity-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(138,197,155,.13);font-size:18px;}.journey-activity-name{overflow:hidden;color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;text-overflow:ellipsis;white-space:nowrap;}.journey-activity-meta{margin-top:3px;color:#a8aaa1;font-size:9px;line-height:1.4;}.journey-activity-link{color:#8ec4d5;font-size:9px;text-decoration:none;white-space:nowrap;}
 .journey-story-point::before{border-color:#d8667c;background:#d8667c;}.journey-story{overflow:hidden;border:1px solid rgba(216,102,124,.28);border-radius:13px;background:rgba(43,29,34,.68);box-shadow:0 8px 20px rgba(0,0,0,.14);}.journey-story summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 13px;list-style:none;cursor:pointer;}.journey-story summary::-webkit-details-marker{display:none;}.journey-story summary::after{content:'＋';color:#d9909e;font-size:14px;}.journey-story[open] summary::after{content:'−';}.journey-story-day{color:#d9909e;font-size:8px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;}.journey-story-title{margin-top:3px;color:#f4f3ed;font-family:var(--ui);font-size:14px;font-weight:700;}.journey-story-body{padding:0 13px 13px;border-top:1px solid rgba(255,255,255,.07);}.journey-story-copy{padding-top:11px;color:#c9cac3;font-size:11px;line-height:1.55;}.journey-story-list{display:grid;gap:7px;margin-top:11px;}.journey-story-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:7px;align-items:center;color:#dedfd8;font-size:10px;}.journey-story-item-icon{text-align:center;font-size:15px;}.journey-story-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.journey-story-item-rating{color:#e8bd68;font-size:9px;letter-spacing:-1px;}
 .trip-review{display:grid;gap:12px}.trip-review-hero,.trip-review-section{padding:16px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(23,27,25,.78);box-shadow:0 10px 24px rgba(0,0,0,.18);backdrop-filter:blur(12px)}.trip-review-heading{margin-top:4px;color:#f4f3ed;font-family:var(--ui);font-size:19px;font-weight:750}.trip-review-copy{margin-top:5px;color:#b7b9b0;font-size:11px;line-height:1.5}.trip-review-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px}.trip-review-stat{padding:10px;border-radius:10px;background:rgba(255,255,255,.055)}.trip-review-stat-value{color:#f4f3ed;font-family:var(--ui);font-size:17px;font-weight:750}.trip-review-stat-label{margin-top:2px;color:#9fa39a;font-size:8px;letter-spacing:1.1px;text-transform:uppercase}.trip-review-list{display:grid;gap:8px;margin-top:11px}.trip-review-memory,.trip-review-activity,.trip-review-place,.trip-review-insight{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid rgba(255,255,255,.07);border-radius:11px;background:rgba(255,255,255,.045)}.trip-review-icon{font-size:17px;text-align:center}.trip-review-item-title{color:#f0efe8;font-family:var(--ui);font-size:12px;font-weight:700;line-height:1.3}.trip-review-item-meta{margin-top:3px;color:#aeb1a8;font-size:9px;line-height:1.4}.trip-review-rating{color:#e8bd68;font-size:9px;letter-spacing:-1px;white-space:nowrap}.trip-review-edit{border:0;background:none;color:#a9d3df;font-family:var(--mono);font-size:9px;cursor:pointer}.trip-review-empty{margin-top:10px;color:#aeb1a8;font-size:11px;line-height:1.5}.moment-actions{display:grid;grid-template-columns:1fr auto;gap:8px}.moment-delete{min-height:49px;margin-top:7px;padding:0 14px;border:1px solid rgba(225,111,96,.35);border-radius:12px;background:rgba(94,39,34,.45);color:#efa99e;font-family:var(--ui);font-size:13px;font-weight:700;cursor:pointer}.moment-delete:disabled{opacity:.55;cursor:wait}
+.trip-review-memory.has-photo{grid-template-columns:56px minmax(0,1fr) auto}.moment-card-thumbnail{width:52px;height:52px;border-radius:9px;object-fit:cover;background:#171a18}.moment-card-thumbnail.is-unavailable{opacity:.35}
 @media(min-width:700px){.trip-review-stats{grid-template-columns:repeat(5,1fr)}.trip-review{grid-template-columns:repeat(2,minmax(0,1fr))}.trip-review-hero{grid-column:1/-1}.trip-review-section.trip-review-wide{grid-column:1/-1}}
 .more-intro{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim);}
 
@@ -736,7 +738,7 @@ var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZ
 // route payload through the protected gateway before it reaches Apps Script.
 var ROUTE_ENRICHMENT_API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
-var momentDraft=null,momentSaving=false,momentDeepLinkPending=new URLSearchParams(location.search).get('capture')==='moment';
+var momentDraft=null,momentSaving=false,momentDeepLinkPending=new URLSearchParams(location.search).get('capture')==='moment',momentThumbnailCache={};
 
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
 // This is intentionally separate from dashboard data state. Switching views
@@ -1223,6 +1225,7 @@ function render(d){
   setTimeout(function(){loadDoLocalPlaces(d);},350);
   setTimeout(function(){loadActRoutes(activityLocation,'trail');},500);
   setTimeout(function(){loadActRoutes(activityLocation,'cycle');},3000);
+  setTimeout(hydrateMomentThumbnails,0);
 }
 
 function renderError(msg){
@@ -1693,7 +1696,8 @@ function tripReviewModel(d){
 function tripReviewMemoryRow(memory,editable){
   var info=momentTypeInfo(memory.type),title=memory.title||memory.comment||info[1],meta=[memory.locationName||memory.accommodation||'',memory.comment&&memory.comment!==title?memory.comment:''].filter(Boolean).join(' · ');
   var id=encodeURIComponent(String(memory.memoryId||''));
-  return '<div class="trip-review-memory"><div class="trip-review-icon">'+info[0]+'</div><div><div class="trip-review-item-title">'+escapeDoHtml(title)+'</div>'+(meta?'<div class="trip-review-item-meta">'+escapeDoHtml(meta)+'</div>':'')+'</div>'+(editable?'<button class="trip-review-edit" type="button" onclick="openMomentEdit(\''+id+'\')">Edit</button>':'<span class="trip-review-rating">'+'★'.repeat(Number(memory.rating)||0)+'</span>')+'</div>';
+  var hasPhoto=!!memory.thumbnailDriveId,visual=hasPhoto?'<img class="moment-card-thumbnail" alt="" data-memory-thumbnail="'+escapeDoHtml(String(memory.memoryId||''))+'" data-thumbnail-version="'+escapeDoHtml(String(memory.thumbnailUpdatedAt||''))+'">':'<div class="trip-review-icon">'+info[0]+'</div>';
+  return '<div class="trip-review-memory'+(hasPhoto?' has-photo':'')+'">'+visual+'<div><div class="trip-review-item-title">'+escapeDoHtml(title)+'</div>'+(meta?'<div class="trip-review-item-meta">'+escapeDoHtml(meta)+'</div>':'')+'</div>'+(editable?'<button class="trip-review-edit" type="button" onclick="openMomentEdit(\''+id+'\')">Edit</button>':'<span class="trip-review-rating">'+'★'.repeat(Number(memory.rating)||0)+'</span>')+'</div>';
 }
 
 function buildTripReview(d){
@@ -2016,7 +2020,7 @@ function buildHomeDailyStory(d){
 
 function initialMomentDraft(){
   var meta=currentData&&currentData.meta||{},coords=meta.currentLocationCoords||{};
-  return{editing:false,memoryId:'',type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:''};
+  return{editing:false,memoryId:'',type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:'',thumbnailBase64:'',thumbnailPreview:'',thumbnailDriveId:'',thumbnailUpdatedAt:'',removeThumbnail:false,photoTimestamp:'',photoTimestampSource:'',photoProcessing:false,photoState:''};
 }
 
 function openMomentCapture(requestPhoneLocation){
@@ -2032,7 +2036,7 @@ function openMomentEdit(encodedId){
   var memoryId=decodeURIComponent(String(encodedId||''));
   var memory=currentData.memories.items.find(function(item){return String(item.memoryId||'')===memoryId;});
   if(!memory)return;
-  momentDraft={editing:true,memoryId:memoryId,type:memory.type||'note',rating:Number(memory.rating)||3,comment:memory.comment||'',lat:memory.lat,lng:memory.lng,accuracyM:null,locationName:memory.locationName||'',locationState:'Saved location',error:''};
+  momentDraft={editing:true,memoryId:memoryId,type:memory.type||'note',rating:Number(memory.rating)||3,comment:memory.comment||'',lat:memory.lat,lng:memory.lng,accuracyM:null,locationName:memory.locationName||'',locationState:'Saved location',error:'',thumbnailBase64:'',thumbnailPreview:'',thumbnailDriveId:memory.thumbnailDriveId||'',thumbnailUpdatedAt:memory.thumbnailUpdatedAt||'',removeThumbnail:false,photoTimestamp:memory.photoTimestamp||'',photoTimestampSource:memory.photoTimestampSource||'',photoProcessing:false,photoState:memory.thumbnailDriveId?'Cover photo attached':''};
   momentSaving=false;document.getElementById('momentOverlay').classList.add('open');document.body.classList.add('trip-editor-open');renderMomentEditor();
 }
 
@@ -2047,6 +2051,52 @@ function closeMomentCaptureIfOutside(event){if(event.target&&event.target.id==='
 function selectMomentType(type){if(!momentDraft)return;momentDraft.type=type;renderMomentEditor();}
 function selectMomentRating(rating){if(!momentDraft)return;momentDraft.rating=rating;renderMomentEditor();}
 
+function momentThumbnailDimensions(width,height,maxSize){
+  width=Math.max(1,Number(width)||1);height=Math.max(1,Number(height)||1);maxSize=Math.max(1,Number(maxSize)||300);
+  var scale=Math.min(1,maxSize/Math.max(width,height));
+  return{width:Math.max(1,Math.round(width*scale)),height:Math.max(1,Math.round(height*scale))};
+}
+
+function momentBlobBase64(blob){
+  return new Promise(function(resolve,reject){var reader=new FileReader();reader.onload=function(){resolve(String(reader.result||'').split(',')[1]||'');};reader.onerror=function(){reject(new Error('Cover photo could not be prepared'));};reader.readAsDataURL(blob);});
+}
+
+function loadMomentPhotoFile(file){
+  return new Promise(function(resolve,reject){
+    var url=URL.createObjectURL(file),image=new Image();
+    image.onload=function(){URL.revokeObjectURL(url);resolve(image);};
+    image.onerror=function(){URL.revokeObjectURL(url);reject(new Error('This photo format could not be opened'));};
+    image.src=url;
+  });
+}
+
+async function selectMomentPhoto(file){
+  if(!momentDraft||!file)return;
+  if(!/^image\//i.test(String(file.type||''))){momentDraft.error='Choose an image from Photos';renderMomentEditor();return;}
+  momentDraft.photoProcessing=true;momentDraft.error='';momentDraft.photoState='Preparing private thumbnail…';renderMomentEditor();
+  try{
+    var image=await loadMomentPhotoFile(file),size=momentThumbnailDimensions(image.naturalWidth||image.width,image.naturalHeight||image.height,300);
+    var canvas=document.createElement('canvas');canvas.width=size.width;canvas.height=size.height;
+    var context=canvas.getContext('2d');if(!context)throw new Error('Photo processing is unavailable');
+    context.drawImage(image,0,0,size.width,size.height);
+    var blob=await new Promise(function(resolve){canvas.toBlob(resolve,'image/jpeg',0.8);});
+    if(!blob)throw new Error('Cover photo could not be prepared');
+    if(blob.size>200*1024)throw new Error('Prepared thumbnail is unexpectedly large');
+    var base64=await momentBlobBase64(blob);
+    momentDraft.thumbnailBase64=base64;momentDraft.thumbnailPreview='data:image/jpeg;base64,'+base64;momentDraft.removeThumbnail=false;
+    momentDraft.photoTimestamp=file.lastModified?new Date(file.lastModified).toISOString():'';
+    momentDraft.photoTimestampSource=file.lastModified?'file_modified':'';
+    momentDraft.photoState='Thumbnail ready · '+Math.max(1,Math.round(blob.size/1024))+' KB';
+  }catch(error){momentDraft.error=error.message||'Cover photo could not be prepared';momentDraft.photoState='';}
+  momentDraft.photoProcessing=false;renderMomentEditor();
+}
+
+function chooseMomentPhoto(){var input=document.getElementById('momentPhotoInput');if(input)input.click();}
+function removeMomentPhoto(){
+  if(!momentDraft)return;
+  momentDraft.thumbnailBase64='';momentDraft.thumbnailPreview='';momentDraft.removeThumbnail=!!momentDraft.thumbnailDriveId;momentDraft.photoTimestamp='';momentDraft.photoTimestampSource='';momentDraft.photoState=momentDraft.removeThumbnail?'Cover photo will be removed':'';momentDraft.error='';renderMomentEditor();
+}
+
 function renderMomentEditor(){
   var root=document.getElementById('momentEditor');if(!root||!momentDraft)return;
   var types=['food','pub','walk','ride','ski','viewpoint','campsite','accommodation','favourite','note'];
@@ -2054,8 +2104,10 @@ function renderMomentEditor(){
     +'<div class="moment-label">Type</div><div class="moment-types">'+types.map(function(type){var info=momentTypeInfo(type);return'<button class="moment-type'+(momentDraft.type===type?' selected':'')+'" type="button" onclick="selectMomentType(\''+type+'\')">'+info[0]+' '+info[1]+'</button>';}).join('')+'</div>'
     +'<div class="moment-label">Rating</div><div class="moment-rating">'+[1,2,3,4,5].map(function(rating){return'<button class="moment-star'+(rating<=momentDraft.rating?' selected':'')+'" type="button" onclick="selectMomentRating('+rating+')" aria-label="'+rating+' star'+(rating===1?'':'s')+'">★</button>';}).join('')+'</div>'
     +'<div class="moment-label">Comment <span style="opacity:.6">· optional</span></div><textarea class="moment-comment" id="momentComment" maxlength="2000" placeholder="What made this worth remembering?">'+escapeDoHtml(momentDraft.comment)+'</textarea>'
+    +'<div class="moment-label">Cover photo <span style="opacity:.6">· optional</span></div><input class="moment-photo-input" id="momentPhotoInput" type="file" accept="image/*" onchange="selectMomentPhoto(this.files&&this.files[0])"><div class="moment-photo-picker">'+(momentDraft.thumbnailPreview?'<img class="moment-photo-preview" src="'+momentDraft.thumbnailPreview+'" alt="Selected cover photo">':momentDraft.thumbnailDriveId&&!momentDraft.removeThumbnail?'<img class="moment-photo-preview" alt="Current cover photo" data-memory-thumbnail="'+escapeDoHtml(momentDraft.memoryId)+'" data-thumbnail-version="'+escapeDoHtml(String(momentDraft.thumbnailUpdatedAt||''))+'">':'<div class="moment-photo-preview moment-photo-placeholder" aria-hidden="true">📷</div>')+'<div class="moment-photo-copy"><div class="moment-photo-title">'+(momentDraft.thumbnailPreview?'Cover photo ready':momentDraft.thumbnailDriveId&&!momentDraft.removeThumbnail?'Current cover photo':'Add a cover photo')+'</div><div class="moment-photo-note">Audrey uploads only a 300px private thumbnail. The original stays in Apple Photos.</div><div class="moment-photo-actions"><button class="moment-photo-button" type="button" onclick="chooseMomentPhoto()"'+(momentDraft.photoProcessing?' disabled':'')+'>'+(momentDraft.thumbnailPreview||momentDraft.thumbnailDriveId?'Change photo':'Choose photo')+'</button>'+((momentDraft.thumbnailPreview||momentDraft.thumbnailDriveId&&!momentDraft.removeThumbnail)?'<button class="moment-photo-button remove" type="button" onclick="removeMomentPhoto()">Remove</button>':'')+'</div>'+(momentDraft.photoState?'<div class="moment-photo-note">'+escapeDoHtml(momentDraft.photoState)+'</div>':'')+'</div></div>'
     +'<div class="moment-location"><span>⌖ '+escapeDoHtml(momentDraft.locationState+(momentDraft.locationName?' · '+momentDraft.locationName:''))+'</span>'+(momentDraft.editing?'':'<button type="button" onclick="requestMomentLocation()">Use phone GPS</button>')+'</div>'
-    +'<div class="moment-status">'+escapeDoHtml(momentDraft.error||'')+'</div><div class="moment-actions"><button class="moment-save" type="button" onclick="saveMoment()"'+(momentSaving?' disabled':'')+'>'+(momentSaving?'Saving…':momentDraft.editing?'Update Moment':'Save Moment')+'</button>'+(momentDraft.editing?'<button class="moment-delete" type="button" onclick="deleteMoment()"'+(momentSaving?' disabled':'')+'>Delete</button>':'')+'</div>';
+    +'<div class="moment-status">'+escapeDoHtml(momentDraft.error||'')+'</div><div class="moment-actions"><button class="moment-save" type="button" onclick="saveMoment()"'+(momentSaving||momentDraft.photoProcessing?' disabled':'')+'>'+(momentSaving?'Saving…':momentDraft.photoProcessing?'Preparing photo…':momentDraft.editing?'Update Moment':'Save Moment')+'</button>'+(momentDraft.editing?'<button class="moment-delete" type="button" onclick="deleteMoment()"'+(momentSaving?' disabled':'')+'>Delete</button>':'')+'</div>';
+  setTimeout(hydrateMomentThumbnails,0);
 }
 
 function requestMomentLocation(){
@@ -2074,20 +2126,68 @@ function currentMomentWeather(){
   if(weather.gustKmh)parts.push('gusts '+weather.gustKmh+' km/h');return parts.join(' · ');
 }
 
+function updateLocalMemory(memory,isNew){
+  currentData.memories=currentData.memories||{items:[],count:0,favourites:0};
+  var found=currentData.memories.items.some(function(item){return item.memoryId===memory.memoryId;});
+  if(found)currentData.memories.items=currentData.memories.items.map(function(item){return item.memoryId===memory.memoryId?memory:item;});
+  else if(isNew)currentData.memories.items.unshift(memory);
+  currentData.memories.count=currentData.memories.items.length;
+  currentData.memories.favourites=currentData.memories.items.filter(function(item){return item.favourite===true||String(item.favourite).toLowerCase()==='true';}).length;
+}
+
+async function fetchMomentThumbnail(memoryId,version){
+  var key=String(memoryId)+'|'+String(version||'');
+  if(momentThumbnailCache[key])return await Promise.resolve(momentThumbnailCache[key]);
+  var params=new URLSearchParams({action:'get_memory_thumbnail',trip:currentData.meta&&currentData.meta.tripName||'',memoryId:String(memoryId)});
+  var request=fetchAudreyJson(API_URL+'?'+params.toString(),{headers:{'Accept':'application/json'}}).then(function(result){
+    if(!result.success||!result.thumbnail||!result.thumbnail.base64)throw new Error(result.error||'Cover photo is unavailable');
+    var dataUrl='data:'+(result.thumbnail.mimeType||'image/jpeg')+';base64,'+result.thumbnail.base64;
+    momentThumbnailCache[key]=dataUrl;return dataUrl;
+  });
+  momentThumbnailCache[key]=request;
+  try{return await request;}catch(error){delete momentThumbnailCache[key];throw error;}
+}
+
+function hydrateMomentThumbnails(){
+  Array.prototype.forEach.call(document.querySelectorAll('img[data-memory-thumbnail]'),function(image){
+    if(image.dataset.thumbnailLoading==='true'||image.getAttribute('src'))return;
+    image.dataset.thumbnailLoading='true';
+    fetchMomentThumbnail(image.dataset.memoryThumbnail,image.dataset.thumbnailVersion||'').then(function(dataUrl){
+      if(image.isConnected)image.src=dataUrl;
+    }).catch(function(){image.classList.add('is-unavailable');image.alt='Cover photo unavailable';}).finally(function(){image.dataset.thumbnailLoading='false';});
+  });
+}
+
 async function saveMoment(){
   if(!momentDraft||momentSaving)return;
   var comment=document.getElementById('momentComment');momentDraft.comment=comment?comment.value.trim():'';momentSaving=true;momentDraft.error='';renderMomentEditor();
   var activity=currentData&&currentData.activities&&currentData.activities.today&&currentData.activities.today[0];
   var payload={action:momentDraft.editing?'update_memory':'save_memory',memoryId:momentDraft.memoryId,tripName:currentData.meta&&currentData.meta.tripName,type:momentDraft.type,rating:momentDraft.rating,comment:momentDraft.comment,lat:momentDraft.lat,lng:momentDraft.lng,locationName:momentDraft.locationName,weatherSummary:currentMomentWeather(),activityId:activity&&activity.id||'',favourite:momentDraft.type==='favourite'};
+  var wasEditing=momentDraft.editing,savedMemory=null;
   try{
     var result=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
     if(!result.success)throw new Error(result.error||'Moment could not be saved');
-    currentData.memories=currentData.memories||{items:[],count:0,favourites:0};
-    if(momentDraft.editing){currentData.memories.items=currentData.memories.items.map(function(memory){return memory.memoryId===result.memory.memoryId?result.memory:memory;});}
-    else currentData.memories.items.unshift(result.memory);
-    currentData.memories.count=currentData.memories.items.length;currentData.memories.favourites=currentData.memories.items.filter(function(memory){return memory.favourite===true||String(memory.favourite).toLowerCase()==='true';}).length;
+    savedMemory=result.memory;updateLocalMemory(savedMemory,!wasEditing);
+    momentDraft.editing=true;momentDraft.memoryId=savedMemory.memoryId;momentDraft.thumbnailDriveId=savedMemory.thumbnailDriveId||momentDraft.thumbnailDriveId;
+    if(momentDraft.thumbnailBase64){
+      momentDraft.photoState='Uploading private thumbnail…';renderMomentEditor();
+      var photoResult=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'upload_memory_thumbnail',memoryId:savedMemory.memoryId,tripName:currentData.meta&&currentData.meta.tripName,jpegBase64:momentDraft.thumbnailBase64,photoTimestamp:momentDraft.photoTimestamp,photoTimestampSource:momentDraft.photoTimestampSource})});
+      if(!photoResult.success)throw new Error(photoResult.error||'Cover photo could not be uploaded');
+      savedMemory=photoResult.memory;updateLocalMemory(savedMemory,false);
+    }else if(momentDraft.removeThumbnail&&momentDraft.thumbnailDriveId){
+      momentDraft.photoState='Removing cover photo…';renderMomentEditor();
+      var removeResult=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'remove_memory_thumbnail',memoryId:savedMemory.memoryId,tripName:currentData.meta&&currentData.meta.tripName})});
+      if(!removeResult.success)throw new Error(removeResult.error||'Cover photo could not be removed');
+      savedMemory=removeResult.memory;updateLocalMemory(savedMemory,false);
+    }
     closeMomentCapture();render(currentData);
-  }catch(error){momentSaving=false;momentDraft.error=error.message||'Moment could not be saved';renderMomentEditor();}
+  }catch(error){
+    momentSaving=false;
+    if(savedMemory){
+      momentDraft.editing=true;momentDraft.memoryId=savedMemory.memoryId;momentDraft.error='Moment saved. '+(error.message||'Cover photo could not be updated')+' Tap Save again to retry.';render(currentData);
+    }else momentDraft.error=error.message||'Moment could not be saved';
+    renderMomentEditor();
+  }
 }
 
 async function deleteMoment(){
