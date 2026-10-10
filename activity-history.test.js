@@ -93,7 +93,10 @@ test('Journey inserts the Daily Story once after the final itinerary row for tha
     Object,
     Number,
     buildJourneyTripPoint: row => '<stop>' + row.location + '</stop>',
+    buildJourneyActivityPoint: activity => '<activity>' + activity.name + '</activity>',
+    buildJourneyMomentPoint: memory => '<moment>' + memory.title + '</moment>',
     buildDailyStoryPoint: (data, date) => '<story>' + date + ':' + data.activities.tripItems[0].name + '</story>',
+    tripDayNumber: () => 1,
     journeyOverview: () => '',
   };
   vm.createContext(tripContext);
@@ -109,5 +112,5 @@ test('Journey inserts the Daily Story once after the final itinerary row for tha
   });
 
   assert.equal((html.match(/<story>/g) || []).length, 2);
-  assert.ok(html.indexOf('White Rocks Hotel</stop><story>2026-09-21:Evening walk') > -1);
+  assert.ok(html.indexOf('White Rocks Hotel</stop><activity>Evening walk</activity><story>2026-09-21:Evening walk') > -1);
 });

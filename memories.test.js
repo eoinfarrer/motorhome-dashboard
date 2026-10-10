@@ -34,6 +34,7 @@ test('Moment save carries trip, weather and activity context automatically', () 
   assert.match(frontend, /'update_memory':'save_memory'/);
   assert.match(frontend, /tripName:currentData\.meta/);
   assert.match(frontend, /weatherSummary:currentMomentWeather\(\)/);
+  assert.match(frontend, /temperature:currentMomentTemperature\(\)/);
   assert.match(frontend, /activityId:activity&&activity\.id/);
 });
 

@@ -26,14 +26,14 @@ const context = {
   formatActivityNumber: value => String(value),
   activityMetricParts: activity => activity.distanceKm ? [activity.distanceKm + ' km'] : [],
   activityIcon: activity => /ride/i.test(activity.sportType || '') ? '🚴' : '🥾',
-  momentTypeInfo: type => type === 'food' ? ['🍽', 'Food'] : ['♥', 'Moment'],
+  momentTypeInfo: type => type === 'food' ? ['🍽', 'Food', '#d5a858'] : ['♥', 'Moment', '#d96882'],
   escapeDoHtml: value => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 };
 vm.createContext(context);
 vm.runInContext([
   'tripDayNumber', 'dailyStoryLocation', 'dailyStoryActivityLabel',
   'dailyStoryModel', 'buildDailyStoryItems', 'buildDailyStoryPoint',
-  'buildHomeDailyStory'
+  'buildHomeDailyStory', 'buildJourneyMomentPoint'
 ].map(functionSource).join('\n'), context);
 
 const day = {
@@ -41,7 +41,7 @@ const day = {
   itinerary: [{date: '2026-10-06', type: 'STAY', location: 'Volterra', isToday: true}],
   weather: [{date: '2026-10-06', location: 'Volterra', condition: 'Clear skies'}],
   activities: {tripItems: [{tripDate: '2026-10-06', name: 'Morning Ride', sportType: 'Ride', distanceKm: 42}]},
-  memories: {items: [{tripDay: 2, type: 'food', title: 'Truffle pasta', rating: 5, favourite: true}]}
+  memories: {items: [{memoryId:'moment-1',tripDay: 2, type: 'food', title: 'Truffle pasta', rating: 5, favourite: true, thumbnailDriveId:'private-id', thumbnailUpdatedAt:'2026-10-06T20:00:00Z'}]}
 };
 
 test('Daily Story combines itinerary, weather, activity and Moments deterministically', () => {
@@ -60,6 +60,16 @@ test('Journey renders one expandable Daily Story with activity and Moment rows',
   assert.match(html, /Morning Ride/);
   assert.match(html, /Truffle pasta/);
   assert.match(html, /★★★★★/);
+  assert.match(html, /data-memory-thumbnail="moment-1"/);
+  assert.doesNotMatch(html, /private-id/);
+});
+
+test('Journey renders a first-class Moment with its private thumbnail reference', () => {
+  const html = context.buildJourneyMomentPoint(day.memories.items[0]);
+  assert.match(html, /journey-moment-point/);
+  assert.match(html, /Truffle pasta/);
+  assert.match(html, /data-memory-thumbnail="moment-1"/);
+  assert.doesNotMatch(html, /private-id/);
 });
 
 test('Home shows a compact Today so far card linked to the Journey story', () => {

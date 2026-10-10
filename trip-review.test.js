@@ -26,8 +26,9 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext([
-  'tripDayNumber', 'tripReviewActivityCategory', 'tripReviewModel',
-  'tripReviewMemoryRow', 'buildTripReview'
+  'tripDayNumber', 'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
+  'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapModel', 'buildTripReviewMap',
+  'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview'
 ].map(functionSource).join('\n'), context);
 
 const christmasTrip = {
@@ -42,8 +43,8 @@ const christmasTrip = {
     {tripDate: '2026-12-25', name: 'Christmas walk', sportType: 'Hike', distanceKm: 8.1, movingMinutes: 125}
   ]},
   memories: {items: [
-    {memoryId: 'pub-1', tripDay: 2, type: 'pub', title: 'Pub · York', comment: 'Warm fire', rating: 5, favourite: true, locationName: 'York', thumbnailDriveId: 'private-drive-id', thumbnailUpdatedAt: '2026-12-24T18:00:00Z', photoCount: 1},
-    {memoryId: 'food-1', tripDay: 3, type: 'food', title: 'Food · York', comment: 'Christmas lunch', rating: 5, locationName: 'York'}
+    {memoryId: 'pub-1', tripDay: 2, type: 'pub', title: 'Pub · York', comment: 'Warm fire', rating: 5, favourite: true, locationName: 'York', lat:53.96, lng:-1.08, thumbnailDriveId: 'private-drive-id', thumbnailUpdatedAt: '2026-12-24T18:00:00Z', photoCount: 1},
+    {memoryId: 'food-1', tripDay: 3, type: 'food', title: 'Food · York', comment: 'Christmas lunch', rating: 5, locationName: 'York', lat:53.961, lng:-1.079}
   ]}
 };
 
@@ -56,8 +57,11 @@ test('Trip Review summarises a UK Christmas trip deterministically', () => {
   assert.equal(review.activityCategories[0].label, 'Walks & hikes');
   assert.equal(review.activityCategories[0].count, 2);
   assert.equal(review.favourites.length, 2);
-  assert.equal(review.places.length, 1);
-  assert.match(review.insights.map(item => item.title).join(' '), /Highest rated category/);
+  assert.equal(review.highlights.length, 2);
+  assert.equal(review.definingMoments.length, 2);
+  assert.equal(review.themes[0].title, 'Food & drink');
+  assert.equal(review.map.points.length, 2);
+  assert.match(review.insights.map(item => item.title).join(' '), /Most meaningful category/);
 });
 
 test('Journey Review renders overview, favourites, activities and Moment management', () => {
@@ -67,7 +71,12 @@ test('Journey Review renders overview, favourites, activities and Moment managem
   assert.match(html, /120 km/);
   assert.match(html, /Favourite Moments/);
   assert.match(html, /Walks &amp; hikes|Walks & hikes/);
-  assert.match(html, /Places worth returning to/);
+  assert.match(html, /Trip Highlights/);
+  assert.match(html, /Defining Moments/);
+  assert.match(html, /What Made This Trip Special/);
+  assert.match(html, /Journey Map/);
+  assert.match(html, /trip-review-map-svg/);
+  assert.doesNotMatch(html, /Places worth returning to|Strongest return signal|You should/);
   assert.match(html, /Audrey Insights/);
   assert.match(html, /Manage Moments/);
   assert.match(html, /openMomentEdit/);
