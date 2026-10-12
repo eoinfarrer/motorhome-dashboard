@@ -107,7 +107,7 @@ test('Journey Map projection, fitting and tile URLs are deterministic', () => {
   assert.match(context.travelogueMapTileUrl(10, 508, 330), /^https:\/\/tile\.openstreetmap\.org\/10\/508\/330\.png$/);
 });
 
-test('Journey Map controls do not start a pan or capture their pointer', () => {
+test('Journey Map controls and pins do not start a pan or capture their pointer', () => {
   let captures = 0;
   context.travelogueMapView = {
     centerWorld: {x: 100, y: 200},
@@ -117,12 +117,14 @@ test('Journey Map controls do not start a pan or capture their pointer', () => {
       classList: {add: () => assert.fail('control press must not start dragging')}
     }
   };
-  context.travelogueMapPointerDown({
-    pointerId: 4,
-    button: 0,
-    clientX: 20,
-    clientY: 30,
-    target: {closest: selector => selector.includes('button') ? {} : null}
+  ['button', '[data-map-index]'].forEach((interactiveTarget, index) => {
+    context.travelogueMapPointerDown({
+      pointerId: 4 + index,
+      button: 0,
+      clientX: 20,
+      clientY: 30,
+      target: {closest: selector => selector.includes(interactiveTarget) ? {} : null}
+    });
   });
   assert.equal(captures, 0);
   assert.equal(context.travelogueMapView.drag, null);
