@@ -29,7 +29,7 @@ vm.runInContext([
   'tripDayNumber', 'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
   'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapLegMode', 'tripReviewMapModel',
   'buildTripReviewMapFallback', 'buildTripReviewMap', 'travelogueWorldPoint',
-  'travelogueMapFitView', 'travelogueMapTileUrl',
+  'travelogueMapFitView', 'travelogueMapTileUrl', 'travelogueMapPointerDown',
   'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview'
 ].map(functionSource).join('\n'), context);
 
@@ -105,6 +105,27 @@ test('Journey Map projection, fitting and tile URLs are deterministic', () => {
   ], 320, 280);
   assert.ok(view.zoom >= 9 && view.zoom <= 17);
   assert.match(context.travelogueMapTileUrl(10, 508, 330), /^https:\/\/tile\.openstreetmap\.org\/10\/508\/330\.png$/);
+});
+
+test('Journey Map controls do not start a pan or capture their pointer', () => {
+  let captures = 0;
+  context.travelogueMapView = {
+    centerWorld: {x: 100, y: 200},
+    drag: null,
+    canvas: {
+      setPointerCapture: () => captures++,
+      classList: {add: () => assert.fail('control press must not start dragging')}
+    }
+  };
+  context.travelogueMapPointerDown({
+    pointerId: 4,
+    button: 0,
+    clientX: 20,
+    clientY: 30,
+    target: {closest: selector => selector.includes('button') ? {} : null}
+  });
+  assert.equal(captures, 0);
+  assert.equal(context.travelogueMapView.drag, null);
 });
 
 test('Journey Map distinguishes flight and ferry itinerary legs', () => {
