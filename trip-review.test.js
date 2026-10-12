@@ -34,12 +34,13 @@ vm.runInContext([
 const christmasTrip = {
   meta: {tripName: 'Christmas in Yorkshire', departDate: '2026-12-23', returnDate: '2026-12-28'},
   itinerary: [
-    {date: '2026-12-23', type: 'DRIVE', location: 'York', distanceKm: 120, durationMin: 150},
-    {date: '2026-12-24', type: 'STAY', location: 'York'},
-    {date: '2026-12-25', type: 'STAY', location: 'York'}
+    {date: '2026-12-23', type: 'DEPART', location: 'Boston Spa', distanceKm: 120, durationMin: 150, lat:53.9041, lng:-1.3419},
+    {date: '2026-12-23', type: 'ARRIVE', location: 'York', lat:53.96, lng:-1.08},
+    {date: '2026-12-24', type: 'STAY', location: 'York', lat:53.96, lng:-1.08},
+    {date: '2026-12-25', type: 'STAY', location: 'York', lat:53.96, lng:-1.08}
   ],
   activities: {tripItems: [
-    {tripDate: '2026-12-24', name: 'City walls', sportType: 'Walk', distanceKm: 6.2, movingMinutes: 90},
+    {tripDate: '2026-12-24', start:'2026-12-24T10:00:00', name: 'City walls', sportType: 'Walk', distanceKm: 6.2, movingMinutes: 90, startLat:53.962, startLon:-1.082},
     {tripDate: '2026-12-25', name: 'Christmas walk', sportType: 'Hike', distanceKm: 8.1, movingMinutes: 125}
   ]},
   memories: {items: [
@@ -60,7 +61,11 @@ test('Trip Review summarises a UK Christmas trip deterministically', () => {
   assert.equal(review.highlights.length, 2);
   assert.equal(review.definingMoments.length, 2);
   assert.equal(review.themes[0].title, 'Food & drink');
-  assert.equal(review.map.points.length, 2);
+  assert.equal(review.map.points.length, 7);
+  assert.equal(review.map.route.length, 2);
+  assert.equal(review.map.routeSegments.length, 1);
+  assert.deepEqual(Array.from(review.map.route, point => point.label), ['Boston Spa', 'York']);
+  assert.equal(review.map.points.filter(point => point.kind === 'activity').length, 1);
   assert.match(review.insights.map(item => item.title).join(' '), /Most meaningful category/);
 });
 
@@ -76,12 +81,35 @@ test('Journey Review renders overview, favourites, activities and Moment managem
   assert.match(html, /What Made This Trip Special/);
   assert.match(html, /Journey Map/);
   assert.match(html, /trip-review-map-svg/);
+  assert.match(html, /data-map-route="itinerary"/);
   assert.doesNotMatch(html, /Places worth returning to|Strongest return signal|You should/);
   assert.match(html, /Audrey Insights/);
   assert.match(html, /Manage Moments/);
   assert.match(html, /openMomentEdit/);
   assert.match(html, /data-memory-thumbnail="pub-1"/);
   assert.doesNotMatch(html, /private-drive-id/);
+});
+
+test('Journey Map never joins Moment pins into a false route', () => {
+  const map = context.tripReviewMapModel({itinerary:[]}, [
+    {type:'food', title:'Lunch', timestamp:'2026-12-24T12:00:00Z', lat:53.9, lng:-1.3},
+    {type:'pub', title:'Evening', timestamp:'2026-12-24T19:00:00Z', lat:54.0, lng:-1.1}
+  ], []);
+  const html = context.buildTripReviewMap(map);
+  assert.equal(map.route.length, 0);
+  assert.equal(map.routeSegments.length, 0);
+  assert.doesNotMatch(html, /<polyline/);
+  assert.equal((html.match(/data-map-point="moment"/g) || []).length, 2);
+});
+
+test('Journey Map does not bridge over an itinerary stop with missing coordinates', () => {
+  const map = context.tripReviewMapModel({itinerary:[
+    {date:'2026-12-23',type:'DEPART',location:'Boston Spa',lat:53.9,lng:-1.34},
+    {date:'2026-12-23',type:'STOPOVER',location:'Unknown stop'},
+    {date:'2026-12-23',type:'ARRIVE',location:'York',lat:53.96,lng:-1.08}
+  ]}, [], []);
+  assert.equal(map.routeSegments.length, 0);
+  assert.doesNotMatch(context.buildTripReviewMap(map), /<polyline/);
 });
 
 test('Trip Review has useful empty states before the Christmas trip begins', () => {

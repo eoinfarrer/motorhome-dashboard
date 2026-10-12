@@ -1723,27 +1723,37 @@ function tripReviewThemes(memories,categories){
   return Object.keys(scores).map(function(key){return scores[key];}).sort(function(a,b){return b.score-a.score;}).slice(0,4);
 }
 
-function tripReviewCoordinates(item){
-  var lat=Number(item&&((item.lat!==undefined&&item.lat!==null)?item.lat:item.latitude));
-  var lng=Number(item&&((item.lng!==undefined&&item.lng!==null)?item.lng:(item.lon!==undefined&&item.lon!==null)?item.lon:item.longitude));
+function tripReviewCoordinates(item,kind){
+  var start=kind==='activity',lat=Number(item&&(start&&item.startLat!==undefined&&item.startLat!==null?item.startLat:(item.lat!==undefined&&item.lat!==null)?item.lat:item.latitude));
+  var lng=Number(item&&(start&&item.startLon!==undefined&&item.startLon!==null?item.startLon:(item.lng!==undefined&&item.lng!==null)?item.lng:(item.lon!==undefined&&item.lon!==null)?item.lon:item.longitude));
   return isFinite(lat)&&isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180?{lat:lat,lng:lng}:null;
 }
 
 function tripReviewMapModel(d,memories,activities){
-  var points=[];
-  (d.itinerary||[]).forEach(function(row){var coords=tripReviewCoordinates(row);if(coords)points.push({kind:'stop',label:row.location||row.type||'Stop',icon:'●',lat:coords.lat,lng:coords.lng});});
-  (activities||[]).forEach(function(activity){var coords=tripReviewCoordinates(activity);if(coords)points.push({kind:'activity',label:activity.name||activity.sportType||'Activity',icon:tripReviewActivityCategory(activity).icon,lat:coords.lat,lng:coords.lng});});
-  (memories||[]).forEach(function(memory){var coords=tripReviewCoordinates(memory);if(coords){var info=momentTypeInfo(memory.type);points.push({kind:'moment',label:memory.title||memory.comment||info[1],icon:info[0],colour:info[2],lat:coords.lat,lng:coords.lng});}});
+  var points=[],routePoints=[],routeSegments=[],previousRoutePoint=null;
+  (d.itinerary||[]).forEach(function(row,index){
+    var coords=tripReviewCoordinates(row);if(!coords){previousRoutePoint=null;return;}
+    var point={kind:'stop',label:row.location||row.type||'Stop',icon:'●',colour:'#8ec4d5',lat:coords.lat,lng:coords.lng,date:row.date||'',sortKey:String(row.date||'')+'T00:00:00.'+String(index).padStart(3,'0'),type:row.type||''};
+    points.push(point);
+    if(!previousRoutePoint||Math.abs(previousRoutePoint.lat-point.lat)>.00001||Math.abs(previousRoutePoint.lng-point.lng)>.00001){
+      if(previousRoutePoint)routeSegments.push([previousRoutePoint,point]);
+      routePoints.push(point);previousRoutePoint=point;
+    }
+  });
+  (activities||[]).forEach(function(activity,index){var coords=tripReviewCoordinates(activity,'activity');if(coords)points.push({kind:'activity',label:activity.name||activity.sportType||'Activity',icon:tripReviewActivityCategory(activity).icon,colour:'#d4a94f',lat:coords.lat,lng:coords.lng,date:activity.tripDate||activity.date||'',sortKey:activity.start||activity.timestamp||String(activity.tripDate||activity.date||'')+'T12:00:00.'+String(index).padStart(3,'0')});});
+  (memories||[]).forEach(function(memory,index){var coords=tripReviewCoordinates(memory);if(coords){var info=momentTypeInfo(memory.type);points.push({kind:'moment',label:memory.title||memory.comment||info[1],icon:info[0],colour:info[2],lat:coords.lat,lng:coords.lng,date:String(memory.date||memory.timestamp||'').slice(0,10),sortKey:memory.timestamp||String(memory.date||'')+'T18:00:00.'+String(index).padStart(3,'0')});}});
+  points.sort(function(a,b){return String(a.sortKey||'').localeCompare(String(b.sortKey||''));});
   var stops=[],seen={};(d.itinerary||[]).forEach(function(row){if(!row.location||!/^(STAY|STOPOVER|ARRIVE)$/.test(String(row.type||'').toUpperCase()))return;var key=String(row.location).toLowerCase();if(!seen[key]){seen[key]=true;stops.push(row.location);}});
-  return{points:points,stops:stops};
+  return{points:points,route:routePoints,routeSegments:routeSegments,stops:stops};
 }
 
 function buildTripReviewMap(map){
-  map=map||{points:[],stops:[]};var points=map.points||[],visual='';
+  map=map||{points:[],route:[],routeSegments:[],stops:[]};var points=map.points||[],routeSegments=map.routeSegments||[],visual='';
   if(points.length){
     var lats=points.map(function(point){return point.lat;}),lngs=points.map(function(point){return point.lng;}),minLat=Math.min.apply(Math,lats),maxLat=Math.max.apply(Math,lats),minLng=Math.min.apply(Math,lngs),maxLng=Math.max.apply(Math,lngs),latSpan=Math.max(.001,maxLat-minLat),lngSpan=Math.max(.001,maxLng-minLng);
-    var projected=points.map(function(point){return{x:18+(point.lng-minLng)/lngSpan*284,y:152-(point.lat-minLat)/latSpan*134,point:point};});
-    visual='<svg class="trip-review-map-svg" viewBox="0 0 320 170" role="img" aria-label="Map of geolocated trip moments and activities">'+(projected.length>1?'<polyline points="'+projected.map(function(item){return item.x.toFixed(1)+','+item.y.toFixed(1);}).join(' ')+'" fill="none" stroke="rgba(169,211,223,.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>':'')+projected.map(function(item){var colour=item.point.colour||'#8ec4d5';return'<g><circle cx="'+item.x.toFixed(1)+'" cy="'+item.y.toFixed(1)+'" r="9" fill="'+colour+'" stroke="#f4f3ed" stroke-width="1"/><text x="'+item.x.toFixed(1)+'" y="'+(item.y+3.5).toFixed(1)+'" text-anchor="middle" font-size="8">'+escapeDoHtml(item.point.icon)+'</text><title>'+escapeDoHtml(item.point.label)+'</title></g>';}).join('')+'</svg>';
+    function project(point){return{x:18+(point.lng-minLng)/lngSpan*284,y:152-(point.lat-minLat)/latSpan*134,point:point};}
+    var projected=points.map(project);
+    visual='<svg class="trip-review-map-svg" viewBox="0 0 320 170" role="img" aria-label="Map of geolocated trip stops, moments and activities">'+routeSegments.map(function(segment){return'<polyline data-map-route="itinerary" points="'+segment.map(project).map(function(item){return item.x.toFixed(1)+','+item.y.toFixed(1);}).join(' ')+'" fill="none" stroke="rgba(169,211,223,.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';}).join('')+projected.map(function(item){var colour=item.point.colour||'#8ec4d5';return'<g data-map-point="'+escapeDoHtml(item.point.kind)+'"><circle cx="'+item.x.toFixed(1)+'" cy="'+item.y.toFixed(1)+'" r="9" fill="'+colour+'" stroke="#f4f3ed" stroke-width="1"/><text x="'+item.x.toFixed(1)+'" y="'+(item.y+3.5).toFixed(1)+'" text-anchor="middle" font-size="8">'+escapeDoHtml(item.point.icon)+'</text><title>'+escapeDoHtml(item.point.label)+'</title></g>';}).join('')+'</svg>';
   }else visual='<div class="trip-review-map-empty">Geolocated Moments and activities will draw the journey here.</div>';
   var stops=(map.stops||[]).map(function(stop){return'<span>'+escapeDoHtml(stop)+'</span>';}).join('');
   return'<div class="trip-review-map">'+visual+(stops?'<div class="trip-review-map-stops">'+stops+'</div>':'')+'</div>';
