@@ -27,7 +27,9 @@ const context = {
 vm.createContext(context);
 vm.runInContext([
   'tripDayNumber', 'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
-  'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapModel', 'buildTripReviewMap',
+  'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapLegMode', 'tripReviewMapModel',
+  'buildTripReviewMapFallback', 'buildTripReviewMap', 'travelogueWorldPoint',
+  'travelogueMapFitView', 'travelogueMapTileUrl',
   'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview'
 ].map(functionSource).join('\n'), context);
 
@@ -64,6 +66,7 @@ test('Trip Review summarises a UK Christmas trip deterministically', () => {
   assert.equal(review.map.points.length, 7);
   assert.equal(review.map.route.length, 2);
   assert.equal(review.map.routeSegments.length, 1);
+  assert.equal(review.map.routeSegments[0].mode, 'road');
   assert.deepEqual(Array.from(review.map.route, point => point.label), ['Boston Spa', 'York']);
   assert.equal(review.map.points.filter(point => point.kind === 'activity').length, 1);
   assert.match(review.insights.map(item => item.title).join(' '), /Most meaningful category/);
@@ -82,12 +85,32 @@ test('Journey Review renders overview, favourites, activities and Moment managem
   assert.match(html, /Journey Map/);
   assert.match(html, /trip-review-map-svg/);
   assert.match(html, /data-map-route="itinerary"/);
+  assert.match(html, /data-travelogue-map/);
+  assert.match(html, /Fit trip/);
+  assert.match(html, /OpenStreetMap contributors/);
   assert.doesNotMatch(html, /Places worth returning to|Strongest return signal|You should/);
   assert.match(html, /Audrey Insights/);
   assert.match(html, /Manage Moments/);
   assert.match(html, /openMomentEdit/);
   assert.match(html, /data-memory-thumbnail="pub-1"/);
   assert.doesNotMatch(html, /private-drive-id/);
+});
+
+test('Journey Map projection, fitting and tile URLs are deterministic', () => {
+  const york = context.travelogueWorldPoint(53.96, -1.08, 10);
+  assert.ok(Number.isFinite(york.x));
+  assert.ok(Number.isFinite(york.y));
+  const view = context.travelogueMapFitView([
+    {lat:53.9041,lng:-1.3419}, {lat:53.96,lng:-1.08}
+  ], 320, 280);
+  assert.ok(view.zoom >= 9 && view.zoom <= 17);
+  assert.match(context.travelogueMapTileUrl(10, 508, 330), /^https:\/\/tile\.openstreetmap\.org\/10\/508\/330\.png$/);
+});
+
+test('Journey Map distinguishes flight and ferry itinerary legs', () => {
+  assert.equal(context.tripReviewMapLegMode({type:'FLIGHT'},{type:'ARRIVE'}), 'flight');
+  assert.equal(context.tripReviewMapLegMode({type:'DEPART'},{type:'FERRY'}), 'ferry');
+  assert.equal(context.tripReviewMapLegMode({type:'DRIVE'},{type:'STAY'}), 'road');
 });
 
 test('Journey Map never joins Moment pins into a false route', () => {
