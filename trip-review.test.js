@@ -115,6 +115,7 @@ test('Christmas trip produces a compact print-ready Storybook', () => {
   assert.match(html, /tile\.openstreetmap\.org/);
   assert.match(html, /OpenStreetMap contributors/);
   assert.match(html, /Defining Moments/);
+  assert.match(html, /storybook-photo-frame/);
   assert.match(html, /The journey, closely remembered/);
   assert.match(html, /Day 2/);
   assert.match(html, /What made this journey ours/);
