@@ -26,11 +26,16 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext([
-  'tripDayNumber', 'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
+  'tripDayNumber', 'dailyStoryLocation', 'dailyStoryActivityLabel', 'dailyStoryModel',
+  'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
   'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapLegMode', 'tripReviewMapModel',
   'buildTripReviewMapFallback', 'buildTripReviewMap', 'travelogueWorldPoint',
   'travelogueMapFitView', 'travelogueMapTileUrl', 'travelogueMapPointerDown',
-  'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview'
+  'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview',
+  'storybookDateLabel', 'storybookHeroAsset', 'storybookModel', 'storybookStat',
+  'storybookPageNumber', 'storybookMomentTitle', 'storybookMomentImage',
+  'buildStorybookMap', 'buildStorybookCover', 'buildStorybookMoments',
+  'buildStorybookDays', 'buildStorybookReflection', 'buildStorybook'
 ].map(functionSource).join('\n'), context);
 
 const christmasTrip = {
@@ -93,6 +98,27 @@ test('Journey Review renders overview, favourites, activities and Moment managem
   assert.match(html, /Manage Moments/);
   assert.match(html, /openMomentEdit/);
   assert.match(html, /data-memory-thumbnail="pub-1"/);
+  assert.doesNotMatch(html, /private-drive-id/);
+  assert.match(html, /Preview Storybook/);
+});
+
+test('Christmas trip produces a compact print-ready Storybook', () => {
+  const model = context.storybookModel(christmasTrip);
+  assert.equal(model.name, 'Christmas in Yorkshire');
+  assert.equal(model.days, 6);
+  assert.equal(model.hero, 'assets/scenes/home.jpg');
+  assert.ok(model.selectedStories.length <= 3);
+  const html = context.buildStorybook(christmasTrip);
+  assert.match(html, /Audrey Travel Storybook/);
+  assert.match(html, /Christmas in Yorkshire/);
+  assert.match(html, /The journey in places/);
+  assert.match(html, /tile\.openstreetmap\.org/);
+  assert.match(html, /OpenStreetMap contributors/);
+  assert.match(html, /Defining Moments/);
+  assert.match(html, /The journey, closely remembered/);
+  assert.match(html, /Day 2/);
+  assert.match(html, /What made this journey ours/);
+  assert.ok((html.match(/class="storybook-page/g) || []).length >= 4);
   assert.doesNotMatch(html, /private-drive-id/);
 });
 

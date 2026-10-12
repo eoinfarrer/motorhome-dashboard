@@ -193,6 +193,10 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 @media(min-width:700px){.trip-review-map-canvas{height:360px}}
 .trip-review-map-tiles,.trip-review-map-overlay{will-change:transform}
 .trip-review-map-tile{filter:saturate(.72) brightness(.72)}.trip-review-map-detail-meta{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.trip-review-storybook-action{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}.trip-review-storybook-copy{color:#aeb1a8;font-size:9px;line-height:1.4}.trip-review-storybook-btn{flex:0 0 auto;padding:9px 12px;border:1px solid rgba(203,184,143,.35);border-radius:9px;background:rgba(203,184,143,.12);color:#ead8ac;font-family:var(--ui);font-size:10px;font-weight:700;cursor:pointer}
+.storybook-overlay{position:fixed;z-index:1000;inset:0;display:none;overflow:auto;background:#111511;color:#172019}.storybook-overlay.is-open{display:block}.storybook-toolbar{position:sticky;z-index:4;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px max(14px,calc((100vw - 840px)/2));border-bottom:1px solid rgba(255,255,255,.12);background:rgba(17,21,17,.96);backdrop-filter:blur(14px)}.storybook-toolbar-title{color:#f4f1e9;font-family:var(--ui);font-size:13px;font-weight:700}.storybook-toolbar-actions{display:flex;gap:7px}.storybook-toolbar-btn{padding:8px 11px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(255,255,255,.06);color:#e9e8e1;font-family:var(--ui);font-size:10px;font-weight:700;cursor:pointer}.storybook-toolbar-btn.primary{border-color:#c6a15b;background:#c6a15b;color:#172019}.storybook-document{display:grid;gap:18px;width:min(100%,840px);margin:0 auto;padding:18px}.storybook-page{position:relative;overflow:hidden;box-sizing:border-box;width:100%;min-height:1120px;padding:54px;background:#f3efe6;color:#172019;box-shadow:0 16px 50px rgba(0,0,0,.35)}.storybook-page.dark{background:#152019;color:#f7f3e9}.storybook-kicker{color:#c2923f;font:700 10px/1.2 var(--ui);letter-spacing:1.6px;text-transform:uppercase}.storybook-title{margin-top:10px;font-family:Georgia,'Times New Roman',serif;font-size:38px;line-height:1.04}.storybook-subtitle{margin-top:8px;color:#5c7a65;font:italic 15px/1.45 Georgia,serif}.storybook-cover{display:grid;grid-template-rows:48% 52%;padding:0}.storybook-cover-image{position:relative;background-position:center;background-size:cover}.storybook-cover-image:after{position:absolute;inset:0;content:'';background:linear-gradient(90deg,rgba(12,18,14,.48),transparent 65%),linear-gradient(0deg,rgba(12,18,14,.44),transparent 45%)}.storybook-cover-heading{position:absolute;z-index:1;top:54px;left:54px;color:#fff}.storybook-cover-heading .storybook-title{max-width:480px;font-size:54px}.storybook-cover-tagline{position:absolute;z-index:1;bottom:34px;left:54px;color:#fff;font:italic 19px Georgia,serif}.storybook-cover-body{padding:38px 54px;background:#152019;color:#fff}.storybook-stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:15px;margin-top:24px;padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.12)}.storybook-stat-value{font:700 23px Georgia,serif}.storybook-stat-label{margin-top:4px;color:#aebbb3;font:7px var(--ui);letter-spacing:1px;text-transform:uppercase}.storybook-theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:18px}.storybook-theme{display:grid;grid-template-columns:12px 1fr;gap:8px;align-items:start}.storybook-theme-dot{width:7px;height:7px;margin-top:3px;border-radius:50%;background:#c6a15b}.storybook-theme-title{font:700 9px var(--ui);text-transform:uppercase}.storybook-theme-copy{margin-top:3px;color:#aebbb3;font:8px/1.4 var(--ui)}.storybook-defining{margin-top:22px;padding:16px 18px;border:1px solid rgba(255,255,255,.14);border-radius:12px}.storybook-defining-title{margin-top:8px;font:700 19px Georgia,serif}.storybook-defining-meta{margin-top:6px;color:#aebbb3;font:8px var(--ui)}.storybook-map-frame{position:relative;height:760px;margin-top:25px;overflow:hidden;background:#dce2dc}.storybook-map-tiles,.storybook-map-svg{position:absolute;inset:0;width:100%;height:100%}.storybook-map-tile{position:absolute;width:256px;height:256px}.storybook-map-svg{overflow:visible}.storybook-map-route{fill:none;stroke:#fff;stroke-width:7;stroke-linejoin:round;stroke-linecap:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}.storybook-map-route-accent{fill:none;stroke:#c6a15b;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.storybook-map-pin circle{fill:#c6a15b;stroke:#fff;stroke-width:2}.storybook-map-pin text{fill:#172019;font:700 8px var(--ui)}.storybook-map-caption{position:absolute;right:8px;bottom:7px;padding:3px 5px;background:rgba(255,255,255,.88);font:7px var(--ui)}.storybook-map-legend{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;padding:16px;border-radius:12px;background:#152019;color:#fff}.storybook-map-stop{font:700 8px/1.3 var(--ui)}.storybook-map-stop span{display:block;margin-top:3px;color:#aebbb3;font-weight:400}.storybook-moment-lead{display:grid;grid-template-columns:60% 40%;height:470px;margin-top:28px}.storybook-moment-image{background-position:center;background-size:cover}.storybook-photo{display:block;width:100%;height:100%;object-fit:cover}.storybook-card>.storybook-moment-image{display:block;width:100%;height:160px;object-fit:cover}.storybook-moment-copy{padding:34px;background:#152019;color:#fff}.storybook-moment-title{margin-top:18px;font:700 31px/1.05 Georgia,serif}.storybook-moment-rating{margin-top:24px;color:#d8b76b;letter-spacing:3px}.storybook-moment-comment{margin-top:24px;color:#e6dfd1;font:italic 14px/1.55 Georgia,serif}.storybook-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}.storybook-card{overflow:hidden;border:1px solid rgba(23,32,25,.12);background:#fff}.storybook-card-image{height:160px;background-position:center;background-size:cover}.storybook-card-body{min-height:142px;padding:18px}.storybook-card-title{margin-top:10px;font:700 18px Georgia,serif}.storybook-card-meta{margin-top:14px;color:#5c7a65;font:700 8px var(--ui);text-transform:uppercase}.storybook-days{display:grid;gap:16px;margin-top:28px}.storybook-day{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:24px;padding:25px;border:1px solid rgba(23,32,25,.13);border-radius:12px;background:#fff}.storybook-day:nth-child(even){background:#e9e0cf}.storybook-day-title{margin-top:9px;font:700 25px Georgia,serif}.storybook-day-meta{margin-top:7px;color:#5c7a65;font:700 8px var(--ui);text-transform:uppercase}.storybook-day-copy{margin-top:18px;font:12px/1.55 Georgia,serif}.storybook-day-side{padding-left:20px;border-left:1px solid rgba(23,32,25,.15)}.storybook-day-side-title{margin-top:13px;color:#5c7a65;font:700 8px var(--ui);letter-spacing:1px;text-transform:uppercase}.storybook-day-side-copy{margin-top:7px;font:700 9px/1.4 var(--ui)}.storybook-reflection{padding:0}.storybook-reflection-hero{height:310px;padding:54px;background-position:center;background-size:cover;color:#fff}.storybook-reflection-body{padding:52px 54px}.storybook-reflection-lead{max-width:700px;margin-top:30px;font:700 30px/1.24 Georgia,serif}.storybook-reflection-copy{max-width:700px;margin-top:26px;color:#d8ded9;font:15px/1.6 Georgia,serif}.storybook-reflection-quote{margin-top:28px;padding:8px 0 8px 22px;border-left:3px solid #c6a15b;color:#f5efe1;font:italic 18px/1.45 Georgia,serif}.storybook-page-number{position:absolute;right:34px;bottom:22px;color:#92a198;font:7px var(--ui)}body.storybook-open{overflow:hidden}
+@media(max-width:700px){.storybook-document{padding:8px}.storybook-page{min-height:0;padding:28px}.storybook-cover{min-height:900px;padding:0}.storybook-cover-heading{top:36px;left:28px}.storybook-cover-heading .storybook-title{font-size:39px}.storybook-cover-tagline{left:28px}.storybook-cover-body{padding:28px}.storybook-stat-grid{grid-template-columns:repeat(3,1fr)}.storybook-map-frame{height:560px}.storybook-moment-lead{grid-template-columns:1fr;height:auto}.storybook-moment-image{height:300px}.storybook-card-grid{grid-template-columns:1fr}.storybook-day{grid-template-columns:1fr}.storybook-day-side{padding:15px 0 0;border-top:1px solid rgba(23,32,25,.15);border-left:0}}
+@media print{@page{size:A4 portrait;margin:0}body.storybook-printing{background:#fff}body.storybook-printing .app-shell,body.storybook-printing>.cycling-modal-overlay,body.storybook-printing>.trip-editor-overlay,body.storybook-printing>.moment-overlay{display:none!important}body.storybook-printing .storybook-overlay{position:static;display:block;overflow:visible;background:#fff}body.storybook-printing .storybook-toolbar{display:none}.storybook-document{display:block;width:auto;margin:0;padding:0}.storybook-page{width:210mm;min-height:297mm;height:297mm;margin:0;padding:14mm;box-shadow:none;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}.storybook-cover{padding:0}.storybook-reflection{padding:0}.storybook-page:last-child{break-after:auto;page-break-after:auto}}
 @media(min-width:700px){.trip-review-stats{grid-template-columns:repeat(5,1fr)}.trip-review{grid-template-columns:repeat(2,minmax(0,1fr))}.trip-review-hero{grid-column:1/-1}.trip-review-section.trip-review-wide{grid-column:1/-1}}
 .more-intro{padding:14px 18px;background:var(--bg2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-dim);}
 
@@ -733,6 +737,14 @@ body.trip-editor-open{overflow:hidden;}
   <section class="moment-sheet" role="dialog" aria-modal="true" aria-labelledby="momentTitle">
     <div id="momentEditor"></div>
   </section>
+</div>
+
+<div class="storybook-overlay" id="storybookOverlay" aria-hidden="true">
+  <header class="storybook-toolbar">
+    <div class="storybook-toolbar-title">Audrey Storybook · Preview</div>
+    <div class="storybook-toolbar-actions"><button class="storybook-toolbar-btn" type="button" onclick="closeStorybook()">Close</button><button class="storybook-toolbar-btn primary" type="button" onclick="printStorybook()">Export PDF</button></div>
+  </header>
+  <main class="storybook-document" id="storybookDocument"></main>
 </div>
 
 <script src="assets/fit-export.js"></script>
@@ -1899,8 +1911,8 @@ function buildTripReview(d){
     [review.averageRating?review.averageRating.toFixed(1)+' ★':'—','Average rating'],
     [review.photoCount,'Photos']
   ];
-  var html='<div class="trip-review"><section class="trip-review-hero"><div class="journey-kicker">Trip Review</div><div class="trip-review-heading">'+escapeDoHtml(name)+'</div><div class="trip-review-copy">A deterministic summary built from your itinerary, activities and Moments. It will become richer as the trip progresses.</div><div class="trip-review-stats">'+stats.map(function(stat){return'<div class="trip-review-stat"><div class="trip-review-stat-value">'+stat[0]+'</div><div class="trip-review-stat-label">'+stat[1]+'</div></div>';}).join('')+'</div></section>';
-  html+='<section class="trip-review-section"><div class="journey-kicker">Favourite Moments</div>'+(review.favourites.length?'<div class="trip-review-list">'+review.favourites.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Your five-star and favourite Moments will appear here.</div>')+'</section>';
+  var html='<div class="trip-review"><section class="trip-review-hero"><div class="journey-kicker">Trip Review</div><div class="trip-review-heading">'+escapeDoHtml(name)+'</div><div class="trip-review-copy">A deterministic summary built from your itinerary, activities and Moments. It will become richer as the trip progresses.</div><div class="trip-review-stats">'+stats.map(function(stat){return'<div class="trip-review-stat"><div class="trip-review-stat-value">'+stat[0]+'</div><div class="trip-review-stat-label">'+stat[1]+'</div></div>';}).join('')+'</div><div class="trip-review-storybook-action"><div class="trip-review-storybook-copy">A compact keepsake generated from this trip’s stories, activities and Moments.</div><button class="trip-review-storybook-btn" type="button" onclick="openStorybook()">📖 Preview Storybook</button></div></section>';
+  html+='<section class="trip-review-section"><div class="journey-kicker">❤️ Favourite Moments</div>'+(review.favourites.length?'<div class="trip-review-list">'+review.favourites.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Your five-star and favourite Moments will appear here.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">Activities</div>'+(review.activityCategories.length?'<div class="trip-review-list">'+review.activityCategories.map(function(category){var meta=[category.distanceKm?formatActivityNumber(category.distanceKm,1)+' km':'',category.movingMinutes?fmtDuration(category.movingMinutes):''].filter(Boolean).join(' · ');return'<div class="trip-review-activity"><div class="trip-review-icon">'+category.icon+'</div><div><div class="trip-review-item-title">'+category.label+'</div><div class="trip-review-item-meta">'+category.count+' recorded'+(meta?' · '+meta:'')+'</div></div></div>';}).join('')+'</div>':'<div class="trip-review-empty">Completed trip activities will be summarised here.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">Trip Highlights</div>'+(review.highlights.length?'<div class="trip-review-list">'+review.highlights.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Highly rated and richly described Moments will form the trip highlights.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">🏆 Defining Moments</div>'+(review.definingMoments.length?'<div class="trip-review-list">'+review.definingMoments.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Favourite, five-star and richly described Moments will appear here.</div>')+'</section>';
@@ -1911,6 +1923,105 @@ function buildTripReview(d){
   return html;
 }
 
+function storybookDateLabel(value){
+  if(!value)return'';var date=new Date(String(value).slice(0,10)+'T12:00:00');
+  return isNaN(date.getTime())?String(value):date.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function storybookHeroAsset(d){
+  var destination=typeof getDestinationScene==='function'&&getDestinationScene(d),meta=d&&d.meta||{},text=[meta.tripName,meta.season].filter(Boolean).join(' ').toLowerCase();
+  if(destination&&destination.asset)return destination.asset;
+  if(/winter|ski|alps|alpine|dolomit/.test(text))return'assets/scenes/alpine.jpg';
+  if(/christmas|horsham|york|britain|england|uk/.test(text))return'assets/scenes/home.jpg';
+  return'assets/scenes/mountains.jpg';
+}
+
+function storybookModel(d){
+  d=d||{};var meta=d.meta||{},review=tripReviewModel(d),rows=Array.isArray(d.itinerary)?d.itinerary:[];
+  var dates={};rows.forEach(function(row){if(/^\d{4}-\d{2}-\d{2}$/.test(row.date||''))(dates[row.date]=dates[row.date]||[]).push(row);});
+  var stories=Object.keys(dates).sort().map(function(date){var story=dailyStoryModel(d,date,dates[date]);story.score=story.memories.length*4+story.activities.length*3+(story.weatherSummary?1:0)+(/STAY|ARRIVE/.test(dates[date].map(function(row){return row.type;}).join(' '))?1:0);return story;});
+  var selected=stories.filter(function(story){return story.hasContent;}).sort(function(a,b){return b.score-a.score||a.date.localeCompare(b.date);}).slice(0,3).sort(function(a,b){return a.date.localeCompare(b.date);});
+  if(!selected.length)selected=stories.slice(0,3);
+  var dated=Object.keys(dates).sort(),start=meta.departDate||dated[0]||'',end=meta.returnDate||dated[dated.length-1]||start;
+  var days=start&&end?Math.max(1,Math.round((Date.parse(end+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000)+1):Math.max(1,dated.length);
+  var defining=review.definingMoments[0]||review.favourites[0]||review.highlights[0]||null,themeNames=review.themes.slice(0,2).map(function(theme){return theme.title.toLowerCase();});
+  var reflection=themeNames.length?'This journey was shaped by '+themeNames.join(' and ')+'. The moments that mattered most came from the experiences shared along the way.':'This Storybook will become richer as activities and Moments are recorded throughout the trip.';
+  return{name:meta.tripName||'This journey',status:meta.tripStatus||'',start:start,end:end,days:days,review:review,stories:stories,selectedStories:selected,defining:defining,hero:storybookHeroAsset(d),reflection:reflection};
+}
+
+function storybookStat(value,label){return'<div><div class="storybook-stat-value">'+escapeDoHtml(String(value))+'</div><div class="storybook-stat-label">'+escapeDoHtml(label)+'</div></div>';}
+function storybookPageNumber(number){return'<div class="storybook-page-number">'+String(number).padStart(2,'0')+'</div>';}
+function storybookMomentTitle(memory){var info=momentTypeInfo(memory&&memory.type),title=memory&&memory.title||memory&&memory.comment||info[1];return title;}
+function storybookMomentImage(memory,fallback){
+  if(memory&&memory.thumbnailDriveId)return'<img class="storybook-moment-image storybook-photo" alt="" data-memory-thumbnail="'+escapeDoHtml(String(memory.memoryId||''))+'" data-thumbnail-version="'+escapeDoHtml(String(memory.thumbnailUpdatedAt||''))+'">';
+  return'<div class="storybook-moment-image" style="background-image:url(\''+escapeDoHtml(fallback)+'\')"></div>';
+}
+
+function buildStorybookMap(map){
+  map=map||{points:[],routeSegments:[],route:[]};var points=(map.route||[]).slice(),width=1000,height=680;
+  if(!points.length)return'<div class="storybook-map-frame"><div class="trip-review-map-empty">The journey map will appear when itinerary locations have coordinates.</div></div>';
+  var view=travelogueMapFitView(points,width,height),zoom=view.zoom,scale=Math.pow(2,zoom),left=view.centerWorld.x-width/2,top=view.centerWorld.y-height/2;
+  function project(point){var world=travelogueWorldPoint(point.lat,point.lng,zoom);return{x:world.x-left,y:world.y-top};}
+  var minTileX=Math.floor(left/256),maxTileX=Math.floor((left+width)/256),minTileY=Math.max(0,Math.floor(top/256)),maxTileY=Math.min(scale-1,Math.floor((top+height)/256)),tiles='';
+  for(var ty=minTileY;ty<=maxTileY;ty++)for(var tx=minTileX;tx<=maxTileX;tx++){var wrapped=((tx%scale)+scale)%scale;tiles+='<img class="storybook-map-tile" alt="" referrerpolicy="strict-origin-when-cross-origin" src="'+travelogueMapTileUrl(zoom,wrapped,ty)+'" style="left:'+((tx*256-left)/width*100).toFixed(3)+'%;top:'+((ty*256-top)/height*100).toFixed(3)+'%;width:'+(256/width*100).toFixed(3)+'%;height:'+(256/height*100).toFixed(3)+'%">';}
+  var routes=(map.routeSegments||[]).map(function(segment){return segment.points.map(project).map(function(point){return point.x.toFixed(1)+','+point.y.toFixed(1);}).join(' ');});
+  var routeSvg=routes.map(function(value){return'<polyline class="storybook-map-route" points="'+value+'"/><polyline class="storybook-map-route-accent" points="'+value+'"/>';}).join('');
+  var pins=points.slice(0,8).map(function(point,index){var pos=project(point);return'<g class="storybook-map-pin" transform="translate('+pos.x.toFixed(1)+' '+pos.y.toFixed(1)+')"><circle r="13"/><text y="3" text-anchor="middle">'+(index+1)+'</text></g>';}).join('');
+  var legend=points.slice(0,8).map(function(point,index){return'<div class="storybook-map-stop">'+(index+1)+' · '+escapeDoHtml(point.label)+'<span>'+escapeDoHtml(point.date||point.type||'Journey stop')+'</span></div>';}).join('');
+  return'<div class="storybook-map-frame"><div class="storybook-map-tiles">'+tiles+'</div><svg class="storybook-map-svg" viewBox="0 0 '+width+' '+height+'">'+routeSvg+pins+'</svg><div class="storybook-map-caption">© OpenStreetMap contributors</div></div><div class="storybook-map-legend">'+legend+'</div>';
+}
+
+function buildStorybookCover(model,page){
+  var r=model.review,def=model.defining,range=[storybookDateLabel(model.start),storybookDateLabel(model.end)].filter(Boolean).join(' - '),themes=r.themes.slice(0,4);
+  return'<section class="storybook-page storybook-cover"><div class="storybook-cover-image" style="background-image:url(\''+escapeDoHtml(model.hero)+'\')"><div class="storybook-cover-heading"><div class="storybook-kicker">Audrey Travel Storybook</div><div class="storybook-title">'+escapeDoHtml(model.name)+'</div><div class="storybook-subtitle" style="color:#f3efe6">'+escapeDoHtml(range)+'</div></div><div class="storybook-cover-tagline">A journey remembered.</div></div><div class="storybook-cover-body"><div class="storybook-kicker">The journey at a glance</div><div class="storybook-stat-grid">'+storybookStat(model.days,'Days')+storybookStat(Math.round(r.distanceKm).toLocaleString(),'Kilometres')+storybookStat(r.activities.length,'Activities')+storybookStat(r.memories.length,'Moments')+storybookStat(r.photoCount,'Photos')+'</div><div class="storybook-kicker" style="margin-top:22px">What made this trip special</div><div class="storybook-theme-grid">'+(themes.length?themes.map(function(theme){return'<div class="storybook-theme"><span class="storybook-theme-dot"></span><div><div class="storybook-theme-title">'+escapeDoHtml(theme.title)+'</div><div class="storybook-theme-copy">'+escapeDoHtml(theme.copy)+'</div></div></div>';}).join(''):'<div class="storybook-theme-copy">Themes will emerge as the trip gathers Moments and activities.</div>')+'</div><div class="storybook-defining"><div class="storybook-kicker">Defining Moment</div><div class="storybook-defining-title">'+escapeDoHtml(def?storybookMomentTitle(def):'Waiting for the Moment that defines this trip')+'</div><div class="storybook-defining-meta">'+escapeDoHtml(def?[def.locationName,storybookDateLabel(def.date||def.timestamp)].filter(Boolean).join(' · '):'Add a Favourite Moment during the trip')+'</div></div></div>'+storybookPageNumber(page)+'</section>';
+}
+
+function buildStorybookMoments(model,page){
+  var memories=model.review.definingMoments.slice(0,3),lead=memories[0],rest=memories.slice(1),fallback=model.hero;
+  if(!lead)return'';
+  var leadInfo=momentTypeInfo(lead.type),rating=Number(lead.rating)||0;
+  return'<section class="storybook-page"><div class="storybook-kicker">The memories that stayed</div><div class="storybook-title">Defining Moments</div><div class="storybook-moment-lead">'+storybookMomentImage(lead,fallback)+'<div class="storybook-moment-copy"><div class="storybook-kicker">'+escapeDoHtml(leadInfo[1])+'</div><div class="storybook-moment-title">'+escapeDoHtml(storybookMomentTitle(lead))+'</div><div class="storybook-moment-rating">'+(rating?rating+'/5':'Favourite')+'</div><div class="storybook-defining-meta">'+escapeDoHtml([lead.locationName,storybookDateLabel(lead.date||lead.timestamp)].filter(Boolean).join(' · '))+'</div><div class="storybook-moment-comment">'+escapeDoHtml(lead.comment||'A Moment worth remembering.')+'</div></div></div>'+(rest.length?'<div class="storybook-card-grid">'+rest.map(function(memory){return'<article class="storybook-card">'+storybookMomentImage(memory,fallback)+'<div class="storybook-card-body"><div class="storybook-kicker">'+escapeDoHtml(momentTypeInfo(memory.type)[1])+'</div><div class="storybook-card-title">'+escapeDoHtml(storybookMomentTitle(memory))+'</div><div class="storybook-card-meta">'+escapeDoHtml([memory.locationName,storybookDateLabel(memory.date||memory.timestamp)].filter(Boolean).join(' · '))+'</div></div></article>';}).join('')+'</div>':'')+storybookPageNumber(page)+'</section>';
+}
+
+function buildStorybookDays(model,page){
+  var stories=model.selectedStories;
+  if(!stories.length)return'';
+  return'<section class="storybook-page"><div class="storybook-kicker">Days in focus</div><div class="storybook-title">The journey, closely remembered</div><div class="storybook-days">'+stories.map(function(story){var activities=story.activities.map(dailyStoryActivityLabel).join(' · ')||'No activity recorded',moments=story.memories.slice(0,3).map(function(memory){return storybookMomentTitle(memory)+(memory.rating?' '+memory.rating+'/5':'');}).join(' · ')||'Moments will appear here';return'<article class="storybook-day"><div><div class="storybook-kicker">Day '+story.dayNumber+'</div><div class="storybook-day-title">'+escapeDoHtml(story.location||'Travel day')+'</div><div class="storybook-day-meta">'+escapeDoHtml([storybookDateLabel(story.date),story.weatherSummary].filter(Boolean).join(' · '))+'</div><div class="storybook-day-copy">'+escapeDoHtml(story.copy)+'</div></div><aside class="storybook-day-side"><div class="storybook-day-side-title">Activity</div><div class="storybook-day-side-copy">'+escapeDoHtml(activities)+'</div><div class="storybook-day-side-title">Moments</div><div class="storybook-day-side-copy">'+escapeDoHtml(moments)+'</div></aside></article>';}).join('')+'</div>'+storybookPageNumber(page)+'</section>';
+}
+
+function buildStorybookReflection(model,page){
+  var r=model.review,activity=r.activityCategories[0],highlight=model.defining;
+  var detail=highlight?'The defining memory was “'+storybookMomentTitle(highlight)+'”'+(highlight.locationName?' in '+highlight.locationName:'')+'.':'The defining memories will emerge as the trip unfolds.';
+  if(activity)detail+=' '+activity.label+' provided a recurring rhythm across the journey.';
+  return'<section class="storybook-page dark storybook-reflection"><div class="storybook-reflection-hero" style="background-image:linear-gradient(rgba(10,15,12,.5),rgba(10,15,12,.5)),url(\''+escapeDoHtml(model.hero)+'\')"><div class="storybook-kicker">Trip highlights</div><div class="storybook-title">What made this journey ours</div><div class="storybook-subtitle" style="color:#f3efe6">Small moments, held together.</div></div><div class="storybook-reflection-body"><div class="storybook-kicker">Audrey reflection</div><div class="storybook-reflection-lead">'+escapeDoHtml(model.reflection)+'</div><div class="storybook-reflection-copy">'+escapeDoHtml(detail)+'</div><div class="storybook-reflection-quote">The best journeys leave room for something memorable to happen.</div></div>'+storybookPageNumber(page)+'</section>';
+}
+
+function buildStorybook(d){
+  var model=storybookModel(d),pages=[],number=1;
+  pages.push(buildStorybookCover(model,number++));
+  pages.push('<section class="storybook-page"><div class="storybook-kicker">The route</div><div class="storybook-title">The journey in places</div><div class="storybook-subtitle">A story map of the stops that shaped the trip.</div>'+buildStorybookMap(model.review.map)+storybookPageNumber(number++)+'</section>');
+  var moments=buildStorybookMoments(model,number);if(moments){pages.push(moments);number++;}
+  var days=buildStorybookDays(model,number);if(days){pages.push(days);number++;}
+  pages.push(buildStorybookReflection(model,number));
+  return pages.join('');
+}
+
+function openStorybook(){
+  if(!currentData)return;var overlay=document.getElementById('storybookOverlay'),documentHolder=document.getElementById('storybookDocument');if(!overlay||!documentHolder)return;
+  documentHolder.innerHTML=buildStorybook(currentData);overlay.classList.add('is-open');overlay.setAttribute('aria-hidden','false');document.body.classList.add('storybook-open');hydrateMomentThumbnails();overlay.scrollTop=0;
+}
+function closeStorybook(){var overlay=document.getElementById('storybookOverlay');if(overlay){overlay.classList.remove('is-open');overlay.setAttribute('aria-hidden','true');}document.body.classList.remove('storybook-open','storybook-printing');}
+function finishStorybookPrint(){document.body.classList.remove('storybook-printing');}
+function waitForStorybookImages(){
+  var images=Array.prototype.slice.call(document.querySelectorAll('#storybookDocument img'));
+  return Promise.all(images.map(function(image){
+    if(image.complete)return Promise.resolve();
+    return new Promise(function(resolve){var done=function(){resolve();};image.addEventListener('load',done,{once:true});image.addEventListener('error',done,{once:true});setTimeout(done,3000);});
+  }));
+}
+function printStorybook(){document.body.classList.add('storybook-printing');waitForStorybookImages().then(function(){setTimeout(function(){window.print();},50);});}
+if(typeof window!=='undefined')window.addEventListener('afterprint',finishStorybookPrint);
+
 function journeyOverview(value,label){
   return '<div><div class="journey-overview-value">'+value+'</div><div class="journey-overview-label">'+label+'</div></div>';
 }
@@ -1920,7 +2031,7 @@ function tripDayNumber(d,date){
   var dated=rows.map(function(row){return row.date;}).filter(function(value){return /^\d{4}-\d{2}-\d{2}$/.test(value||'');}).sort();
   var start=meta.departDate||dated[0],end=meta.returnDate||dated[dated.length-1];
   if(!start||!date)return 1;
-  var tripDays=end?Math.max(1,Math.round((Date.parse(end+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000)):1;
+  var tripDays=end?Math.max(1,Math.round((Date.parse(end+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000)+1):1;
   return Math.min(tripDays,Math.max(1,Math.round((Date.parse(date+'T00:00:00Z')-Date.parse(start+'T00:00:00Z'))/86400000)+1));
 }
 
