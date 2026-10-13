@@ -45,11 +45,11 @@ test('Journey Review can edit and delete an existing Moment', () => {
   assert.match(frontend, /function deleteMoment\(/);
 });
 
-test('Moment capture exposes the native image picker and creates only a small JPEG thumbnail', () => {
+test('Moment capture exposes the native image picker and creates a bounded Storybook-quality JPEG', () => {
   assert.match(frontend, /type="file" accept="image\/\*"/);
-  assert.match(frontend, /canvas\.toBlob\(resolve,'image\/jpeg',0\.8\)/);
-  assert.match(frontend, /momentThumbnailDimensions\([^,]+,[^,]+,300\)/);
-  assert.match(frontend, /blob\.size>200\*1024/);
+  assert.match(frontend, /canvas\.toBlob\(resolve,'image\/jpeg',0\.85\)/);
+  assert.match(frontend, /momentThumbnailDimensions\([^,]+,[^,]+,900\)/);
+  assert.match(frontend, /blob\.size>1024\*1024/);
   assert.match(frontend, /The original stays in Apple Photos/);
 });
 

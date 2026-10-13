@@ -32,7 +32,7 @@ vm.runInContext([
   'buildTripReviewMapFallback', 'buildTripReviewMap', 'travelogueWorldPoint',
   'travelogueMapFitView', 'travelogueMapTileUrl', 'travelogueMapPointerDown',
   'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview',
-  'storybookDateLabel', 'storybookHeroAsset', 'storybookModel', 'storybookStat',
+  'storybookDateLabel', 'storybookHeroKey', 'storybookHeroAsset', 'storybookImageDimensions', 'storybookModel', 'storybookStat',
   'storybookPageNumber', 'storybookMomentTitle', 'storybookMomentImage',
   'buildStorybookMap', 'buildStorybookCover', 'buildStorybookMoments',
   'buildStorybookDays', 'buildStorybookReflection', 'buildStorybook'
@@ -121,6 +121,18 @@ test('Christmas trip produces a compact print-ready Storybook', () => {
   assert.match(html, /What made this journey ours/);
   assert.ok((html.match(/class="storybook-page/g) || []).length >= 4);
   assert.doesNotMatch(html, /private-drive-id/);
+});
+
+test('Storybook supports a private high quality hero and square map tiles', () => {
+  assert.deepEqual(JSON.parse(JSON.stringify(context.storybookImageDimensions(4000, 3000, 2000, 1400))), {width: 1867, height: 1400});
+  assert.deepEqual(JSON.parse(JSON.stringify(context.storybookImageDimensions(800, 600, 2000, 1400))), {width: 800, height: 600});
+  assert.match(source, /id="storybookHeroInput" type="file" accept="image\/\*"/);
+  assert.match(source, /action:'upload_storybook_hero'/);
+  assert.match(source, /action:'get_storybook_hero'/);
+  assert.match(source, /action:'remove_storybook_hero'/);
+  assert.match(source, /canvas\.toBlob\(resolve,'image\/jpeg',0\.88\)/);
+  assert.match(source, /\.storybook-map-frame\{[^}]*aspect-ratio:50\/34/);
+  assert.doesNotMatch(source, /\.storybook-map-frame\{height:560px\}/);
 });
 
 test('Journey Map projection, fitting and tile URLs are deterministic', () => {
