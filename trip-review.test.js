@@ -34,7 +34,8 @@ vm.runInContext([
   'tripReviewModel', 'tripReviewMemoryRow', 'buildTripReview',
   'storybookDateLabel', 'storybookHeroKey', 'storybookHeroAsset', 'storybookImageDimensions', 'storybookModel', 'storybookStat',
   'storybookPageNumber', 'storybookMomentTitle', 'storybookMomentImage',
-  'buildStorybookMap', 'buildStorybookCover', 'buildStorybookMoments',
+  'storybookTimelineDate', 'storybookTimelineTitle', 'storybookTimelineComment', 'storybookTimelineMemories',
+  'buildStorybookTimeline', 'buildStorybookMap', 'buildStorybookCover', 'buildStorybookMoments',
   'buildStorybookDays', 'buildStorybookReflection', 'buildStorybook'
 ].map(functionSource).join('\n'), context);
 
@@ -114,6 +115,12 @@ test('Christmas trip produces a compact print-ready Storybook', () => {
   assert.match(html, /The journey in places/);
   assert.match(html, /tile\.openstreetmap\.org/);
   assert.match(html, /OpenStreetMap contributors/);
+  assert.match(html, /❤️ Moments Timeline/);
+  assert.match(html, /The memories that shaped the journey/);
+  assert.ok(html.indexOf('The journey in places') < html.indexOf('❤️ Moments Timeline'));
+  assert.ok(html.indexOf('❤️ Moments Timeline') < html.indexOf('Defining Moments'));
+  assert.match(html, /data-memory-thumbnail="pub-1"/);
+  assert.match(html, /Warm fire/);
   assert.match(html, /Defining Moments/);
   assert.match(html, /storybook-photo-frame/);
   assert.match(html, /The journey, closely remembered/);
@@ -121,6 +128,21 @@ test('Christmas trip produces a compact print-ready Storybook', () => {
   assert.match(html, /What made this journey ours/);
   assert.ok((html.match(/class="storybook-page/g) || []).length >= 4);
   assert.doesNotMatch(html, /private-drive-id/);
+});
+
+test('Storybook Moments Timeline selects meaning first and presents it chronologically', () => {
+  const model = context.storybookModel(christmasTrip);
+  const selected = context.storybookTimelineMemories(model, 2);
+  assert.equal(selected.length, 2);
+  assert.equal(context.storybookTimelineDate(model, selected[0]), '2026-12-24');
+  assert.equal(context.storybookTimelineDate(model, selected[1]), '2026-12-25');
+  assert.equal(context.storybookTimelineTitle(selected[0]), 'Pub · York');
+  assert.equal(context.storybookTimelineComment(selected[0]), 'Warm fire');
+  const timeline = context.buildStorybookTimeline(model, 3);
+  assert.equal(timeline.pages, 1);
+  assert.match(timeline.html, /03<\/div>/);
+  assert.match(timeline.html, /Favourite Moment/);
+  assert.match(timeline.html, /★★★★★/);
 });
 
 test('Storybook supports a private high quality hero and square map tiles', () => {
