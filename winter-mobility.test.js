@@ -19,6 +19,8 @@ function functionSource(source, name) {
 }
 
 const context = {URL};
+context.currentDoDayMode = 'ski';
+context.currentDoPlaceContext = 'now';
 vm.createContext(context);
 vm.runInContext([
   functionSource(frontend, 'escapeDoHtml'),
@@ -26,6 +28,9 @@ vm.runInContext([
   functionSource(frontend, 'isSkiSeason'),
   functionSource(frontend, 'isSkiTrip'),
   functionSource(frontend, 'getDoStayLocation'),
+  functionSource(frontend, 'buildDoLocalOpportunities'),
+  functionSource(frontend, 'buildDoDayModeSwitch'),
+  functionSource(frontend, 'buildDoOpportunities'),
   functionSource(frontend, 'winterMobilityDestinations_'),
   functionSource(frontend, 'findWinterPass_'),
   functionSource(frontend, 'translateWinterPassDetail_'),
@@ -116,6 +121,35 @@ test('Alta Badia winter board offers ad hoc valleys without itinerary drives', (
   assert.match(html, /Val di Fassa/);
   assert.match(html, /CLOSED/);
   assert.doesNotMatch(html, /next drive/i);
+});
+
+test('winter trips can switch to stay-based local interests for a non-ski day', () => {
+  context.currentDoDayMode = 'explore';
+  context.currentDoPlaceContext = 'now';
+  const html = context.buildDoOpportunities({
+    meta: {tripName: 'Italy Winter 2027', departDate: '2027-01-22', season: 'winter', currentLocation: 'San Cassiano'},
+    itinerary: [{isToday: true, type: 'STAY', location: 'San Cassiano'}],
+    snowStatus: {resorts: [{name: 'Alta Badia', isOpen: true}]}
+  });
+  assert.match(html, /Ski today/);
+  assert.match(html, /Explore today/);
+  assert.match(html, /Explore from your stay/);
+  assert.match(html, /This stay/);
+  assert.match(html, /id="do-local-opportunities"/);
+  assert.doesNotMatch(html, /Where to ski today/);
+});
+
+test('unknown ski regions never inherit the South Tyrol pass list', () => {
+  context.currentDoDayMode = 'ski';
+  const html = context.buildExploreFromHere({
+    meta: {tripName: 'Three Valleys Ski', departDate: '2027-02-01', currentLocation: 'Méribel', vehicleRelevant: false},
+    snowStatus: {passes: [{name: 'Gardena Pass', status: '✅ Open'}]}
+  });
+  assert.equal(html, '');
+});
+
+test('local-place loading remains enabled only when a ski trip selects Explore today', () => {
+  assert.match(frontend, /if\(isSkiTrip\(d\)&&currentDoDayMode!==['"]explore['"]\)return/);
 });
 
 test('official feed classifier distinguishes open, restricted and closed passes', () => {

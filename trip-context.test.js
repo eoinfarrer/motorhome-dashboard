@@ -112,7 +112,7 @@ test('a December UK road trip is not treated as a ski trip', () => {
 });
 
 test('local itinerary suggestions are gated by trip purpose rather than month', () => {
-  assert.match(frontend, /async function loadDoLocalPlaces\(d\)[\s\S]*?if\(isSkiTrip\(d\)\)return;/);
+  assert.match(frontend, /async function loadDoLocalPlaces\(d\)[\s\S]*?if\(isSkiTrip\(d\)&&currentDoDayMode!==['"]explore['"]\)return;/);
 });
 
 test('an explicitly winter trip remains a ski trip', () => {
