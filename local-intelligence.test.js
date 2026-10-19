@@ -22,7 +22,11 @@ vm.createContext(context);
 vm.runInContext([
   'categoriseDoPlace_', 'groupDoPlace_', 'doRateValue_',
   'isReligiousDoPlace_', 'isStrongDoMustSee_', 'scoreDoPlace_',
-  'selectDiverseDoPlaces_'
+  'selectDiverseDoPlaces_', 'isSouthTyrolDoCoords_',
+  'selectOpenDataHubOccurrence_', 'normaliseDoEventTime_',
+  'localisedDoValue_', 'localisedDoName_', 'firstHttpsDoUrl_',
+  'categoriseOpenDataHubEvent_', 'trimDoSummary_', 'haversineDoKm_',
+  'normaliseOpenDataHubEvent_'
 ].map(functionSource).join('\n'), context);
 
 function place(name, kinds, distanceKm, rate, extras = {}) {
@@ -57,6 +61,43 @@ test('Boston Spa ranking suppresses churches and favours close food and drink', 
   assert.ok(names.includes('Village Coffee'));
   assert.ok(!names.includes('Boston Spa Methodist Church'));
   assert.ok(!names.includes('The Red Lion Bramham'));
+});
+
+test('South Tyrol event coverage includes Alta Badia but excludes unrelated trips', () => {
+  assert.equal(context.isSouthTyrolDoCoords_({lat: 46.57, lon: 11.93}), true);
+  assert.equal(context.isSouthTyrolDoCoords_({lat: 53.91, lon: -1.35}), false);
+  assert.equal(context.isSouthTyrolDoCoords_({lat: 45.41, lon: 6.63}), false);
+});
+
+test('Open Data Hub events use the first live occurrence inside the stay window', () => {
+  const occurrence = context.selectOpenDataHubOccurrence_([
+    {From: '2027-01-10T00:00:00', To: '2027-01-10T00:00:00', Begin: '09:00:00', End: '10:00:00'},
+    {From: '2027-01-23T00:00:00', To: '2027-01-23T00:00:00', Begin: '18:30:00', End: '20:00:00', Cancelled: '1'},
+    {From: '2027-01-24T00:00:00', To: '2027-01-24T00:00:00', Begin: '17:00:00', End: '19:00:00', IsBookable: true}
+  ], {from: '2027-01-22', to: '2027-01-28'});
+  assert.deepEqual(JSON.parse(JSON.stringify(occurrence)), {
+    start: '2027-01-24T17:00:00', end: '2027-01-24T19:00:00',
+    date: '2027-01-24', time: '17:00', bookable: true
+  });
+});
+
+test('Open Data Hub event response is normalized for Audrey', () => {
+  const event = context.normaliseOpenDataHubEvent_({
+    Id: 'event-1', Shortname: 'Mountain food evening', Latitude: 46.58, Longitude: 11.94,
+    Detail: {en: {Title: 'Mountain food evening', BaseText: 'Taste local dishes.'}},
+    ContactInfos: {en: {City: 'San Cassiano', Url: 'https://example.test/event'}},
+    LocationInfo: {RegionInfo: {Name: {en: 'Dolomites Region Alta Badia'}}, DistrictInfo: {Name: {en: 'San Cassiano'}}},
+    ODHTags: [{Id: 'genuss-events'}], EventProperty: {TicketRequired: true},
+    EventDate: [{From: '2027-01-24T00:00:00', To: '2027-01-24T00:00:00', Begin: '18:00:00', End: '21:00:00'}]
+  }, {lat: 46.57, lon: 11.93}, {from: '2027-01-22', to: '2027-01-28'});
+  assert.equal(event.title, 'Mountain food evening');
+  assert.equal(event.category, 'food');
+  assert.equal(event.location, 'San Cassiano');
+  assert.equal(event.date, '2027-01-24');
+  assert.equal(event.time, '18:00');
+  assert.equal(event.ticketRequired, true);
+  assert.equal(event.url, 'https://example.test/event');
+  assert.ok(event.distanceKm > 0);
 });
 
 test('architecture alone is not labelled must see', () => {

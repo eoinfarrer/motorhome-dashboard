@@ -30,6 +30,8 @@ vm.runInContext([
   functionSource(frontend, 'getDoStayLocation'),
   functionSource(frontend, 'buildDoLocalOpportunities'),
   functionSource(frontend, 'buildDoDayModeSwitch'),
+  functionSource(frontend, 'formatDoEventDate_'),
+  functionSource(frontend, 'buildDoLocalEvent'),
   functionSource(frontend, 'buildDoOpportunities'),
   functionSource(frontend, 'winterMobilityDestinations_'),
   functionSource(frontend, 'findWinterPass_'),
@@ -136,7 +138,22 @@ test('winter trips can switch to stay-based local interests for a non-ski day', 
   assert.match(html, /Explore from your stay/);
   assert.match(html, /This stay/);
   assert.match(html, /id="do-local-opportunities"/);
+  assert.match(html, /Happening during your stay/);
   assert.doesNotMatch(html, /Where to ski today/);
+});
+
+test('South Tyrol events render as concise links above local places', () => {
+  const html = context.buildDoLocalEvent({
+    title: 'Christmas market', category: 'market', date: '2027-01-24', time: '17:30',
+    location: 'Corvara', distanceKm: 7.2, bookable: false,
+    url: 'https://www.altabadia.org/en/alta-badia-events'
+  });
+  assert.match(html, /MARKET/);
+  assert.match(html, /Christmas market/);
+  assert.match(html, /Sun 24 Jan · 17:30/);
+  assert.match(html, /Corvara/);
+  assert.match(html, /7.2 km away/);
+  assert.match(html, /target="_blank"/);
 });
 
 test('unknown ski regions never inherit the South Tyrol pass list', () => {
