@@ -4315,6 +4315,7 @@ function buildDoLocalPlace(place){
   if(place.sources&&place.sources.opentripmap)signals.push('Place detail');
   if(place.sources&&place.sources.osm)signals.push('OSM context');
   if(place.sources&&place.sources.wikimedia)signals.push('Wikimedia');
+  if(place.sources&&place.sources.googlePlaces)signals.push('Google Maps');
   if(place.access&&place.access.label)signals.unshift(place.access.label);
   var url=safeDoUrl(place.url||place.otmUrl||'');
   var image=safeDoUrl(place.image||'');

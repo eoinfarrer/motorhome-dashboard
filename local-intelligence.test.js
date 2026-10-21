@@ -63,3 +63,11 @@ test('architecture alone is not labelled must see', () => {
   assert.equal(context.groupDoPlace_('architecture,churches', {}), 'other');
   assert.equal(context.isReligiousDoPlace_(place('St Mary Church', 'architecture,churches', 0.2, 3)), true);
 });
+
+test('local place cards identify Google Maps results', () => {
+  const html = fs.readFileSync(__dirname + '/index.html', 'utf8');
+  const cardSourceStart = html.indexOf('function buildDoLocalPlace(place)');
+  const cardSourceEnd = html.indexOf('\nfunction escapeDoHtml', cardSourceStart);
+  assert.ok(cardSourceStart >= 0 && cardSourceEnd > cardSourceStart);
+  assert.match(html.slice(cardSourceStart, cardSourceEnd), /sources\.googlePlaces\)signals\.push\('Google Maps'\)/);
+});
