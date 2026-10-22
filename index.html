@@ -1234,7 +1234,7 @@ function render(d){
   applyCollapsed();
   applyAppView();
   applyJourneyMode();
-  if(momentDeepLinkPending){momentDeepLinkPending=false;setTimeout(function(){openMomentCapture(false,momentDeepLinkComment);},0);}
+  if(momentDeepLinkPending){momentDeepLinkPending=false;setTimeout(function(){openMomentCapture(true,momentDeepLinkComment);},0);}
   if(isSettingsPanelOpen&&currentAppView==='more'){
     var settingsPanel=document.getElementById('settingsPanel');
     var settingsBtn=document.getElementById('settingsBtn');

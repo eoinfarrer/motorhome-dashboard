@@ -36,7 +36,7 @@ test('voice shortcut transcription opens Moment capture with a safe bounded comm
   assert.equal(deepLink.comment, 'Best lunch of the trip');
   assert.equal(context.normaliseMomentTranscript('  hello\nworld  '), 'hello world');
   assert.equal(context.normaliseMomentTranscript('x'.repeat(700)).length, 500);
-  assert.match(frontend, /openMomentCapture\(false,momentDeepLinkComment\)/);
+  assert.match(frontend, /openMomentCapture\(true,momentDeepLinkComment\)/);
 });
 
 test('Moment capture requests phone GPS but preserves an itinerary fallback', () => {
