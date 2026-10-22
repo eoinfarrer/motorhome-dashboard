@@ -21,7 +21,7 @@ const context = {};
 vm.createContext(context);
 vm.runInContext([
   'categoriseDoPlace_', 'groupDoPlace_', 'doRateValue_',
-  'isReligiousDoPlace_', 'isStrongDoMustSee_', 'scoreDoPlace_',
+  'isReligiousDoPlace_', 'isUnhelpfulDoPlace_', 'isStrongDoMustSee_', 'scoreDoPlace_',
   'selectDiverseDoPlaces_', 'isSouthTyrolDoCoords_',
   'selectOpenDataHubOccurrence_', 'normaliseDoEventTime_',
   'localisedDoValue_', 'localisedDoName_', 'firstHttpsDoUrl_',
