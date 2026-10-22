@@ -24,6 +24,21 @@ test('Moments uses one Home-only heart action and retains the dedicated deep lin
   assert.match(frontend, /get\('capture'\)==='moment'/);
 });
 
+test('voice shortcut transcription opens Moment capture with a safe bounded comment', () => {
+  const context = {URLSearchParams, location: {search:'', hash:'#capture=moment&comment=Best%20lunch%20of%20the%20trip'}};
+  vm.createContext(context);
+  vm.runInContext([
+    functionSource('normaliseMomentTranscript'),
+    functionSource('readMomentDeepLink')
+  ].join('\n'), context);
+  const deepLink = context.readMomentDeepLink();
+  assert.equal(deepLink.capture, true);
+  assert.equal(deepLink.comment, 'Best lunch of the trip');
+  assert.equal(context.normaliseMomentTranscript('  hello\nworld  '), 'hello world');
+  assert.equal(context.normaliseMomentTranscript('x'.repeat(700)).length, 500);
+  assert.match(frontend, /openMomentCapture\(false,momentDeepLinkComment\)/);
+});
+
 test('Moment capture requests phone GPS but preserves an itinerary fallback', () => {
   assert.match(frontend, /navigator\.geolocation\.getCurrentPosition/);
   assert.match(frontend, /currentLocationCoords/);

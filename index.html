@@ -757,7 +757,8 @@ var API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZ
 // route payload through the protected gateway before it reaches Apps Script.
 var ROUTE_ENRICHMENT_API_URL='https://script.google.com/macros/s/AKfycbzkNIe9iFbh0DN4ApI07qv-6vqZlBuhGr_85ED0DpBnhIw1oq7Ubad00jJL4d73Ee36ew/exec';
 var currentData=null,currentTrip=null;
-var momentDraft=null,momentSaving=false,momentDeepLinkPending=new URLSearchParams(location.search).get('capture')==='moment',momentThumbnailCache={};
+var momentDeepLink=readMomentDeepLink();
+var momentDraft=null,momentSaving=false,momentDeepLinkPending=momentDeepLink.capture,momentDeepLinkComment=momentDeepLink.comment,momentThumbnailCache={};
 var storybookHeroCache={},storybookHeroSaving=false,storybookHeroLoading=false;
 var travelogueMapView=null,travelogueMapResizeBound=false;
 
@@ -1233,7 +1234,7 @@ function render(d){
   applyCollapsed();
   applyAppView();
   applyJourneyMode();
-  if(momentDeepLinkPending){momentDeepLinkPending=false;setTimeout(function(){openMomentCapture(false);},0);}
+  if(momentDeepLinkPending){momentDeepLinkPending=false;setTimeout(function(){openMomentCapture(false,momentDeepLinkComment);},0);}
   if(isSettingsPanelOpen&&currentAppView==='more'){
     var settingsPanel=document.getElementById('settingsPanel');
     var settingsBtn=document.getElementById('settingsBtn');
@@ -2464,11 +2465,24 @@ function initialMomentDraft(){
   return{editing:false,memoryId:'',type:'favourite',rating:5,comment:'',lat:isFinite(Number(coords.lat))?Number(coords.lat):null,lng:isFinite(Number(coords.lon))?Number(coords.lon):null,accuracyM:null,locationName:meta.currentLocation||'',locationState:coords.lat!=null?'Using trip location':'Location not yet available',error:'',thumbnailBase64:'',thumbnailPreview:'',thumbnailDriveId:'',thumbnailUpdatedAt:'',removeThumbnail:false,photoTimestamp:'',photoTimestampSource:'',photoProcessing:false,photoState:''};
 }
 
-function openMomentCapture(requestPhoneLocation){
+function normaliseMomentTranscript(value){
+  return String(value||'').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/\s+/g,' ').trim().slice(0,500);
+}
+
+function readMomentDeepLink(){
+  var query=new URLSearchParams(location.search),fragment=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+  return{
+    capture:fragment.get('capture')==='moment'||query.get('capture')==='moment',
+    comment:normaliseMomentTranscript(fragment.get('comment')||query.get('comment')||'')
+  };
+}
+
+function openMomentCapture(requestPhoneLocation,initialComment){
   if(!currentData)return;
-  momentDraft=initialMomentDraft();momentSaving=false;
+  momentDraft=initialMomentDraft();momentDraft.comment=normaliseMomentTranscript(initialComment);momentSaving=false;
   document.getElementById('momentOverlay').classList.add('open');document.body.classList.add('trip-editor-open');
   renderMomentEditor();
+  if(momentDraft.comment)setTimeout(function(){var comment=document.getElementById('momentComment');if(comment){comment.focus();comment.setSelectionRange(comment.value.length,comment.value.length);}},0);
   if(requestPhoneLocation!==false)requestMomentLocation();
 }
 
@@ -2484,7 +2498,7 @@ function openMomentEdit(encodedId){
 function closeMomentCapture(){
   var overlay=document.getElementById('momentOverlay');if(overlay)overlay.classList.remove('open');
   document.body.classList.remove('trip-editor-open');momentDraft=null;momentSaving=false;
-  if(new URLSearchParams(location.search).get('capture')==='moment')history.replaceState({},'',location.pathname);
+  if(readMomentDeepLink().capture)history.replaceState({},'',location.pathname);
 }
 
 function closeMomentCaptureIfOutside(event){if(event.target&&event.target.id==='momentOverlay')closeMomentCapture();}
