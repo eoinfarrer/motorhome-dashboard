@@ -40,7 +40,7 @@ npm run deploy:secure
 2. Verify dashboard reads, trip edits, settings, route imports and exports.
 3. Replace the public GitHub Pages app with a link to the protected URL.
 4. Remove the old anonymous Apps Script deployment.
-5. Reauthorise Strava with `read_all` only after the public endpoint is gone.
+5. Garmin is the recorded-activity source; RideWithGPS and Komoot provide routes.
 
 The old Apps Script deployment is an immutable older version, so it remains a
 rollback option until it is explicitly removed.

@@ -30,6 +30,8 @@ vm.runInContext([
   functionSource(frontend, 'getDoStayLocation'),
   functionSource(frontend, 'buildDoLocalOpportunities'),
   functionSource(frontend, 'buildDoDayModeSwitch'),
+  functionSource(frontend, 'buildDoReadinessContext'),
+  functionSource(frontend, 'applyDoReadinessToDecision'),
   functionSource(frontend, 'formatDoEventDate_'),
   functionSource(frontend, 'buildDoLocalEvent'),
   functionSource(frontend, 'buildDoOpportunities'),

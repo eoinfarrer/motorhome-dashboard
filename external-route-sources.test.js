@@ -47,19 +47,16 @@ test('trims each source to relevant routes and prioritises saved routes', () => 
   assert.equal(result.every(route => route.audreyType === 'trail'), true);
 });
 
-test('wires both authenticated route sources and their GPX actions', () => {
+test('uses RideWithGPS as the authenticated route library after Strava retirement', () => {
   assert.match(frontend, /action:'discover_ridewithgps'/);
-  assert.match(frontend, /action:'discover_strava_routes'/);
-  assert.match(frontend, /action: 'get_strava_route_gpx'/);
   assert.match(frontend, /trimExternalRoutesForTab\(rwData\.routes\|\|\[\],type,10\)/);
-  assert.match(frontend, /trimExternalRoutesForTab\(stravaData\.routes\|\|\[\],type,10\)/);
+  assert.doesNotMatch(frontend, /discover_strava_routes|get_strava_route_gpx|actSelectStrava/);
 });
 
 test('keeps route sources independent behind the authenticated JSON helper', () => {
   assert.match(frontend, /var curated = \[\], curatedStatus = ''/);
   assert.match(frontend, /Saved route fetch failed:/);
   assert.match(frontend, /await fetchAudreyJson\(API_URL \+ '\?' \+ rwParams\.toString\(\)\)/);
-  assert.match(frontend, /await fetchAudreyJson\(API_URL \+ '\?' \+ stravaParams\.toString\(\)\)/);
   assert.doesNotMatch(functionSource('loadActRoutes'), /credentials:'omit'/);
 });
 

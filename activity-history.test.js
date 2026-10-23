@@ -47,11 +47,12 @@ test('Home presents a completed padel session without meaningless zero distance'
   assert.doesNotMatch(html, /0 km/);
 });
 
-test('Journey activity safely renders metrics, location and Strava link', () => {
+test('Journey activity safely renders metrics, location and Garmin link', () => {
   const html = context.buildJourneyActivityPoint({
     name: '<Coast ride>', sportType: 'Ride', tripLocation: 'White Rocks Hotel',
     distanceKm: 42.6, movingMinutes: 138, elevationM: 780,
-    url: 'https://www.strava.com/activities/123'
+    source: 'Garmin',
+    url: 'https://connect.garmin.com/modern/activity/123'
   });
 
   assert.match(html, /&lt;Coast ride&gt;/);
