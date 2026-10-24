@@ -38,6 +38,7 @@ Audrey Travel OS helps plan, experience, remember and learn from travel. Version
 
 - Filters supermarkets, generic accommodation and routine utility businesses from local interest suggestions.
 - Removes the obsolete Wrangler configuration that caused a Cloudflare warning.
+- Redirects the former public GitHub Pages entry point to the protected Audrey domain.
 - Records a tested rollback point for both the web app and Apps Script backend.
 
 The GitHub repository names remain unchanged to preserve deployment links and history. The product is now formally named **Audrey Travel OS**.
