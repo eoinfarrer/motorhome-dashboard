@@ -7,7 +7,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Audrey</title>
+<meta name="application-name" content="Audrey Travel OS">
+<meta name="apple-mobile-web-app-title" content="Audrey Travel OS">
+<meta name="description" content="Audrey Travel OS helps plan, experience, remember and learn from travel.">
+<title>Audrey Travel OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -218,9 +221,10 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 
 /* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(20,22,20,.97);position:sticky;top:0;z-index:100;gap:12px;box-shadow:0 1px 12px rgba(0,0,0,.16);backdrop-filter:blur(18px);}
-.header-left{display:flex;align-items:center;flex-shrink:0;}
+.header-left{display:flex;align-items:center;gap:7px;flex-shrink:0;}
 .wordmark{font-family:var(--display);font-size:20px;font-weight:800;letter-spacing:-0.5px;color:#f7f5ee;}
 .wordmark span{color:var(--gold);}
+.product-edition{padding-left:7px;border-left:1px solid rgba(255,255,255,.18);color:#b9bcb3;font-size:7px;font-weight:600;letter-spacing:1.2px;line-height:1.15;text-transform:uppercase;white-space:nowrap;}
 .trip-selector{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#f7f5ee;font-family:var(--mono);font-size:12px;padding:6px 10px;border-radius:6px;outline:none;cursor:pointer;max-width:180px;flex-shrink:1;min-width:0;}
 .refresh-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);color:#dcddd7;font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all 0.15s;}
 .refresh-btn:hover{border-color:var(--gold);color:var(--gold);}
@@ -687,6 +691,7 @@ body.trip-editor-open{overflow:hidden;}
 <header class="header">
   <div class="header-left">
     <div class="wordmark">Au<span>drey</span></div>
+    <div class="product-edition">Travel OS<br>1.0</div>
   </div>
   <select class="trip-selector" id="tripSelector" onchange="loadTrip(this.value)">
     <option value="">Loading...</option>
@@ -1315,7 +1320,7 @@ function buildMoreView(d,fc){
     +'<section class="more-group"><div class="more-group-label">Trip detail</div><div class="more-trip-content">'+trip.join('')+'</div></section>'
     +'<section class="more-group"><div class="more-group-label">Activity history</div>'+buildMoreActivityHistory(d.activities)+'</section>'
     +'<section class="more-group"><div class="more-group-label">Configuration</div><div class="more-config-panel" id="settingsPanel">'+buildMoreSettingsHtml(d,fc)+'</div></section>'
-    +'<section class="more-group"><div class="more-group-label">System</div><div class="more-system-meta"><strong>Data updated</strong><br>'+timestamp+' · Use the header Refresh for a normal update.</div><details class="more-system"><summary class="more-system-summary">Advanced system</summary><div class="more-system-body"><div class="more-system-copy">Run all backend modules only when you need a manual maintenance refresh.</div><button class="more-system-btn" type="button" onclick="runAllModulesNow()">Run all modules now</button><div class="more-system-status" id="runAllStatus"></div></div></details></section>'
+    +'<section class="more-group"><div class="more-group-label">System</div><div class="more-system-meta"><strong>Audrey Travel OS 1.0</strong><br>Data updated '+timestamp+' · Use the header Refresh for a normal update.</div><details class="more-system"><summary class="more-system-summary">Advanced system</summary><div class="more-system-body"><div class="more-system-copy">Run all backend modules only when you need a manual maintenance refresh.</div><button class="more-system-btn" type="button" onclick="runAllModulesNow()">Run all modules now</button><div class="more-system-status" id="runAllStatus"></div></div></details></section>'
     +'</div></div>';
 }
 

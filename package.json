@@ -1,5 +1,6 @@
 {
-  "name": "audrey-dashboard",
+  "name": "audrey-travel-os",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build:fit": "esbuild src/fit-export.mjs --bundle --minify --format=iife --global-name=AudreyFit --outfile=assets/fit-export.js",
