@@ -4028,8 +4028,8 @@ function calcBearing(lat1, lon1, lat2, lon2) {
 // ── Segment detection — finds key climbs and cols ─────────────
 function detectSegments(gpx, startTime, flatSpeedKmh, climbSpeedKmh) {
   var points = gpx.points;
-  flatSpeedKmh  = flatSpeedKmh  || 35;
-  climbSpeedKmh = climbSpeedKmh || 10;
+  flatSpeedKmh  = flatSpeedKmh  || 24;
+  climbSpeedKmh = climbSpeedKmh || 6;
   var paceMinPerKm = 60 / flatSpeedKmh;
   
 
@@ -4297,13 +4297,13 @@ function renderCyclingUpload() {
     + '</div>'
     + '<div class="cycling-input-group">'
     + '<label class="cycling-input-label">Flat speed (km/h)</label>'
-    + '<input class="cycling-input" type="number" id="cyclingFlatSpeed" value="35" step="1" min="10" max="60">'
+    + '<input class="cycling-input" type="number" id="cyclingFlatSpeed" value="24" step="1" min="10" max="60">'
     + '</div>'
     + '</div>'
     + '<div class="cycling-inputs">'
     + '<div class="cycling-input-group">'
     + '<label class="cycling-input-label">Climbing speed (km/h)</label>'
-    + '<input class="cycling-input" type="number" id="cyclingClimbSpeed" value="10" step="1" min="5" max="25">'
+    + '<input class="cycling-input" type="number" id="cyclingClimbSpeed" value="6" step="1" min="5" max="25">'
     + '</div>'
     + '<div class="cycling-input-group">'
     + '<label class="cycling-input-label">Start date</label>'
@@ -4360,8 +4360,8 @@ async function runGPXAnalysis() {
   if (!cyclingGPX) return;
  
   var startTimeStr = document.getElementById('cyclingStartTime').value || '06:30';
-  var flatSpeed  = parseFloat(document.getElementById('cyclingFlatSpeed').value)  || 35;
-  var climbSpeed = parseFloat(document.getElementById('cyclingClimbSpeed').value) || 10;
+  var flatSpeed  = parseFloat(document.getElementById('cyclingFlatSpeed').value)  || 24;
+  var climbSpeed = parseFloat(document.getElementById('cyclingClimbSpeed').value) || 6;
   var pace       = 60 / flatSpeed; // kept for compatibility
  
   // Build start datetime — use date picker if set, else today/tomorrow
@@ -6109,8 +6109,8 @@ function getActivityDefaultSettings(type){
   if(start<=now)start.setDate(start.getDate()+1);
   return {
     startDate:start.getFullYear()+'-'+String(start.getMonth()+1).padStart(2,'0')+'-'+String(start.getDate()).padStart(2,'0'),
-    startTime:'07:00',flatSpeed:type==='cycle'?30:type==='mtb'?15:4,
-    climbSpeed:type==='cycle'?10:type==='mtb'?8:2
+    startTime:'07:00',flatSpeed:type==='cycle'?24:type==='mtb'?15:4,
+    climbSpeed:type==='cycle'?6:type==='mtb'?8:2
   };
 }
 
