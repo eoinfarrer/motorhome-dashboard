@@ -86,6 +86,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .home-flood-label{color:#e7bf76;font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;}
 .home-flood-title{margin-top:5px;color:#fff4e6;font-family:var(--ui);font-size:15px;font-weight:750;line-height:1.35;}
 .home-flood-copy{margin-top:5px;color:#e0d5c5;font-size:10px;line-height:1.5;}
+.home-flood-source{margin-top:7px;color:#aa9f90;font-size:8px;line-height:1.45;}
 .home-flood-link{display:inline-block;margin-top:10px;color:#f0c98b;font-size:9px;font-weight:700;letter-spacing:.5px;text-decoration:none;text-transform:uppercase;}
 /* Reusable Home glass system: primary panel, secondary panel, inset metrics. */
 .home-decision,.home-vehicle-surface{padding:18px;border:1px solid var(--home-glass-border);border-radius:16px;background:var(--home-glass-primary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
@@ -2471,10 +2472,14 @@ function buildHomeFloodSafety(risk){
   var copy=targets.length?'Affects '+targets.join(', ')+'.':(risk.summary||'Review the official warning before travelling.');
   if(alert.riverOrSea)copy+=' '+alert.riverOrSea+'.';
   var url=/^https:\/\//.test(String(alert.url||''))?String(alert.url):'https://check-for-flooding.service.gov.uk/';
+  var source=alert.provider?'Source: '+alert.provider:'';
+  if(alert.sourceUpdated||alert.updated)source+=(source?' · ':'')+'Updated '+String(alert.sourceUpdated||alert.updated);
+  if(alert.licence)source+=(source?' · ':'')+String(alert.licence);
   return '<section class="home-flood home-flood-'+level+'">'
     +'<div class="home-flood-label">Flood safety</div>'
     +'<div class="home-flood-title">'+escapeDoHtml(label+' · '+(alert.title||'Official warning'))+'</div>'
     +'<div class="home-flood-copy">'+escapeDoHtml(copy)+'</div>'
+    +(source?'<div class="home-flood-source">'+escapeDoHtml(source)+'</div>':'')
     +'<a class="home-flood-link" href="'+escapeDoHtml(url)+'" target="_blank" rel="noopener">Official warning details →</a>'
     +'</section>';
 }

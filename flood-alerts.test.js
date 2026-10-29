@@ -37,3 +37,15 @@ test('Home renders warning severity, affected stop and official link', () => {
   assert.match(html, /Official warning details/);
   assert.match(html, /home-flood-warning/);
 });
+
+test('Home displays German source attribution, update time and licence', () => {
+  const html = context.buildHomeFloodSafety({monitoring:true, alerts:[{
+    severity:'alert', title:'Flood watch · Test district', riverOrSea:'Test district',
+    provider:'Länderübergreifendes Hochwasserportal (LHP)',
+    sourceUpdated:'2026-10-29T21:32:47+01:00', licence:'CC BY 4.0',
+    targets:[{label:'Bavaria'}], url:'https://www.hochwasserzentralen.de/'
+  }]});
+  assert.match(html, /Länderübergreifendes Hochwasserportal/);
+  assert.match(html, /2026-10-29T21:32:47/);
+  assert.match(html, /CC BY 4.0/);
+});
