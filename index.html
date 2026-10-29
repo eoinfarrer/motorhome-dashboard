@@ -80,6 +80,13 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .home-attention{padding:15px 16px;border:1px solid rgba(224,120,99,.23);border-radius:14px;background:rgba(58,35,31,.8);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
 .home-attention-label{color:var(--danger);font-size:9px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;}
 .home-attention-copy{margin-top:5px;color:#f5dfd8;font-family:var(--ui);font-size:14px;font-weight:650;line-height:1.4;}
+.home-flood{padding:15px 16px;border:1px solid rgba(221,164,73,.36);border-radius:14px;background:rgba(48,40,29,.88);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
+.home-flood.home-flood-warning{border-color:rgba(226,122,62,.55);background:rgba(61,36,27,.9);}
+.home-flood.home-flood-severe{border-color:rgba(221,77,65,.62);background:rgba(66,29,28,.92);}
+.home-flood-label{color:#e7bf76;font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;}
+.home-flood-title{margin-top:5px;color:#fff4e6;font-family:var(--ui);font-size:15px;font-weight:750;line-height:1.35;}
+.home-flood-copy{margin-top:5px;color:#e0d5c5;font-size:10px;line-height:1.5;}
+.home-flood-link{display:inline-block;margin-top:10px;color:#f0c98b;font-size:9px;font-weight:700;letter-spacing:.5px;text-decoration:none;text-transform:uppercase;}
 /* Reusable Home glass system: primary panel, secondary panel, inset metrics. */
 .home-decision,.home-vehicle-surface{padding:18px;border:1px solid var(--home-glass-border);border-radius:16px;background:var(--home-glass-primary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
 .home-opportunity,.home-condition{border:1px solid var(--home-glass-border);background:var(--home-glass-secondary);box-shadow:var(--home-glass-shadow);backdrop-filter:blur(12px);}
@@ -2431,6 +2438,8 @@ function buildHomeView(d,fc){
   if(context.attention)parts.push('<section class="home-attention">'
     +'<div class="home-attention-label">Needs attention</div>'
     +'<div class="home-attention-copy">'+context.attention+'</div></section>');
+  var floodSafety=buildHomeFloodSafety(d.floodRisk);
+  if(floodSafety)parts.push(floodSafety);
   if(!context.attention){
     if(context.mode==='drive')parts.push(buildHomeDriveDecision(meta,d.master,fc));
     else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
@@ -2451,6 +2460,23 @@ function buildHomeView(d,fc){
   if(meta.vehicleRelevant!==false)parts.push(buildHomeVehicleStatus(d.vehicle));
   parts.push('</div></div></div>');
   return parts.join('');
+}
+
+function buildHomeFloodSafety(risk){
+  if(!risk||!risk.monitoring||!Array.isArray(risk.alerts)||!risk.alerts.length)return'';
+  var alert=risk.alerts[0]||{};
+  var level=alert.severity==='severe'?'severe':alert.severity==='warning'?'warning':'alert';
+  var label=level==='severe'?'Severe flood warning':level==='warning'?'Flood warning':'Flood alert';
+  var targets=Array.isArray(alert.targets)?alert.targets.map(function(target){return target.label;}).filter(Boolean):[alert.targetLabel].filter(Boolean);
+  var copy=targets.length?'Affects '+targets.join(', ')+'.':(risk.summary||'Review the official warning before travelling.');
+  if(alert.riverOrSea)copy+=' '+alert.riverOrSea+'.';
+  var url=/^https:\/\//.test(String(alert.url||''))?String(alert.url):'https://check-for-flooding.service.gov.uk/';
+  return '<section class="home-flood home-flood-'+level+'">'
+    +'<div class="home-flood-label">Flood safety</div>'
+    +'<div class="home-flood-title">'+escapeDoHtml(label+' · '+(alert.title||'Official warning'))+'</div>'
+    +'<div class="home-flood-copy">'+escapeDoHtml(copy)+'</div>'
+    +'<a class="home-flood-link" href="'+escapeDoHtml(url)+'" target="_blank" rel="noopener">Official warning details →</a>'
+    +'</section>';
 }
 
 function momentTypeInfo(type){
