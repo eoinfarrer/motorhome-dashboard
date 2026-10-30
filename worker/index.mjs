@@ -1,5 +1,7 @@
 const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
+const PUSH_SUBSCRIPTION_PREFIX = 'push-subscription:';
+const PUSH_STATE_PREFIX = 'flood-push-state:';
 let accessJwks = null;
 let accessJwksExpiresAt = 0;
 
@@ -55,6 +57,147 @@ export function canonicalJsonBody(body) {
 
 function bytesToHex(bytes) {
   return Array.from(bytes, value => value.toString(16).padStart(2, '0')).join('');
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64UrlToBytes(value) {
+  const base64 = String(value || '').replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(String(value || '').length / 4) * 4, '=');
+  return Uint8Array.from(atob(base64), character => character.charCodeAt(0));
+}
+
+function concatBytes(...arrays) {
+  const size = arrays.reduce((total, array) => total + array.length, 0);
+  const result = new Uint8Array(size);
+  let offset = 0;
+  arrays.forEach(array => { result.set(array, offset); offset += array.length; });
+  return result;
+}
+
+async function hmacSha256(keyBytes, valueBytes) {
+  const key = await crypto.subtle.importKey('raw', keyBytes, {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
+  return new Uint8Array(await crypto.subtle.sign('HMAC', key, valueBytes));
+}
+
+async function hkdfExpand(prk, info, length) {
+  const output = await hmacSha256(prk, concatBytes(info, new Uint8Array([1])));
+  return output.slice(0, length);
+}
+
+function validPushSubscription(subscription) {
+  if (!subscription || typeof subscription !== 'object') return false;
+  let endpoint;
+  try { endpoint = new URL(subscription.endpoint); } catch (_error) { return false; }
+  if (endpoint.protocol !== 'https:') return false;
+  const host = endpoint.hostname.toLowerCase();
+  const trusted = host === 'fcm.googleapis.com'
+    || host === 'updates.push.services.mozilla.com'
+    || host === 'web.push.apple.com'
+    || host.endsWith('.push.apple.com')
+    || host.endsWith('.notify.windows.com');
+  if (!trusted) return false;
+  const p256dh = String(subscription.keys && subscription.keys.p256dh || '');
+  const auth = String(subscription.keys && subscription.keys.auth || '');
+  try {
+    return base64UrlToBytes(p256dh).length === 65 && base64UrlToBytes(auth).length >= 16;
+  } catch (_error) {
+    return false;
+  }
+}
+
+async function pushSubscriptionKey(subscription) {
+  const digest = await crypto.subtle.digest('SHA-256', encoder.encode(String(subscription.endpoint || '')));
+  return PUSH_SUBSCRIPTION_PREFIX + bytesToHex(new Uint8Array(digest)).slice(0, 32);
+}
+
+async function createVapidAuthorization(endpoint, env) {
+  const privateJwk = JSON.parse(String(env.AUDREY_VAPID_PRIVATE_JWK || '{}'));
+  const publicKey = String(env.AUDREY_VAPID_PUBLIC_KEY || '');
+  if (!privateJwk.d || !privateJwk.x || !privateJwk.y || !publicKey) throw new Error('Web Push VAPID is not configured');
+  const origin = new URL(endpoint).origin;
+  const header = bytesToBase64Url(encoder.encode(JSON.stringify({typ:'JWT', alg:'ES256'})));
+  const claims = bytesToBase64Url(encoder.encode(JSON.stringify({
+    aud: origin,
+    exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60,
+    sub: String(env.AUDREY_VAPID_SUBJECT || 'https://audrey.eoinfarrer.uk')
+  })));
+  const input = header + '.' + claims;
+  const key = await crypto.subtle.importKey('jwk', privateJwk, {name:'ECDSA', namedCurve:'P-256'}, false, ['sign']);
+  const signature = new Uint8Array(await crypto.subtle.sign({name:'ECDSA', hash:'SHA-256'}, key, encoder.encode(input)));
+  return 'vapid t=' + input + '.' + bytesToBase64Url(signature) + ', k=' + publicKey;
+}
+
+export async function encryptWebPushPayload(subscription, payload) {
+  if (!validPushSubscription(subscription)) throw new Error('Invalid Web Push subscription');
+  const clientPublic = base64UrlToBytes(subscription.keys.p256dh);
+  const authSecret = base64UrlToBytes(subscription.keys.auth);
+  const clientKey = await crypto.subtle.importKey('raw', clientPublic, {name:'ECDH', namedCurve:'P-256'}, false, []);
+  const serverKeys = await crypto.subtle.generateKey({name:'ECDH', namedCurve:'P-256'}, true, ['deriveBits']);
+  const serverPublic = new Uint8Array(await crypto.subtle.exportKey('raw', serverKeys.publicKey));
+  const sharedSecret = new Uint8Array(await crypto.subtle.deriveBits({name:'ECDH', public:clientKey}, serverKeys.privateKey, 256));
+
+  const keyInfo = concatBytes(encoder.encode('WebPush: info\0'), clientPublic, serverPublic);
+  const prkKey = await hmacSha256(authSecret, sharedSecret);
+  const ikm = await hkdfExpand(prkKey, keyInfo, 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const prk = await hmacSha256(salt, ikm);
+  const contentKey = await hkdfExpand(prk, encoder.encode('Content-Encoding: aes128gcm\0'), 16);
+  const nonce = await hkdfExpand(prk, encoder.encode('Content-Encoding: nonce\0'), 12);
+  const plaintext = concatBytes(encoder.encode(JSON.stringify(payload)), new Uint8Array([2]));
+  const aesKey = await crypto.subtle.importKey('raw', contentKey, 'AES-GCM', false, ['encrypt']);
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv:nonce}, aesKey, plaintext));
+  const recordSize = new Uint8Array(4);
+  new DataView(recordSize.buffer).setUint32(0, 4096, false);
+  return concatBytes(salt, recordSize, new Uint8Array([serverPublic.length]), serverPublic, ciphertext);
+}
+
+export async function sendWebPush(subscription, notification, env, fetchImpl = fetch) {
+  const body = await encryptWebPushPayload(subscription, notification);
+  const response = await fetchImpl(subscription.endpoint, {
+    method:'POST',
+    headers:{
+      'Authorization': await createVapidAuthorization(subscription.endpoint, env),
+      'Content-Encoding':'aes128gcm',
+      'Content-Type':'application/octet-stream',
+      'TTL':'3600',
+      'Urgency': notification && notification.urgency === 'high' ? 'high' : 'normal'
+    },
+    body
+  });
+  return {ok:response.ok, status:response.status};
+}
+
+async function storedPushSubscriptions(env) {
+  if (!env.AUDREY_PUSH || typeof env.AUDREY_PUSH.list !== 'function') return [];
+  const listed = await env.AUDREY_PUSH.list({prefix:PUSH_SUBSCRIPTION_PREFIX});
+  const subscriptions = [];
+  for (const key of listed.keys || []) {
+    const value = await env.AUDREY_PUSH.get(key.name, 'json');
+    if (validPushSubscription(value)) subscriptions.push({key:key.name, subscription:value});
+  }
+  return subscriptions;
+}
+
+async function deliverPushToAll(env, notification, fetchImpl = fetch) {
+  const subscriptions = await storedPushSubscriptions(env);
+  const results = [];
+  for (const item of subscriptions) {
+    try {
+      const result = await sendWebPush(item.subscription, notification, env, fetchImpl);
+      results.push(result);
+      if (result.status === 404 || result.status === 410) await env.AUDREY_PUSH.delete(item.key);
+    } catch (error) {
+      console.warn('Audrey Web Push delivery failed', {message:String(error && error.message || error).slice(0,160)});
+      results.push({ok:false, status:0});
+    }
+  }
+  return results;
 }
 
 export async function signGatewayRequest(secret, method, timestamp, payload) {
@@ -290,6 +433,92 @@ async function proxyApi(request, env, fetchImpl) {
   return json({error: 'Backend is temporarily unavailable', code: 'UPSTREAM_UNAVAILABLE'}, 502);
 }
 
+async function fetchAudreyDashboardForPush(env, fetchImpl = fetch) {
+  if (!env.AUDREY_APPS_SCRIPT_URL || !env.AUDREY_GATEWAY_SECRET) throw new Error('Secure backend is not configured');
+  const target = new URL(env.AUDREY_APPS_SCRIPT_URL);
+  const timestamp = Math.floor(Date.now() / 1000);
+  const signature = await signGatewayRequest(env.AUDREY_GATEWAY_SECRET, 'GET', timestamp, canonicalQuery(target.searchParams));
+  target.searchParams.set('gw_ts', String(timestamp));
+  target.searchParams.set('gw_sig', signature);
+  const response = await fetchImpl(target.toString(), {headers:{'Accept':'application/json'}, redirect:'follow'});
+  if (!response.ok) throw new Error('Audrey backend returned HTTP ' + response.status);
+  const data = await response.json();
+  if (data && data.error) throw new Error(String(data.error));
+  return data;
+}
+
+function floodPushState(alerts) {
+  return (alerts || []).reduce((state, alert) => {
+    if (alert && alert.id) state[String(alert.id)] = Number(alert.severityLevel || 9);
+    return state;
+  }, {});
+}
+
+function floodPushNotification(alert, data) {
+  const level = Number(alert.severityLevel);
+  const label = level === 1 ? 'Severe flood warning' : level === 2 ? 'Flood warning' : 'Flood alert';
+  const targets = (alert.targets || []).map(target => target.label).filter(Boolean);
+  const target = targets[0] || alert.targetLabel || data && data.meta && data.meta.currentLocation || 'your trip';
+  return {
+    title:'Audrey · ' + label,
+    body:String(alert.title || label) + ' near ' + target + '. Open Audrey for official details.',
+    tag:'audrey-flood-' + String(alert.id || '').replace(/[^A-Za-z0-9_-]/g, '-').slice(-80),
+    url:'/?view=home',
+    urgency:level <= 2 ? 'high' : 'normal'
+  };
+}
+
+export async function runFloodPushCheck(env, fetchImpl = fetch) {
+  if (!env.AUDREY_PUSH) return {checked:false, reason:'storage_unavailable'};
+  const data = await fetchAudreyDashboardForPush(env, fetchImpl);
+  const risk = data && data.floodRisk || {};
+  const alerts = risk.monitoring && Array.isArray(risk.alerts) ? risk.alerts : [];
+  const trip = String(data && data.meta && data.meta.tripName || 'trip').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0,80);
+  const stateKey = PUSH_STATE_PREFIX + trip;
+  const previous = await env.AUDREY_PUSH.get(stateKey, 'json') || {};
+  const current = floodPushState(alerts);
+  if (!alerts.length) {
+    await env.AUDREY_PUSH.put(stateKey, JSON.stringify(current));
+    return {checked:true, alerts:0, sent:0};
+  }
+  const changed = alerts.filter(alert => previous[alert.id] == null || Number(alert.severityLevel) < Number(previous[alert.id]));
+  if (!changed.length) return {checked:true, alerts:alerts.length, sent:0};
+  changed.sort((left,right) => Number(left.severityLevel) - Number(right.severityLevel));
+  const deliveries = await deliverPushToAll(env, floodPushNotification(changed[0], data), fetchImpl);
+  const sent = deliveries.filter(result => result.ok).length;
+  if (sent) await env.AUDREY_PUSH.put(stateKey, JSON.stringify(current));
+  return {checked:true, alerts:alerts.length, changed:changed.length, sent};
+}
+
+async function handlePushRoute(request, env, url, fetchImpl) {
+  if (!env.AUDREY_PUSH) return json({error:'Notification storage is not configured'}, 503);
+  if (url.pathname === '/push/public-key' && request.method === 'GET') {
+    const publicKey = String(env.AUDREY_VAPID_PUBLIC_KEY || '');
+    return publicKey ? json({publicKey}) : json({error:'Notifications are not configured'}, 503);
+  }
+  if (url.pathname === '/push/subscription' && request.method === 'POST') {
+    const subscription = await request.json();
+    if (!validPushSubscription(subscription)) return json({error:'Invalid notification subscription'}, 400);
+    const key = await pushSubscriptionKey(subscription);
+    await env.AUDREY_PUSH.put(key, JSON.stringify(subscription));
+    return json({success:true});
+  }
+  if (url.pathname === '/push/subscription' && request.method === 'DELETE') {
+    const subscription = await request.json();
+    if (subscription && subscription.endpoint) await env.AUDREY_PUSH.delete(await pushSubscriptionKey(subscription));
+    return json({success:true});
+  }
+  if (url.pathname === '/push/test' && request.method === 'POST') {
+    const deliveries = await deliverPushToAll(env, {
+      title:'Audrey notifications are ready',
+      body:'Flood and critical travel alerts can now reach this iPhone when Audrey is closed.',
+      tag:'audrey-notification-test', url:'/?view=home', urgency:'normal'
+    }, fetchImpl);
+    return json({success:deliveries.some(result => result.ok), delivered:deliveries.filter(result => result.ok).length});
+  }
+  return json({error:'Not found'}, 404);
+}
+
 export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   const email = await authenticatedEmail(request, env, ctx);
   if (!email || !(await emailAllowed(email, env))) {
@@ -306,6 +535,10 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
     }
     return proxyApi(request, env, fetchImpl);
   }
+  if (url.pathname.startsWith('/push/')) {
+    if (!['GET','POST','DELETE'].includes(request.method)) return json({error:'Method not allowed'}, 405);
+    return handlePushRoute(request, env, url, fetchImpl);
+  }
   if (!env.STATIC || typeof env.STATIC.fetch !== 'function') {
     return json({error: 'Secure static site is not configured'}, 503);
   }
@@ -315,5 +548,10 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
 export default {
   fetch(request, env, ctx) {
     return handleRequest(request, env, ctx);
+  },
+  scheduled(_event, env, ctx) {
+    ctx.waitUntil(runFloodPushCheck(env).catch(error => {
+      console.error('Audrey scheduled flood push failed', {message:String(error && error.message || error).slice(0,160)});
+    }));
   }
 };

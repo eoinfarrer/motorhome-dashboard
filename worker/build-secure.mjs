@@ -18,6 +18,8 @@ if (!publicApi.test(source)) {
 const secure = source.replace(publicApi, "var API_URL='/api';");
 await writeFile(path.join(output, 'index.html'), secure);
 await cp(path.join(root, 'assets'), path.join(output, 'assets'), {recursive: true});
+await cp(path.join(root, 'manifest.webmanifest'), path.join(output, 'manifest.webmanifest'));
+await cp(path.join(root, 'sw.js'), path.join(output, 'sw.js'));
 await writeFile(path.join(output, '_headers'), [
   '/*',
   '  Cache-Control: no-store',

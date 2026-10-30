@@ -1,0 +1,13 @@
+{
+  "name": "Audrey Travel OS",
+  "short_name": "Audrey",
+  "description": "Plan, experience, remember and learn from travel.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#171918",
+  "theme_color": "#171918",
+  "icons": [
+    {"src": "/assets/audrey-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

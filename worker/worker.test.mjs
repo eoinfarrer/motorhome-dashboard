@@ -1,6 +1,48 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {canonicalAccessEmail, canonicalJsonBody, canonicalQuery, handleRequest, signGatewayRequest} from './index.mjs';
+import {canonicalAccessEmail, canonicalJsonBody, canonicalQuery, encryptWebPushPayload, handleRequest, runFloodPushCheck, sendWebPush, signGatewayRequest} from './index.mjs';
+
+class MemoryKv {
+  constructor() { this.values = new Map(); }
+  async get(key, type) {
+    const value = this.values.get(key);
+    if (value == null) return null;
+    return type === 'json' ? JSON.parse(value) : value;
+  }
+  async put(key, value) { this.values.set(key, String(value)); }
+  async delete(key) { this.values.delete(key); }
+  async list(options = {}) {
+    const prefix = options.prefix || '';
+    return {keys: Array.from(this.values.keys()).filter(key => key.startsWith(prefix)).map(name => ({name}))};
+  }
+}
+
+function base64Url(bytes) {
+  return Buffer.from(bytes).toString('base64url');
+}
+
+async function pushFixture() {
+  const recipient = await crypto.subtle.generateKey({name:'ECDH', namedCurve:'P-256'}, true, ['deriveBits']);
+  const recipientPublic = new Uint8Array(await crypto.subtle.exportKey('raw', recipient.publicKey));
+  const vapid = await crypto.subtle.generateKey({name:'ECDSA', namedCurve:'P-256'}, true, ['sign','verify']);
+  const privateJwk = await crypto.subtle.exportKey('jwk', vapid.privateKey);
+  const publicJwk = await crypto.subtle.exportKey('jwk', vapid.publicKey);
+  const publicRaw = new Uint8Array(65);
+  publicRaw[0] = 4;
+  publicRaw.set(Buffer.from(publicJwk.x, 'base64url'), 1);
+  publicRaw.set(Buffer.from(publicJwk.y, 'base64url'), 33);
+  return {
+    subscription: {
+      endpoint:'https://fcm.googleapis.com/fcm/send/audrey-test',
+      keys:{p256dh:base64Url(recipientPublic), auth:base64Url(crypto.getRandomValues(new Uint8Array(16)))}
+    },
+    vapidEnv:{
+      AUDREY_VAPID_PRIVATE_JWK:JSON.stringify(privateJwk),
+      AUDREY_VAPID_PUBLIC_KEY:base64Url(publicRaw),
+      AUDREY_VAPID_SUBJECT:'https://audrey.example'
+    }
+  };
+}
 
 function access(email = 'owner@example.com') {
   return {access: {getIdentity: async () => ({email})}};
@@ -198,4 +240,60 @@ test('secure gateway returns JSON when the upstream remains invalid', async () =
   assert.equal(response.status, 502);
   assert.equal(response.headers.get('Content-Type'), 'application/json; charset=utf-8');
   assert.equal((await response.json()).code, 'UPSTREAM_INVALID_RESPONSE');
+});
+
+test('secure Worker stores only a validated owner push subscription', async () => {
+  const fixture = await pushFixture();
+  const storage = new MemoryKv();
+  const configured = env({...fixture.vapidEnv, AUDREY_PUSH:storage});
+  const keyResponse = await handleRequest(new Request('https://audrey.example/push/public-key'), configured, access());
+  assert.equal(keyResponse.status, 200);
+  assert.equal((await keyResponse.json()).publicKey, fixture.vapidEnv.AUDREY_VAPID_PUBLIC_KEY);
+
+  const response = await handleRequest(new Request('https://audrey.example/push/subscription', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(fixture.subscription)
+  }), configured, access());
+  assert.equal(response.status, 200);
+  assert.equal((await storage.list({prefix:'push-subscription:'})).keys.length, 1);
+});
+
+test('Web Push payload uses the RFC 8291 record shape and VAPID headers', async () => {
+  const fixture = await pushFixture();
+  const encrypted = await encryptWebPushPayload(fixture.subscription, {title:'Audrey test', body:'Ready'});
+  assert.equal(encrypted.length > 16 + 4 + 1 + 65, true);
+  assert.equal(new DataView(encrypted.buffer, encrypted.byteOffset + 16, 4).getUint32(0, false), 4096);
+  assert.equal(encrypted[20], 65);
+
+  let sent;
+  const result = await sendWebPush(fixture.subscription, {title:'Audrey test', body:'Ready'}, fixture.vapidEnv, async (url, options) => {
+    sent = {url, options};
+    return new Response('', {status:201});
+  });
+  assert.equal(result.ok, true);
+  assert.equal(sent.options.headers['Content-Encoding'], 'aes128gcm');
+  assert.match(sent.options.headers.Authorization, /^vapid t=.+, k=.+$/);
+});
+
+test('scheduled flood push sends only for a new or escalated official warning', async () => {
+  const fixture = await pushFixture();
+  const storage = new MemoryKv();
+  const configured = env({...fixture.vapidEnv, AUDREY_PUSH:storage});
+  await storage.put('push-subscription:test', JSON.stringify(fixture.subscription));
+  let deliveries = 0;
+  const dashboard = {
+    meta:{tripName:'Lake District'},
+    floodRisk:{monitoring:true, alerts:[{id:'ea:123', severityLevel:2, title:'Flood warning for Keswick', targets:[{label:'Keswick'}]}]}
+  };
+  const mockFetch = async url => {
+    if (String(url).startsWith(configured.AUDREY_APPS_SCRIPT_URL)) {
+      return new Response(JSON.stringify(dashboard), {headers:{'Content-Type':'application/json'}});
+    }
+    deliveries++;
+    return new Response('', {status:201});
+  };
+  const first = await runFloodPushCheck(configured, mockFetch);
+  const second = await runFloodPushCheck(configured, mockFetch);
+  assert.equal(first.sent, 1);
+  assert.equal(second.sent, 0);
+  assert.equal(deliveries, 1);
 });
