@@ -524,6 +524,7 @@ export async function runWeatherPushCheck(env, fetchImpl = fetch) {
   const data = await fetchAudreyDashboardForPush(env, fetchImpl);
   const risk = data && data.weatherRisk || {};
   const alerts = risk.alerts && Array.isArray(risk.alerts) ? risk.alerts : [];
+  console.log('Weather push check', {alerts: alerts.length, subscriptions: (await storedPushSubscriptions(env)).length, test: alerts.some(alert => alert && alert.test === true)});
   const trip = String(data && data.meta && data.meta.tripName || 'trip').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0,80);
   const stateKey = WEATHER_PUSH_STATE_PREFIX + trip;
   const previous = await env.AUDREY_PUSH.get(stateKey, 'json') || {};
