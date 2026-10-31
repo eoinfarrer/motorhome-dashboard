@@ -2451,6 +2451,8 @@ function buildHomeView(d,fc){
     +'<div class="home-attention-copy">'+context.attention+'</div></section>');
   var floodSafety=buildHomeFloodSafety(d.floodRisk);
   if(floodSafety)parts.push(floodSafety);
+  var weatherSafety=buildHomeWeatherSafety(d.weatherRisk);
+  if(weatherSafety)parts.push(weatherSafety);
   if(!context.attention){
     if(context.mode==='drive')parts.push(buildHomeDriveDecision(meta,d.master,fc));
     else if(context.mode==='returned'||context.mode==='pretrip')parts.push(buildHomeNextContext(meta,fc));
@@ -2491,6 +2493,16 @@ function buildHomeFloodSafety(risk){
     +'<div class="home-flood-copy">'+escapeDoHtml(copy)+'</div>'
     +(source?'<div class="home-flood-source">'+escapeDoHtml(source)+'</div>':'')
     +'<a class="home-flood-link" href="'+escapeDoHtml(url)+'" target="_blank" rel="noopener">Official warning details →</a>'
+    +'</section>';
+}
+
+function buildHomeWeatherSafety(risk){
+  if(!risk||!Array.isArray(risk.alerts)||!risk.alerts.length)return'';
+  var alert=risk.alerts[0], level=alert.severity==='severe'?'severe':alert.severity==='warning'?'warning':'alert';
+  return '<section class="home-flood home-flood-'+level+'"><div class="home-flood-label">Weather safety</div>'
+    +'<div class="home-flood-title">'+escapeDoHtml(alert.title||'Weather risk')+'</div>'
+    +'<div class="home-flood-copy">'+escapeDoHtml(alert.message||risk.summary||'Review conditions before setting out.')+'</div>'
+    +(risk.alerts.length>1?'<div class="home-flood-source">+'+(risk.alerts.length-1)+' more forecast risk'+(risk.alerts.length===2?'':'s')+' in the outlook</div>':'')
     +'</section>';
 }
 
