@@ -549,6 +549,20 @@ export async function runWeatherPushCheck(env, fetchImpl = fetch) {
   return {checked:true, alerts:alerts.length, changed:changed.length, sent};
 }
 
+export async function runActivitySuggestionPushCheck(env, fetchImpl = fetch) {
+  if (!env.AUDREY_PUSH) return {checked:false, reason:'storage_unavailable'};
+  const data = await fetchAudreyDashboardForPush(env, fetchImpl);
+  const suggestion = data && data.activitySuggestion;
+  if (!suggestion) return {checked:true, sent:0, reason:'no_high_signal_suggestion'};
+  const trip = String(data && data.meta && data.meta.tripName || 'trip').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0,80);
+  const key = PUSH_STATE_PREFIX + 'activity-suggestion:' + trip + ':' + String(suggestion.date || 'today');
+  if (await env.AUDREY_PUSH.get(key)) return {checked:true, sent:0, reason:'already_sent'};
+  const deliveries = await deliverPushToAll(env, {title:'Audrey · '+String(suggestion.title || 'Today suggestion'), body:String(suggestion.message || '')+' '+String(suggestion.action || ''), tag:'audrey-activity-'+String(suggestion.date || 'today'), url:'/?view=home', urgency:'normal'}, fetchImpl, subscription => !!(subscription.audreyPreferences && subscription.audreyPreferences.activityAware));
+  const sent = deliveries.filter(result => result.ok).length;
+  if (sent) await env.AUDREY_PUSH.put(key, 'sent');
+  return {checked:true, sent};
+}
+
 async function handlePushRoute(request, env, url, fetchImpl) {
   if (!env.AUDREY_PUSH) return json({error:'Notification storage is not configured'}, 503);
   if (url.pathname === '/push/public-key' && request.method === 'GET') {
@@ -611,7 +625,8 @@ export default {
   scheduled(_event, env, ctx) {
     ctx.waitUntil(Promise.all([
       runFloodPushCheck(env).catch(error => console.error('Audrey scheduled flood push failed', {message:String(error && error.message || error).slice(0,160)})),
-      runWeatherPushCheck(env).catch(error => console.error('Audrey scheduled weather push failed', {message:String(error && error.message || error).slice(0,160)}))
+      runWeatherPushCheck(env).catch(error => console.error('Audrey scheduled weather push failed', {message:String(error && error.message || error).slice(0,160)})),
+      runActivitySuggestionPushCheck(env).catch(error => console.error('Audrey scheduled activity suggestion failed', {message:String(error && error.message || error).slice(0,160)}))
     ]));
   }
 };
