@@ -558,7 +558,7 @@ export async function runActivitySuggestionPushCheck(env, fetchImpl = fetch) {
   const trip = String(data && data.meta && data.meta.tripName || 'trip').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0,80);
   const key = PUSH_STATE_PREFIX + 'activity-suggestion:' + trip + ':' + String(suggestion.date || 'today');
   if (await env.AUDREY_PUSH.get(key)) return {checked:true, sent:0, reason:'already_sent'};
-  const deliveries = await deliverPushToAll(env, {title:'Audrey · '+String(suggestion.title || 'Today suggestion'), body:String(suggestion.message || '')+' '+String(suggestion.action || ''), tag:'audrey-activity-'+String(suggestion.date || 'today'), url:'/?view=home', urgency:'normal'}, fetchImpl, subscription => !!(subscription.audreyPreferences && subscription.audreyPreferences.activityAware));
+  const deliveries = await deliverPushToAll(env, {title:'Audrey · '+String(suggestion.title || 'Today suggestion'), body:String(suggestion.message || '')+' '+String(suggestion.action || ''), tag:'audrey-activity-'+String(suggestion.date || 'today'), url:'/?view=do&suggestion=1', urgency:'normal'}, fetchImpl, subscription => !!(subscription.audreyPreferences && subscription.audreyPreferences.activityAware));
   const sent = deliveries.filter(result => result.ok).length;
   if (sent) await env.AUDREY_PUSH.put(key, 'sent');
   return {checked:true, sent};

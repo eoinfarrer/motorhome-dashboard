@@ -789,7 +789,8 @@ var travelogueMapView=null,travelogueMapResizeBound=false;
 // ── AUDREY 2.0 VIEW STATE ─────────────────────────────────────
 // This is intentionally separate from dashboard data state. Switching views
 // never fetches again: every view is composed from the current API payload.
-var currentAppView='home';
+var initialViewParam=new URLSearchParams(location.search).get('view');
+var currentAppView=initialViewParam==='do'?'do':'home';
 var APP_VIEW_LABELS={home:'Home',journey:'Journey',do:'Do',van:'Van',more:'More'};
 var isSettingsPanelOpen=false;
 var currentJourneyMode='today';
