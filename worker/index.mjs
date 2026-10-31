@@ -185,10 +185,11 @@ async function storedPushSubscriptions(env) {
   return subscriptions;
 }
 
-async function deliverPushToAll(env, notification, fetchImpl = fetch) {
+async function deliverPushToAll(env, notification, fetchImpl = fetch, shouldDeliver = () => true) {
   const subscriptions = await storedPushSubscriptions(env);
   const results = [];
   for (const item of subscriptions) {
+    if (!shouldDeliver(item.subscription, notification)) continue;
     try {
       const result = await sendWebPush(item.subscription, notification, env, fetchImpl);
       results.push(result);
@@ -199,6 +200,22 @@ async function deliverPushToAll(env, notification, fetchImpl = fetch) {
     }
   }
   return results;
+}
+
+function weatherSeverityAllowed(alert, subscription) {
+  const prefs = subscription && subscription.audreyPreferences || {};
+  const minimum = {alert:2, warning:3, severe:4}[String(prefs.severity || 'alert')] || 2;
+  const severity = String(alert.severity || 'alert');
+  if (({alert:2, warning:3, severe:4}[severity] || 2) < minimum) return false;
+  if (severity === 'severe') return true;
+  const start = String(prefs.quietStart || '22:00'), end = String(prefs.quietEnd || '07:00');
+  const current = new Date();
+  const minutes = current.getUTCHours() * 60 + current.getUTCMinutes();
+  const parse = value => { const match = /^(\d{2}):(\d{2})$/.exec(value); return match ? Number(match[1]) * 60 + Number(match[2]) : null; };
+  const startMinutes = parse(start), endMinutes = parse(end);
+  if (startMinutes == null || endMinutes == null || startMinutes === endMinutes) return true;
+  const quiet = startMinutes < endMinutes ? minutes >= startMinutes && minutes < endMinutes : minutes >= startMinutes || minutes < endMinutes;
+  return !quiet;
 }
 
 export async function signGatewayRequest(secret, method, timestamp, payload) {
@@ -525,7 +542,8 @@ export async function runWeatherPushCheck(env, fetchImpl = fetch) {
     return {checked:true, alerts:alerts.length, sent:0};
   }
   changed.sort((left, right) => (rank[right.severity] || 0) - (rank[left.severity] || 0));
-  const deliveries = await deliverPushToAll(env, weatherPushNotification(changed[0]), fetchImpl);
+  const chosen = changed[0];
+  const deliveries = await deliverPushToAll(env, weatherPushNotification(chosen), fetchImpl, subscription => weatherSeverityAllowed(chosen, subscription));
   const sent = deliveries.filter(result => result.ok).length;
   if (sent) await env.AUDREY_PUSH.put(stateKey, JSON.stringify(current));
   return {checked:true, alerts:alerts.length, changed:changed.length, sent};
