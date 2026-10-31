@@ -623,6 +623,7 @@ export default {
     return handleRequest(request, env, ctx);
   },
   scheduled(_event, env, ctx) {
+    console.log('Audrey scheduled push checks starting');
     ctx.waitUntil(Promise.all([
       runFloodPushCheck(env).catch(error => console.error('Audrey scheduled flood push failed', {message:String(error && error.message || error).slice(0,160)})),
       runWeatherPushCheck(env).catch(error => console.error('Audrey scheduled weather push failed', {message:String(error && error.message || error).slice(0,160)})),
