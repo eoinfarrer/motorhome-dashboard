@@ -1375,7 +1375,7 @@ function buildMoreSettingsHtml(d,fc){
     +settingsRow('LPG tank',fc.tankLitres||'—','L','tank')+'</div>';
   html+='<div class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Safety notifications</span></div>'
     +'<div class="push-settings"><div class="push-settings-copy">Receive Audrey flood and weather-risk alerts on this iPhone, even when the app is closed. Apple requires Audrey to be installed on the Home Screen.</div>'
-    +'<div class="push-preferences"><label>Notify me about <select id="pushSeverity"><option value="alert">All weather risks</option><option value="warning">Warnings and critical only</option><option value="severe">Critical only</option></select></label><label>Quiet hours <input id="pushQuietStart" type="time" value="22:00"> to <input id="pushQuietEnd" type="time" value="07:00"></label></div>'
+    +'<div class="push-preferences"><label>Notify me about <select id="pushSeverity"><option value="alert">All weather risks</option><option value="warning">Warnings and critical only</option><option value="severe">Critical only</option></select></label><label>Quiet hours <input id="pushQuietStart" type="time" value="22:00"> to <input id="pushQuietEnd" type="time" value="07:00"></label><label class="push-check"><span>Activity-aware suggestions</span><input id="pushActivityAware" type="checkbox"></label></div>'
     +'<div class="push-settings-actions"><button id="pushEnableBtn" class="push-settings-btn primary" type="button" onclick="enableAudreyNotifications()">Enable notifications</button><button id="pushTestBtn" class="push-settings-btn" type="button" onclick="testAudreyNotification()" disabled>Send test</button></div>'
     +'<div id="pushSettingsStatus" class="push-settings-status">Checking this device…</div></div></div>';
   html+='<section class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Ski resorts</span></div><div id="resortList">';
@@ -6767,10 +6767,10 @@ async function runAllModulesNow() {
 
 // ── NATIVE WEB PUSH ───────────────────────────────────────────
 var audreyServiceWorkerRegistration=null;
-var audreyPushPreferences={severity:'alert',quietStart:'22:00',quietEnd:'07:00'};
+var audreyPushPreferences={severity:'alert',quietStart:'22:00',quietEnd:'07:00',activityAware:false};
 function readPushPreferences(){try{audreyPushPreferences=Object.assign(audreyPushPreferences,JSON.parse(localStorage.getItem('audrey-push-preferences')||'{}'));}catch(_e){} return audreyPushPreferences;}
-function savePushPreferences(){var severity=document.getElementById('pushSeverity'),start=document.getElementById('pushQuietStart'),end=document.getElementById('pushQuietEnd');audreyPushPreferences={severity:severity&&severity.value||'alert',quietStart:start&&start.value||'22:00',quietEnd:end&&end.value||'07:00'};localStorage.setItem('audrey-push-preferences',JSON.stringify(audreyPushPreferences));return audreyPushPreferences;}
-function hydratePushPreferences(){var p=readPushPreferences(),severity=document.getElementById('pushSeverity'),start=document.getElementById('pushQuietStart'),end=document.getElementById('pushQuietEnd');if(severity)severity.value=p.severity;if(start)start.value=p.quietStart;if(end)end.value=p.quietEnd;[severity,start,end].forEach(function(el){if(el)el.onchange=savePushPreferences;});}
+function savePushPreferences(){var severity=document.getElementById('pushSeverity'),start=document.getElementById('pushQuietStart'),end=document.getElementById('pushQuietEnd'),activity=document.getElementById('pushActivityAware');audreyPushPreferences={severity:severity&&severity.value||'alert',quietStart:start&&start.value||'22:00',quietEnd:end&&end.value||'07:00',activityAware:!!(activity&&activity.checked)};localStorage.setItem('audrey-push-preferences',JSON.stringify(audreyPushPreferences));return audreyPushPreferences;}
+function hydratePushPreferences(){var p=readPushPreferences(),severity=document.getElementById('pushSeverity'),start=document.getElementById('pushQuietStart'),end=document.getElementById('pushQuietEnd'),activity=document.getElementById('pushActivityAware');if(severity)severity.value=p.severity;if(start)start.value=p.quietStart;if(end)end.value=p.quietEnd;if(activity)activity.checked=!!p.activityAware;[severity,start,end,activity].forEach(function(el){if(el)el.onchange=savePushPreferences;});}
 
 function audreyStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
