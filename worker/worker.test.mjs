@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {canonicalAccessEmail, canonicalJsonBody, canonicalQuery, encryptWebPushPayload, handleRequest, runFloodPushCheck, sendWebPush, signGatewayRequest} from './index.mjs';
+import {canonicalAccessEmail, canonicalJsonBody, canonicalQuery, encryptWebPushPayload, handleRequest, runFloodPushCheck, runWeatherPushCheck, sendWebPush, signGatewayRequest} from './index.mjs';
 
 class MemoryKv {
   constructor() { this.values = new Map(); }
@@ -293,6 +293,25 @@ test('scheduled flood push sends only for a new or escalated official warning', 
   };
   const first = await runFloodPushCheck(configured, mockFetch);
   const second = await runFloodPushCheck(configured, mockFetch);
+  assert.equal(first.sent, 1);
+  assert.equal(second.sent, 0);
+  assert.equal(deliveries, 1);
+});
+
+test('scheduled weather push sends once for a new risk', async () => {
+  const fixture = await pushFixture();
+  const storage = new MemoryKv();
+  const configured = env({...fixture.vapidEnv, AUDREY_PUSH:storage});
+  await storage.put('push-subscription:test', JSON.stringify(fixture.subscription));
+  let deliveries = 0;
+  const dashboard = {meta:{tripName:'Lake District'}, weatherRisk:{alerts:[{type:'wind', severity:'warning', title:'High wind near Keswick', message:'Review exposed routes.', date:'2026-11-01', location:'Keswick'}]}};
+  const mockFetch = async url => {
+    if (String(url).startsWith(configured.AUDREY_APPS_SCRIPT_URL)) return new Response(JSON.stringify(dashboard), {headers:{'Content-Type':'application/json'}});
+    deliveries++;
+    return new Response('', {status:201});
+  };
+  const first = await runWeatherPushCheck(configured, mockFetch);
+  const second = await runWeatherPushCheck(configured, mockFetch);
   assert.equal(first.sent, 1);
   assert.equal(second.sent, 0);
   assert.equal(deliveries, 1);

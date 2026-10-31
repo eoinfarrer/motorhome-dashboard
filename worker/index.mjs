@@ -2,6 +2,7 @@ const encoder = new TextEncoder();
 const MAX_BODY_BYTES = 8 * 1024 * 1024;
 const PUSH_SUBSCRIPTION_PREFIX = 'push-subscription:';
 const PUSH_STATE_PREFIX = 'flood-push-state:';
+const WEATHER_PUSH_STATE_PREFIX = 'weather-push-state:';
 let accessJwks = null;
 let accessJwksExpiresAt = 0;
 
@@ -490,6 +491,46 @@ export async function runFloodPushCheck(env, fetchImpl = fetch) {
   return {checked:true, alerts:alerts.length, changed:changed.length, sent};
 }
 
+function weatherPushNotification(alert) {
+  const urgency = alert.severity === 'severe' || alert.severity === 'warning' ? 'high' : 'normal';
+  return {
+    title: 'Audrey · ' + String(alert.title || 'Weather risk'),
+    body: String(alert.message || 'Review conditions before setting out.'),
+    tag: 'audrey-weather-' + String(alert.type || 'risk') + '-' + String(alert.date || '').replace(/[^A-Za-z0-9_-]/g, '-'),
+    url: '/?view=home',
+    urgency
+  };
+}
+
+export async function runWeatherPushCheck(env, fetchImpl = fetch) {
+  if (!env.AUDREY_PUSH) return {checked:false, reason:'storage_unavailable'};
+  const data = await fetchAudreyDashboardForPush(env, fetchImpl);
+  const risk = data && data.weatherRisk || {};
+  const alerts = risk.alerts && Array.isArray(risk.alerts) ? risk.alerts : [];
+  const trip = String(data && data.meta && data.meta.tripName || 'trip').replace(/[^A-Za-z0-9_-]+/g, '_').slice(0,80);
+  const stateKey = WEATHER_PUSH_STATE_PREFIX + trip;
+  const previous = await env.AUDREY_PUSH.get(stateKey, 'json') || {};
+  const rank = {severe:4, warning:3, alert:2, info:1};
+  const current = alerts.reduce((state, alert) => {
+    const id = String(alert.type || 'risk') + '|' + String(alert.date || '') + '|' + String(alert.location || '');
+    state[id] = rank[alert.severity] || 1;
+    return state;
+  }, {});
+  const changed = alerts.filter(alert => {
+    const id = String(alert.type || 'risk') + '|' + String(alert.date || '') + '|' + String(alert.location || '');
+    return previous[id] == null || (rank[alert.severity] || 1) > Number(previous[id]);
+  });
+  if (!changed.length) {
+    await env.AUDREY_PUSH.put(stateKey, JSON.stringify(current));
+    return {checked:true, alerts:alerts.length, sent:0};
+  }
+  changed.sort((left, right) => (rank[right.severity] || 0) - (rank[left.severity] || 0));
+  const deliveries = await deliverPushToAll(env, weatherPushNotification(changed[0]), fetchImpl);
+  const sent = deliveries.filter(result => result.ok).length;
+  if (sent) await env.AUDREY_PUSH.put(stateKey, JSON.stringify(current));
+  return {checked:true, alerts:alerts.length, changed:changed.length, sent};
+}
+
 async function handlePushRoute(request, env, url, fetchImpl) {
   if (!env.AUDREY_PUSH) return json({error:'Notification storage is not configured'}, 503);
   if (url.pathname === '/push/public-key' && request.method === 'GET') {
@@ -550,8 +591,9 @@ export default {
     return handleRequest(request, env, ctx);
   },
   scheduled(_event, env, ctx) {
-    ctx.waitUntil(runFloodPushCheck(env).catch(error => {
-      console.error('Audrey scheduled flood push failed', {message:String(error && error.message || error).slice(0,160)});
-    }));
+    ctx.waitUntil(Promise.all([
+      runFloodPushCheck(env).catch(error => console.error('Audrey scheduled flood push failed', {message:String(error && error.message || error).slice(0,160)})),
+      runWeatherPushCheck(env).catch(error => console.error('Audrey scheduled weather push failed', {message:String(error && error.message || error).slice(0,160)}))
+    ]));
   }
 };
