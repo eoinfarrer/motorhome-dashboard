@@ -495,7 +495,7 @@ function weatherPushNotification(alert) {
   const urgency = alert.severity === 'severe' || alert.severity === 'warning' ? 'high' : 'normal';
   return {
     title: 'Audrey · ' + String(alert.title || 'Weather risk'),
-    body: String(alert.message || 'Review conditions before setting out.'),
+    body: String(alert.message || 'Review conditions before setting out.') + (alert.action ? ' ' + String(alert.action) : ''),
     tag: 'audrey-weather-' + String(alert.type || 'risk') + '-' + String(alert.date || '').replace(/[^A-Za-z0-9_-]/g, '-'),
     url: '/?view=home',
     urgency

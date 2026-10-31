@@ -2501,7 +2501,7 @@ function buildHomeWeatherSafety(risk){
   var alert=risk.alerts[0], level=alert.severity==='severe'?'severe':alert.severity==='warning'?'warning':'alert';
   return '<section class="home-flood home-flood-'+level+'"><div class="home-flood-label">Weather safety</div>'
     +'<div class="home-flood-title">'+escapeDoHtml(alert.title||'Weather risk')+'</div>'
-    +'<div class="home-flood-copy">'+escapeDoHtml(alert.message||risk.summary||'Review conditions before setting out.')+'</div>'
+    +'<div class="home-flood-copy">'+escapeDoHtml((alert.message||risk.summary||'Review conditions before setting out.')+(alert.action?' '+alert.action:''))+'</div>'
     +(risk.alerts.length>1?'<div class="home-flood-source">+'+(risk.alerts.length-1)+' more forecast risk'+(risk.alerts.length===2?'':'s')+' in the outlook</div>':'')
     +'</section>';
 }
