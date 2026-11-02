@@ -17,7 +17,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: eoinfarrer/motorhome-planner
-          path: ../marine-backend
+          path: marine-backend
+      - name: Provide the expected backend path for integration tests
+        run: ln -s "$GITHUB_WORKSPACE/marine-backend" "$GITHUB_WORKSPACE/../marine-backend"
       - uses: actions/setup-node@v4
         with:
           node-version: 20
