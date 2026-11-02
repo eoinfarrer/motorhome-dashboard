@@ -5636,7 +5636,7 @@ function renderActRouteList(container,curated,overpass,type,rwgps,rwgpsStatus,lo
 
   if(loadingNearby)html+='<div class="act-loading" style="padding:10px 14px">Finding named routes nearby…</div>';
   if(!html&&!loadingNearby){
-    html=filter==='all'?'<div class="act-loading">No routes found nearby — upload your own GPX below</div>'
+    html=filter==='all'?'<div class="act-loading">No saved or named routes were found within Audrey’s local search area. Add a GPX to the Trails or Cycling Drive folder, then refresh to make it available here.</div>'
       :'<div class="act-loading">No '+activityFilterLabel(filter)+' routes are currently loaded. Try All or upload your own GPX below.</div>';
   }
   container.innerHTML=html;
