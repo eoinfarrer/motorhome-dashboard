@@ -5088,16 +5088,30 @@ function buildDoTodayRecommendation(d,result){
   var places=result&&Array.isArray(result.places)?result.places:[];
   var target=result&&result.context&&result.context.date;
   var events=(result&&Array.isArray(result.events)?result.events:[]).filter(function(event){return !target||event.date===target;});
+  var savedRoutes=d&&Array.isArray(d.savedRoutes)?d.savedRoutes:[];
   var weather=getDoWeatherForContext(d,result),profile=describeDoWeather(weather),options=[];
   places.forEach(function(place,index){options.push({kind:'place',item:place,index:index,score:scoreDoOptionForToday(place,index,'place',d,result,profile)});});
   events.forEach(function(event,index){options.push({kind:'event',item:event,index:index,score:scoreDoOptionForToday(event,index,'event',d,result,profile)});});
+  savedRoutes.slice(0,12).forEach(function(route,index){
+    var type=String(route.type||route.activityType||'').toLowerCase(),outdoors=true;
+    var routeScore=18-index;
+    routeScore+=profile.outdoorModifier;
+    if(/cycl|bike|gravel|mtb/.test(type)&&profile.band==='good')routeScore+=2;
+    if(/hike|walk|trail/.test(type)&&profile.band!=='poor')routeScore+=2;
+    if(profile.band==='poor')routeScore-=8;
+    var distance=Number(route.localDistanceKm!==undefined?route.localDistanceKm:route.distanceKm);
+    if(isFinite(distance))routeScore+=distance<=5?3:distance<=15?1:-3;
+    options.push({kind:'route',item:route,index:index,score:routeScore});
+  });
   options.sort(function(a,b){return b.score-a.score||a.index-b.index;});
   if(!options.length)return null;
   var chosen=options[0],item=chosen.item,context=d&&d.travellerContext||{},reasons=[profile.summary];
   if(doReadinessApplies(d,result)&&context.readinessBand)reasons.push(context.readinessBand+' readiness');
   if(chosen.kind==='event')reasons.push('happening at this stop');
+  else if(chosen.kind==='route')reasons.push('saved route near this stay');
   else if(item.nearby&&((Number(item.nearby.walkingRoutes)||0)+(Number(item.nearby.cyclingRoutes)||0)>0))reasons.push('local routes nearby');
   if(item.distanceKm!==undefined&&item.distanceKm!==null)reasons.push(item.distanceKm+' km away');
+  if(item.localDistanceKm!==undefined&&item.localDistanceKm!==null)reasons.push(item.localDistanceKm+' km from your stay');
   var label=result&&result.context&&result.context.mode==='planning'?'Audrey’s pick for this stop':'Audrey’s pick today';
   var activitySuggestion=d&&d.activitySuggestion||null;
   var confidence=activitySuggestion&&activitySuggestion.confidence?String(activitySuggestion.confidence).replace(/-/g,' '):'';
@@ -5105,10 +5119,10 @@ function buildDoTodayRecommendation(d,result){
   return{
     label:label,
     title:item.title||item.name||'Local option',
-    copy:chosen.kind==='event'?'A timely local event that fits the day.':'The strongest fit from the worthwhile options nearby.',
+    copy:chosen.kind==='event'?'A timely local event that fits the day.':chosen.kind==='route'?'A saved route that fits the conditions and is close enough to use.':'The strongest fit from the worthwhile options nearby.',
     reasons:reasons.slice(0,3),
     confidence:confidence,
-    url:item.url||item.googleMapsUrl||item.otmUrl||''
+    url:item.url||item.googleMapsUrl||item.otmUrl||item.driveUrl||item.driveFileUrl||''
   };
 }
 
