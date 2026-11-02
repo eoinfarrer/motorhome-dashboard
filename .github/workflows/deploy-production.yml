@@ -18,6 +18,7 @@ jobs:
         with:
           repository: eoinfarrer/motorhome-planner
           path: marine-backend
+          token: ${{ secrets.CROSS_REPO_READ_TOKEN }}
       - name: Provide the expected backend path for integration tests
         run: ln -s "$GITHUB_WORKSPACE/marine-backend" "$GITHUB_WORKSPACE/../marine-backend"
       - uses: actions/setup-node@v4
