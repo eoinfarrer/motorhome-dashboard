@@ -1916,10 +1916,10 @@ function renderTravelogueMapDetail(){
   var state=travelogueMapView,detail=state&&state.canvas.querySelector('[data-travelogue-map-detail]');if(!detail)return;
   var point=state.map.points[state.selectedIndex];if(!point){detail.hidden=true;detail.innerHTML='';return;}
   var visual=point.kind==='moment'&&point.hasThumbnail?'<img class="moment-card-thumbnail" alt="" data-memory-thumbnail="'+escapeDoHtml(String(point.memoryId||''))+'">':'<div class="trip-review-map-detail-icon">'+escapeDoHtml(point.icon||'●')+'</div>';
-  detail.innerHTML=visual+'<div><div class="trip-review-map-detail-title">'+escapeDoHtml(point.label)+'</div><div class="trip-review-map-detail-meta">'+escapeDoHtml(point.meta||point.date||'')+'</div></div>'+(point.date?'<button class="trip-review-map-detail-action" type="button" onclick="openTravelogueDay(\''+escapeDoHtml(point.date)+'\')">Open day</button>':'');detail.hidden=false;hydrateMomentThumbnails();
+  var actionLabel=point.kind==='moment'?'Open Moment':point.kind==='activity'?'Open activity':'Open day';\n  detail.innerHTML=visual+'<div><div class="trip-review-map-detail-title">'+escapeDoHtml(point.label)+'</div><div class="trip-review-map-detail-meta">'+escapeDoHtml(point.meta||point.date||'')+'</div></div>'+(point.date?'<button class="trip-review-map-detail-action" type="button" onclick="openTraveloguePoint('+Number(state.selectedIndex)+')">'+actionLabel+'</button>':'');detail.hidden=false;hydrateMomentThumbnails();
 }
 
-function openTravelogueDay(date){
+function openTraveloguePoint(index){\n  var state=travelogueMapView,point=state&&state.map.points[index];if(!point)return;\n  if(point.kind==='moment'&&point.memoryId){openMomentEdit(encodeURIComponent(point.memoryId));return;}\n  if(point.date)openTravelogueDay(point.date);\n}\n\nfunction openTravelogueDay(date){
   currentJourneyMode='trip';applyJourneyMode();
   setTimeout(function(){var holder=document.querySelector('.journey-story-point[data-story-date="'+String(date).replace(/[^0-9-]/g,'')+'"]'),story=holder&&holder.querySelector('.journey-story');if(story){story.open=true;story.scrollIntoView({behavior:'smooth',block:'center'});}},0);
 }
