@@ -5099,11 +5099,15 @@ function buildDoTodayRecommendation(d,result){
   else if(item.nearby&&((Number(item.nearby.walkingRoutes)||0)+(Number(item.nearby.cyclingRoutes)||0)>0))reasons.push('local routes nearby');
   if(item.distanceKm!==undefined&&item.distanceKm!==null)reasons.push(item.distanceKm+' km away');
   var label=result&&result.context&&result.context.mode==='planning'?'Audrey’s pick for this stop':'Audrey’s pick today';
+  var activitySuggestion=d&&d.activitySuggestion||null;
+  var confidence=activitySuggestion&&activitySuggestion.confidence?String(activitySuggestion.confidence).replace(/-/g,' '):'';
+  if(activitySuggestion&&Array.isArray(activitySuggestion.reasons))reasons=reasons.concat(activitySuggestion.reasons.slice(0,2));
   return{
     label:label,
     title:item.title||item.name||'Local option',
     copy:chosen.kind==='event'?'A timely local event that fits the day.':'The strongest fit from the worthwhile options nearby.',
     reasons:reasons.slice(0,3),
+    confidence:confidence,
     url:item.url||item.googleMapsUrl||item.otmUrl||''
   };
 }
@@ -5121,7 +5125,7 @@ function renderDoTodayRecommendation(d,result){
   var pick=buildDoTodayRecommendation(d,result);
   if(!pick){container.innerHTML='';return;}
   var url=safeDoUrl(pick.url),tag=url?'a':'div',attrs=url?' href="'+escapeDoHtml(url)+'" target="_blank" rel="noopener"':'';
-  container.innerHTML='<'+tag+' class="do-today-pick-card"'+attrs+'><div class="do-today-pick-label">'+escapeDoHtml(pick.label)+'</div><div class="do-today-pick-title">'+escapeDoHtml(pick.title)+'</div><div class="do-today-pick-copy">'+escapeDoHtml(pick.copy)+(url?' Open →':'')+'</div><div class="do-today-pick-why">Why: '+escapeDoHtml(pick.reasons.join(' · '))+'</div></'+tag+'>';
+  container.innerHTML='<'+tag+' class="do-today-pick-card"'+attrs+'><div class="do-today-pick-label">'+escapeDoHtml(pick.label)+(pick.confidence?' · '+escapeDoHtml(pick.confidence)+' confidence':'')+'</div><div class="do-today-pick-title">'+escapeDoHtml(pick.title)+'</div><div class="do-today-pick-copy">'+escapeDoHtml(pick.copy)+(url?' Open →':'')+'</div><div class="do-today-pick-why">Why: '+escapeDoHtml(pick.reasons.join(' · '))+'</div></'+tag+'>';
 }
 
 function buildDoLocalEvent(event){
