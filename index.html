@@ -6865,7 +6865,13 @@ async function enableAudreyNotifications(){
     var result=await save.json();
     if(!save.ok||!result.success)throw new Error(result.error||'Could not save this device');
     setPushSettingsState('Notifications are enabled on this device.','is-on',true);
-  }catch(error){setPushSettingsState(error.message||'Could not enable notifications.','is-error',false);if(enable)enable.disabled=false;}
+  }catch(error){
+    if(/invalid notification subscription/i.test(error.message||'')){
+      try{var recovery=await registerAudreyServiceWorker(),stale=await recovery.pushManager.getSubscription();if(stale)await stale.unsubscribe();}catch(_recoveryError){}
+      setPushSettingsState('The previous subscription was rejected. Click Enable notifications to create a fresh one.','is-error',false);
+    }else setPushSettingsState(error.message||'Could not enable notifications.','is-error',false);
+    if(enable)enable.disabled=false;
+  }
 }
 
 async function testAudreyNotification(){
