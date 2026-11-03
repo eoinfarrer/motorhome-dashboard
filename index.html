@@ -6803,7 +6803,20 @@ function audreyStandalone(){
 }
 
 function audreyIOSDevice(){
-  return /iphone|ipad|ipod/i.test(navigator.userAgent)||(/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function audreyPushSubscriptionPayload(subscription){
+  if(!subscription)return null;
+  var payload=typeof subscription.toJSON==='function'?subscription.toJSON():null;
+  if(!payload||!payload.endpoint){
+    payload={endpoint:subscription.endpoint,expirationTime:subscription.expirationTime,keys:{
+      p256dh:subscription.getKey&&subscription.getKey('p256dh'),
+      auth:subscription.getKey&&subscription.getKey('auth')
+    }};
+  }
+  return payload;
+>>>>>>> 15915c7 (Fix iPhone push subscription recovery)
 }
 
 function vapidKeyBytes(value){
@@ -6845,7 +6858,9 @@ async function refreshAudreyNotificationState(){
     var registration=await registerAudreyServiceWorker();
     var subscription=await registration.pushManager.getSubscription();
     if(subscription){
-      var validation=await fetch('/push/subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},subscription,{audreyPreferences:savePushPreferences()}))});
+      var existingPayload=audreyPushSubscriptionPayload(subscription);
+      existingPayload.audreyPreferences=savePushPreferences();
+      var validation=await fetch('/push/subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(existingPayload)});
       if(!validation.ok){await subscription.unsubscribe();subscription=null;}
     }
     setPushSettingsState(subscription?'Notifications are enabled on this device.':'Ready to enable on this device.',subscription?'is-on':'',!!subscription);
@@ -6865,7 +6880,9 @@ async function enableAudreyNotifications(){
     if(!keyResponse.ok||!keyData.publicKey)throw new Error(keyData.error||'Notification service is unavailable');
     var subscription=await registration.pushManager.getSubscription();
     if(!subscription)subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKeyBytes(keyData.publicKey)});
-    var save=await fetch('/push/subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},subscription,{audreyPreferences:savePushPreferences()}))});
+    var payload=audreyPushSubscriptionPayload(subscription);
+    payload.audreyPreferences=savePushPreferences();
+    var save=await fetch('/push/subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     var result=await save.json();
     if(!save.ok||!result.success)throw new Error(result.error||'Could not save this device');
     setPushSettingsState('Notifications are enabled on this device.','is-on',true);
