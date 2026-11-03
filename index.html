@@ -6802,6 +6802,10 @@ function audreyStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
 }
 
+function audreyIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)||(/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+}
+
 function vapidKeyBytes(value){
   var padding='='.repeat((4-value.length%4)%4);
   var binary=atob((value+padding).replace(/-/g,'+').replace(/_/g,'/'));
@@ -6831,7 +6835,7 @@ async function refreshAudreyNotificationState(){
   if(!window.isSecureContext||!('Notification' in window)||!('PushManager' in window)){
     setPushSettingsState('Notifications are unavailable in this browser.','is-error',false);return;
   }
-  if(!audreyStandalone()){
+  if(audreyIOSDevice()&&!audreyStandalone()){
     setPushSettingsState('Open Audrey from its iPhone Home Screen to enable notifications.','',false);return;
   }
   if(Notification.permission==='denied'){
@@ -6848,7 +6852,7 @@ async function enableAudreyNotifications(){
   var enable=document.getElementById('pushEnableBtn');
   if(enable)enable.disabled=true;
   try{
-    if(!audreyStandalone())throw new Error('Open Audrey from its iPhone Home Screen first');
+    if(audreyIOSDevice()&&!audreyStandalone())throw new Error('Open Audrey from its iPhone Home Screen first');
     var permission=await Notification.requestPermission();
     if(permission!=='granted')throw new Error('Notification permission was not granted');
     var registration=await registerAudreyServiceWorker();
