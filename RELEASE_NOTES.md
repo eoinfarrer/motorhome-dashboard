@@ -42,3 +42,21 @@ Audrey Travel OS helps plan, experience, remember and learn from travel. Version
 - Records a tested rollback point for both the web app and Apps Script backend.
 
 The GitHub repository names remain unchanged to preserve deployment links and history. The product is now formally named **Audrey Travel OS**.
+
+# Audrey Travel OS 1.1
+
+Released 3 November 2026.
+
+Version 1.1 makes Audrey more useful during real trips and easier to maintain.
+
+## Highlights
+
+- Add clickable Journey map pins for stops, activities and Moments.
+- Improve local route discovery with saved GPX folders, route classification and clearer empty states.
+- Widen tide-station lookup to 80 km and show the selected station distance.
+- Add mocked tide regression coverage for inland locations such as Horsham.
+- Add Garmin readiness, Body Battery context and activity-aware Today suggestions.
+- Add flood and weather-risk alert coverage across the main European travel countries.
+- Add optional Moment photos, private thumbnails, voice capture and Storybook export.
+- Add deterministic Daily Stories, Moments Timeline, Trip Highlights and Trip Review sections.
+- Move production changes through GitHub pull requests with automated Apps Script and Cloudflare deployment.
