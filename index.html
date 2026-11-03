@@ -6844,6 +6844,10 @@ async function refreshAudreyNotificationState(){
   try{
     var registration=await registerAudreyServiceWorker();
     var subscription=await registration.pushManager.getSubscription();
+    if(subscription){
+      var validation=await fetch('/push/subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},subscription,{audreyPreferences:savePushPreferences()}))});
+      if(!validation.ok){await subscription.unsubscribe();subscription=null;}
+    }
     setPushSettingsState(subscription?'Notifications are enabled on this device.':'Ready to enable on this device.',subscription?'is-on':'',!!subscription);
   }catch(error){setPushSettingsState(error.message||'Could not check notifications.','is-error',false);}
 }
