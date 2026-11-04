@@ -29,6 +29,7 @@ vm.runInContext([
   functionSource('describeDoWeather'),
   functionSource('doReadinessApplies'),
   functionSource('scoreDoOptionForToday'),
+  functionSource('buildDoAdaptiveOptions'),
   functionSource('buildDoTodayRecommendation'),
   functionSource('rankDoPlacesForContext')
 ].join('\n'), context);
