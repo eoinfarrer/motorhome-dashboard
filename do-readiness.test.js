@@ -113,3 +113,17 @@ test('current readiness is not applied to a future itinerary stop', () => {
   assert.doesNotMatch(pick.reasons.join(' '),/Low readiness/);
   assert.equal(pick.label,'Audrey’s pick for this stop');
 });
+
+test('adaptive choices separate easy outdoor options from sheltered food and drink', () => {
+  const data = {weather:[], travellerContext:{available:true,isToday:false,readinessBand:'Excellent'}};
+  const result = {context:{mode:'planning',date:'2026-12-24'},places:[
+    {name:'The Moot Hall',group:'mustSee',category:'culture',distanceKm:.4},
+    {name:'Dog and Gun',group:'food',category:'food',distanceKm:.7},
+    {name:'Friars Crag Viewpoint',group:'outdoors',category:'outdoors',distanceKm:1.1}
+  ],events:[]};
+  const pick = context.buildDoTodayRecommendation(data,result);
+  const alternatives = Object.fromEntries(pick.adaptive.map(option=>[option.kind,option]));
+  assert.equal(alternatives.sheltered.title,'Dog and Gun');
+  assert.equal(alternatives.outdoor.title,'Friars Crag Viewpoint');
+  assert.notEqual(alternatives.easy.title,'Dog and Gun');
+});

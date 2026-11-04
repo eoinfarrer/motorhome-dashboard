@@ -5123,7 +5123,7 @@ function buildDoTodayRecommendation(d,result){
   var activitySuggestion=d&&d.activitySuggestion||null;
   var confidence=activitySuggestion&&activitySuggestion.confidence?String(activitySuggestion.confidence).replace(/-/g,' '):'';
   if(activitySuggestion&&Array.isArray(activitySuggestion.reasons))reasons=reasons.concat(activitySuggestion.reasons.slice(0,2));
-  var adaptive=buildDoAdaptiveOptions(options,d,result,profile);
+  var adaptive=buildDoAdaptiveOptions(options,d,result,profile,item.title||item.name||'');
   return{
     label:label,
     title:item.title||item.name||'Local option',
@@ -5135,7 +5135,7 @@ function buildDoTodayRecommendation(d,result){
   };
 }
 
-function buildDoAdaptiveOptions(options,d,result,weatherProfile){
+function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
   var context=d&&d.travellerContext||{},band=doReadinessApplies(d,result)?String(context.readinessBand||'').toLowerCase():'';
   function routeType(item){return String(item.type||item.activityType||'').toLowerCase();}
   function distance(item){var value=item.localDistanceKm!==undefined?item.localDistanceKm:item.distanceKm;return Number(value);}
@@ -5154,15 +5154,27 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile){
   options.forEach(function(entry){
     var item=entry.item,group=String(item.group||'').toLowerCase(),category=String(item.category||'').toLowerCase(),type=routeType(item),km=distance(item);
     var outdoor=entry.kind==='route'||group==='outdoors'||category==='outdoors'||category==='sport';
-    var sheltered=entry.kind==='event'||group==='food'||group==='mustsee'||category==='food'||category==='culture'||category==='music';
+    var indoorWords=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/;
+    var sheltered=entry.kind==='event'||indoorWords.test(group)||indoorWords.test(category)||indoorWords.test(String(item.title||item.name||'').toLowerCase());
     if(outdoor)candidates.outdoor.push(entry);
-    if((entry.kind==='route'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type))||(!outdoor&&isFinite(km)&&km<=6))candidates.easy.push(entry);
+    if((entry.kind==='route'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type))||(outdoor&&!sheltered&&isFinite(km)&&km<=6)||(!outdoor&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
     if(sheltered)candidates.sheltered.push(entry);
   });
   var labels={outdoor:'BEST OUTDOOR ROUTE',easy:'LOWER-EFFORT OPTION',sheltered:'SHELTERED / SOCIAL'};
+  var used={};
   return ['outdoor','easy','sheltered'].map(function(kind){
-    var pool=candidates[kind].slice().sort(function(a,b){return b.score-a.score||a.index-b.index;});
-    var entry=pool[0];if(!entry)return null;
+    var pool=candidates[kind].slice().sort(function(a,b){
+      var at=String(a.item.title||a.item.name||''),bt=String(b.item.title||b.item.name||'');
+      var aPenalty=at===primaryTitle?8:0,bPenalty=bt===primaryTitle?8:0;
+      if(kind==='sheltered'){
+        var aIndoor=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/.test(String(a.item.group||'')+' '+String(a.item.category||'')+' '+at.toLowerCase());
+        var bIndoor=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/.test(String(b.item.group||'')+' '+String(b.item.category||'')+' '+bt.toLowerCase());
+        if(aIndoor!==bIndoor)return aIndoor?-1:1;
+      }
+      return (b.score-bPenalty)-(a.score-aPenalty)||a.index-b.index;
+    });
+    var entry=pool.find(function(candidate){return !used[String(candidate.item.title||candidate.item.name||'').toLowerCase()];})||pool[0];if(!entry)return null;
+    used[String(entry.item.title||entry.item.name||'').toLowerCase()]=true;
     return{kind:kind,label:labels[kind],title:title(entry),copy:entry.kind==='route'?'Use a saved route that matches the current context.':entry.kind==='event'?'A timely local option if you fancy something social.':'A nearby option with a good balance of interest and effort.',reasons:reason(entry,kind),url:entry.item.url||entry.item.googleMapsUrl||entry.item.otmUrl||entry.item.driveUrl||entry.item.driveFileUrl||''};
   }).filter(Boolean);
 }
