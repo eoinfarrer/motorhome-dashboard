@@ -5068,12 +5068,41 @@ function doReadinessApplies(d,result){
   return !today||target===today.date;
 }
 
+function getDoTripMode(d){
+  d=d||{};var meta=d.meta||{};
+  if(typeof isSkiTrip==='function'&&isSkiTrip(d))return'ski';
+  var explicit=String(meta.transportMode||meta.tripTransport||meta.travelMode||'').toLowerCase();
+  if(/flight|fly|air/.test(explicit))return'flight';
+  var activity=String(meta.activity||meta.todayActivity||meta.tripActivity||'').toLowerCase();
+  if(/cycle|cycling|bike|maratona/.test(activity))return'cycling';
+  if(/motorhome|camper|van|drive|road/.test(explicit))return'motorhome';
+  var text=[meta.tripName,meta.currentLocation,activity].concat((d.itinerary||[]).map(function(row){return[row.location,row.notes].join(' ');})).join(' ').toLowerCase();
+  if(/cycle|cycling|bike|maratona/.test(text))return'cycling';
+  if(/flight|fly|airport/.test(text))return'flight';
+  return'motorhome';
+}
+
 function scoreDoOptionForToday(option,index,kind,d,result,weatherProfile){
   var score=24-index,group=String(option.group||'other'),category=String(option.category||'culture');
   var outdoors=group==='outdoors'||category==='outdoors'||category==='sport';
   var indoors=group==='food'||group==='mustSee'||category==='food'||category==='culture'||category==='music';
   score+=outdoors?weatherProfile.outdoorModifier:(indoors?weatherProfile.indoorModifier:0);
   var context=d&&d.travellerContext||{},band=doReadinessApplies(d,result)?String(context.readinessBand||'').toLowerCase():'';
+  var mode=getDoTripMode(d),type=String(option.type||option.activityType||'').toLowerCase(),name=String(option.title||option.name||'').toLowerCase();
+  if(mode==='motorhome'){
+    if(kind==='route')score+=3;
+    if(/pub|bar|restaurant|cafe|food|drink/.test(group+' '+category+' '+name))score+=2;
+  }else if(mode==='flight'){
+    if(kind==='route')score-=3;
+    if(indoors||/museum|gallery|theatre|restaurant|cafe|food|drink/.test(name))score+=3;
+  }else if(mode==='cycling'){
+    if(kind==='route'&&/cycl|bike|gravel|mtb/.test(type))score+=7;
+    if(kind==='route'&&/hike|walk|trail/.test(type))score-=3;
+    if(/food|drink|pub|bar|restaurant|cafe/.test(group+' '+category+' '+name))score+=2;
+  }else if(mode==='ski'){
+    if(kind==='route'&&/ski|snow/.test(type))score+=7;
+    if(/food|drink|pub|bar|restaurant|cafe|culture|music/.test(group+' '+category+' '+name))score+=2;
+  }
   if(band==='low')score+=outdoors?-8:(indoors?5:1);
   else if(band==='moderate')score+=outdoors?-2:(indoors?3:0);
   else if(band==='excellent')score+=outdoors?6:(group==='mustSee'?2:0);
@@ -5130,6 +5159,7 @@ function buildDoTodayRecommendation(d,result){
     copy:chosen.kind==='event'?'A timely local event that fits the day.':chosen.kind==='route'?'A saved route that fits the conditions and is close enough to use.':'The strongest fit from the worthwhile options nearby.',
     reasons:reasons.slice(0,3),
     adaptive:adaptive,
+    tripMode:getDoTripMode(d),
     confidence:confidence,
     url:item.url||item.googleMapsUrl||item.otmUrl||item.driveUrl||item.driveFileUrl||''
   };
@@ -5167,8 +5197,10 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
       var at=String(a.item.title||a.item.name||''),bt=String(b.item.title||b.item.name||'');
       var aPenalty=at===primaryTitle?8:0,bPenalty=bt===primaryTitle?8:0;
       if(kind==='sheltered'){
-        var aIndoor=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/.test(String(a.item.group||'')+' '+String(a.item.category||'')+' '+at.toLowerCase());
-        var bIndoor=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/.test(String(b.item.group||'')+' '+String(b.item.category||'')+' '+bt.toLowerCase());
+        var aText=String(a.item.group||'')+' '+String(a.item.category||'')+' '+at.toLowerCase(),bText=String(b.item.group||'')+' '+String(b.item.category||'')+' '+bt.toLowerCase();
+        var aFood=/food|drink|pub|bar|restaurant|cafe|coffee/.test(aText),bFood=/food|drink|pub|bar|restaurant|cafe|coffee/.test(bText);
+        if(aFood!==bFood)return aFood?-1:1;
+        var aIndoor=/indoor|museum|gallery|theatre|cinema|culture|music/.test(aText),bIndoor=/indoor|museum|gallery|theatre|cinema|culture|music/.test(bText);
         if(aIndoor!==bIndoor)return aIndoor?-1:1;
       }
       return (b.score-bPenalty)-(a.score-aPenalty)||a.index-b.index;

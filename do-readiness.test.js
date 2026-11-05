@@ -28,6 +28,7 @@ vm.runInContext([
   functionSource('getDoWeatherForContext'),
   functionSource('describeDoWeather'),
   functionSource('doReadinessApplies'),
+  functionSource('getDoTripMode'),
   functionSource('scoreDoOptionForToday'),
   functionSource('buildDoAdaptiveOptions'),
   functionSource('buildDoTodayRecommendation'),
@@ -126,4 +127,14 @@ test('adaptive choices separate easy outdoor options from sheltered food and dri
   assert.equal(alternatives.sheltered.title,'Dog and Gun');
   assert.equal(alternatives.outdoor.title,'Friars Crag Viewpoint');
   assert.notEqual(alternatives.easy.title,'Dog and Gun');
+});
+
+test('trip mode gives cycling routes a useful lift over hiking routes', () => {
+  const data = {meta:{tripName:'Maratona cycling trip'},weather:[],savedRoutes:[],itinerary:[]};
+  const result = {context:{mode:'planning',date:'2027-07-06'},places:[],events:[]};
+  const profile = context.describeDoWeather(null);
+  const cycling = context.scoreDoOptionForToday({type:'cycling',distanceKm:8},0,'route',data,result,profile);
+  const hiking = context.scoreDoOptionForToday({type:'hiking',distanceKm:8},1,'route',data,result,profile);
+  assert.equal(context.getDoTripMode(data),'cycling');
+  assert.ok(cycling>hiking);
 });
