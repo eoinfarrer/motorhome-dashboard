@@ -5124,7 +5124,9 @@ function buildDoTodayRecommendation(d,result){
   var places=result&&Array.isArray(result.places)?result.places:[];
   var target=result&&result.context&&result.context.date;
   var events=(result&&Array.isArray(result.events)?result.events:[]).filter(function(event){return !target||event.date===target;});
-  var savedRoutes=d&&Array.isArray(d.savedRoutes)?d.savedRoutes:[];
+  var savedRoutes=result&&Array.isArray(result.savedRoutes)
+    ? result.savedRoutes
+    : (d&&Array.isArray(d.savedRoutes)?d.savedRoutes:[]);
   var weather=getDoWeatherForContext(d,result),profile=describeDoWeather(weather),options=[];
   places.forEach(function(place,index){options.push({kind:'place',item:place,index:index,score:scoreDoOptionForToday(place,index,'place',d,result,profile)});});
   events.forEach(function(event,index){options.push({kind:'event',item:event,index:index,score:scoreDoOptionForToday(event,index,'event',d,result,profile)});});
