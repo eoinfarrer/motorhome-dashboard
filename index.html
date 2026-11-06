@@ -5113,11 +5113,30 @@ function scoreDoOptionForToday(option,index,kind,d,result,weatherProfile){
     var target=result&&result.context&&result.context.date;
     score+=target&&option.date===target?8:0;
   }
+  if(kind==='route')score+=routeEffortModifier_(option,band,weatherProfile.band);
   if(outdoors&&weatherProfile.band==='good'&&option.nearby){
     score+=Math.min(3,(Number(option.nearby.walkingRoutes)||0)+(Number(option.nearby.cyclingRoutes)||0));
   }
   if(option.access&&option.access.level==='specialist')score-=4;
   return score;
+}
+
+function routeEffortBand_(route){
+  route=route||{};
+  var km=Number(route.distanceKm)||0,elevation=Number(route.elevationM)||0,hours=Number(route.durationHours)||0;
+  var difficulty=String(route.difficulty||'').toLowerCase();
+  if(/hard|difficult|severe|expert/.test(difficulty)||km>=45||elevation>=1000||hours>=6)return'high';
+  if(/moderate|challenging/.test(difficulty)||km>=22||elevation>=500||hours>=4)return'medium';
+  return'low';
+}
+
+function routeEffortModifier_(route,readinessBand,weatherBand){
+  var effort=routeEffortBand_(route),modifier=effort==='high'?-8:effort==='medium'?-2:4;
+  if(readinessBand==='low')modifier+=effort==='high'?-12:effort==='medium'?-6:2;
+  else if(readinessBand==='moderate')modifier+=effort==='high'?-6:effort==='medium'?-2:1;
+  if(weatherBand==='poor')modifier+=effort==='high'?-8:effort==='medium'?-4:0;
+  else if(weatherBand==='mixed')modifier+=effort==='high'?-4:effort==='medium'?-2:0;
+  return modifier;
 }
 
 function buildDoTodayRecommendation(d,result){
@@ -5137,6 +5156,7 @@ function buildDoTodayRecommendation(d,result){
     if(/cycl|bike|gravel|mtb/.test(type)&&profile.band==='good')routeScore+=2;
     if(/hike|walk|trail/.test(type)&&profile.band!=='poor')routeScore+=2;
     if(profile.band==='poor')routeScore-=8;
+    routeScore+=routeEffortModifier_(route,doReadinessApplies(d,result)?String((d.travellerContext||{}).readinessBand||'').toLowerCase():'',profile.band);
     var distance=Number(route.localDistanceKm!==undefined?route.localDistanceKm:route.distanceKm);
     if(isFinite(distance))routeScore+=distance<=5?3:distance<=15?1:-3;
     options.push({kind:'route',item:route,index:index,score:routeScore});
@@ -5189,7 +5209,7 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
     var indoorWords=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/;
     var sheltered=entry.kind==='event'||indoorWords.test(group)||indoorWords.test(category)||indoorWords.test(String(item.title||item.name||'').toLowerCase());
     if(outdoor)candidates.outdoor.push(entry);
-    if((entry.kind==='route'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type))||(outdoor&&!sheltered&&isFinite(km)&&km<=6)||(!outdoor&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
+    if((entry.kind==='route'&&routeEffortBand_(item)==='low'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type))||(outdoor&&!sheltered&&isFinite(km)&&km<=6)||(!outdoor&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
     if(sheltered)candidates.sheltered.push(entry);
   });
   var labels={outdoor:'BEST OUTDOOR ROUTE',easy:'LOWER-EFFORT OPTION',sheltered:'SHELTERED / SOCIAL'};
