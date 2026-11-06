@@ -39,5 +39,16 @@
     "AUDREY_APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzBAxCi9msLUiqI1ySZlWTw0aPZYWe-t0E7FOzNsNQfDB8YQ9BB2OkxcynpZLl-Dzk8Dw/exec",
     "AUDREY_VAPID_PUBLIC_KEY": "BA6S_vqSXoykJPTQ1tp5UQtnUFQYruLERo9A--IBabwMepvhWzWwUdUGA2JxbPcrkI7wde0yYKP-8uMN_W7pPMw",
     "AUDREY_VAPID_SUBJECT": "https://audrey.eoinfarrer.uk"
+  },
+  "previews": {
+    "vars": {
+      "AUDREY_ACCESS_TEAM_DOMAIN": "preview.invalid",
+      "AUDREY_ACCESS_AUD": "preview-invalid-audience",
+      "AUDREY_ALLOWED_EMAIL_HASHES": "",
+      "AUDREY_APPS_SCRIPT_URL": "https://preview.invalid/apps-script",
+      "AUDREY_VAPID_PUBLIC_KEY": "",
+      "AUDREY_VAPID_SUBJECT": "https://preview.invalid"
+    },
+    "kv_namespaces": []
   }
 }
