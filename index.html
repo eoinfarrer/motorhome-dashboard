@@ -5209,7 +5209,9 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
     var indoorWords=/food|drink|pub|bar|restaurant|cafe|coffee|indoor|museum|gallery|theatre|cinema|culture|music/;
     var sheltered=entry.kind==='event'||indoorWords.test(group)||indoorWords.test(category)||indoorWords.test(String(item.title||item.name||'').toLowerCase());
     if(outdoor)candidates.outdoor.push(entry);
-    if((entry.kind==='route'&&routeEffortBand_(item)==='low'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type))||(outdoor&&!sheltered&&isFinite(km)&&km<=6)||(!outdoor&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
+    var isLowEffortRoute=entry.kind==='route'&&routeEffortBand_(item)==='low'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type);
+    var isNearbyNonRoute=!entry.kind||entry.kind!=='route';
+    if(isLowEffortRoute||(isNearbyNonRoute&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
     if(sheltered)candidates.sheltered.push(entry);
   });
   var labels={outdoor:'BEST OUTDOOR ROUTE',easy:'LOWER-EFFORT OPTION',sheltered:'SHELTERED / SOCIAL'};
