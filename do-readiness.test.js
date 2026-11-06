@@ -29,6 +29,8 @@ vm.runInContext([
   functionSource('describeDoWeather'),
   functionSource('doReadinessApplies'),
   functionSource('getDoTripMode'),
+  functionSource('routeEffortBand_'),
+  functionSource('routeEffortModifier_'),
   functionSource('scoreDoOptionForToday'),
   functionSource('buildDoAdaptiveOptions'),
   functionSource('buildDoTodayRecommendation'),
