@@ -8,7 +8,14 @@ const start = source.indexOf('function buildJourneyTrip(');
 const end = source.indexOf('// ── AUDREY 2.0 HOME SCENES', start);
 assert.ok(start >= 0 && end > start);
 const context = {
-  fmtDuration: minutes => `${minutes}m`
+  fmtDuration: minutes => `${minutes}m`,
+  HOME_SCENES: { mountains: {}, alpine: {}, christmas: {} },
+  DESTINATION_SCENES: [],
+  readSceneOverrides: () => ({}),
+  sceneOverrideId: (tripName, row) => `${tripName || ''}|${row && row.date || ''}|${row && row.location || ''}`,
+  escapeDoHtml: value => String(value || ''),
+  saveSceneOverride: () => {},
+  buildJourneySceneControl: () => '<div class="journey-scene-control"></div>'
 };
 vm.createContext(context);
 vm.runInContext(source.slice(start, end), context);
