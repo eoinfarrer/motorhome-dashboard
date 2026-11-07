@@ -62,7 +62,6 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .home-experience[data-scene="mountains"]{--home-scene-glow:rgba(151,177,185,.18);--home-scene-horizon:rgba(77,111,103,.22);--home-scene-base:#18201f;}
 .home-experience[data-scene="alpine"]{--home-scene-glow:rgba(185,205,220,.22);--home-scene-horizon:rgba(80,124,139,.2);--home-scene-base:#172023;}
 .home-experience[data-scene="coast"]{--home-scene-glow:rgba(122,171,188,.2);--home-scene-horizon:rgba(38,101,120,.24);--home-scene-base:#152126;}
-.home-experience[data-scene="highlands"]{--home-scene-glow:rgba(166,149,98,.18);--home-scene-horizon:rgba(85,118,86,.23);--home-scene-base:#1c211a;}
 .home-experience[data-scene="travelling"]{--home-scene-glow:rgba(159,191,194,.17);--home-scene-horizon:rgba(84,117,98,.2);--home-scene-base:#18221f;}
 .home-experience[data-scene-time="evening"]{--home-scene-glow:rgba(196,128,73,.23);--home-scene-horizon:rgba(86,69,89,.16);}
 .home-experience[data-scene-time="night"]{--home-scene-glow:rgba(84,105,135,.16);--home-scene-horizon:rgba(32,56,68,.18);--home-scene-base:#111513;}
@@ -199,6 +198,7 @@ body{background:#171918;color:var(--text);font-family:var(--mono);font-size:15px
 .journey-trip-card.journey-place-card{border:1px solid rgba(255,255,255,.075);box-shadow:0 6px 17px rgba(0,0,0,.1);backdrop-filter:blur(8px);}
 .journey-trip-card.journey-leg-card{padding-top:6px;padding-bottom:6px;background:transparent;}
 .journey-trip-card.journey-leg-card .journey-type{background:rgba(142,196,213,.13);color:#a9d3df;}
+.journey-scene-control{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px 25px;padding:8px 10px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(23,27,25,.52);color:#aeb2a9;font-size:9px}.journey-scene-control select{max-width:145px;padding:5px 7px;border:1px solid rgba(255,255,255,.16);border-radius:6px;background:rgba(255,255,255,.07);color:#f4f3ed;font-size:9px}
 .journey-date{padding-top:2px;font-size:9px;color:#9fa198;line-height:1.3;}.journey-date strong{display:block;color:#dedfd8;font-size:11px;font-weight:600;}
 .journey-stop{color:#f4f3ed;font-family:var(--ui);font-size:13px;font-weight:700;line-height:1.25;}.journey-stop-meta{margin-top:2px;font-size:9px;color:#a8aaa1;line-height:1.4;}.journey-type{padding:3px 5px;border-radius:5px;background:rgba(255,255,255,.08);color:#b9bbb2;font-size:7px;letter-spacing:.9px;text-transform:uppercase;white-space:nowrap;}
 .journey-trip-details{grid-column:2/-1;margin-top:1px;padding-top:2px;border-top:1px solid rgba(255,255,255,.055);}.journey-trip-details summary{font-size:9px;color:#83b9c7;cursor:pointer;}.journey-trip-detail{margin-top:5px;font-size:9px;color:#a8aaa1;line-height:1.45;}.journey-trip-detail a{color:#83b9c7;text-decoration:none;}
@@ -931,6 +931,7 @@ function buildTripEditorItem(item,index){
     +'<div class="trip-editor-grid"><label><span class="trip-editor-label">Date</span><input class="trip-editor-input" type="date" value="'+tripEditorEscape(item.date)+'" onchange="updateTripEditorItem('+index+',\'date\',this.value)"></label>'
     +'<label><span class="trip-editor-label">What happens?</span><select class="trip-editor-select" onchange="updateTripEditorItem('+index+',\'type\',this.value)">'+tripEditorTypeOptions(item.type)+'</select></label></div>'
     +'<div class="trip-editor-field"><label><span class="trip-editor-label">Location</span><input class="trip-editor-input" maxlength="120" placeholder="Town, campsite or airport" value="'+tripEditorEscape(item.location)+'" oninput="updateTripEditorItem('+index+',\'location\',this.value)"></label></div>'
+    +'<div class="trip-editor-field"><label><span class="trip-editor-label">Background scene</span><select class="trip-editor-select" onchange="saveSceneOverride(sceneOverrideId(tripEditorDraft.name,tripEditorDraft.items['+index+']),this.value)">'+sceneOptionsHtml_((readSceneOverrides()[sceneOverrideId(tripEditorDraft.name,item)]||''))+'</select></label></div>'
     +'<div class="trip-editor-field"><label><span class="trip-editor-label">Address</span><input class="trip-editor-input" maxlength="300" placeholder="Used for routing and local suggestions" value="'+tripEditorEscape(item.address)+'" oninput="updateTripEditorItem('+index+',\'address\',this.value)"></label></div>'
     +'<details class="trip-editor-details"><summary>Booking, timings and notes</summary><div class="trip-editor-grid">'
     +'<label class="trip-editor-field"><span class="trip-editor-label">Distance (km)</span><input class="trip-editor-input" type="number" min="0" step="0.1" value="'+tripEditorEscape(item.distanceKm)+'" oninput="updateTripEditorItem('+index+',\'distanceKm\',this.value)"></label>'
@@ -941,6 +942,8 @@ function buildTripEditorItem(item,index){
     +'<label class="trip-editor-field"><span class="trip-editor-label">Contact</span><input class="trip-editor-input" maxlength="160" value="'+tripEditorEscape(item.contact)+'" oninput="updateTripEditorItem('+index+',\'contact\',this.value)"></label></div>'
     +'<label class="trip-editor-field"><span class="trip-editor-label">Notes</span><textarea class="trip-editor-textarea" maxlength="500" oninput="updateTripEditorItem('+index+',\'notes\',this.value)">'+tripEditorEscape(item.notes)+'</textarea></label></details></article>';
 }
+
+function sceneOptionsHtml_(value){return '<option value="">Automatic</option>'+Object.keys(HOME_SCENES).filter(function(key){return !/generic|home|travelling/.test(key);}).map(function(key){return'<option value="'+key+'"'+(value===key?' selected':'')+'>'+key.charAt(0).toUpperCase()+key.slice(1)+'</option>';}).join('')+DESTINATION_SCENES.map(function(scene){return'<option value="'+scene.key+'"'+(value===scene.key?' selected':'')+'>'+scene.key.charAt(0).toUpperCase()+scene.key.slice(1)+'</option>';}).join('');}
 
 function updateTripEditorItem(index,key,value){if(tripEditorDraft&&tripEditorDraft.items[index])tripEditorDraft.items[index][key]=value;}
 function addTripEditorItem(){var last=tripEditorDraft.items[tripEditorDraft.items.length-1];tripEditorDraft.items.push(tripEditorBlankItem(last&&last.date||'','STAY'));renderTripEditor();}
@@ -1370,7 +1373,6 @@ function buildMoreSettingsHtml(d,fc){
   var snowByName={};
   snowResorts.forEach(function(resort){snowByName[String(resort.name||'').toLowerCase()]=resort;});
   var html='<div class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Trip selection</span></div><div style="padding:10px 14px"><select class="trip-select" onchange="updateDefaultTrip(this.value)"><option value="">Choose a trip…</option>'+trips.map(function(trip){var selected=trip.name===(d.meta&&d.meta.tripName)?' selected':'';return'<option value="'+trip.name+'"'+selected+'>'+trip.name+'</option>';}).join('')+'</select></div></div>';
-  html+=buildMoreSceneSettings(d);
   html+='<div class="settings-group"><div class="settings-group-head"><span class="settings-group-title">Fuel &amp; LPG</span></div>'
     +settingsRow('Diesel',fc.pricePerLitre?fc.pricePerLitre.toFixed(2):'—','£/L','diesel')
     +settingsRow('LPG',fc.lpgPrice?fc.lpgPrice.toFixed(2):'—','£/L','lpg')
@@ -1706,6 +1708,7 @@ function buildJourneyTrip(d,fc){
   if(!itin.length)return html+'<div class="journey-point-card"><div class="journey-point-title">No itinerary entries available</div></div>';
   html+='<div class="journey-timeline">';
   itin.forEach(function(row,index){
+    if((!index||itin[index-1].date!==row.date)&&typeof buildJourneySceneControl==='function')html+=buildJourneySceneControl(d,row);
     html+=buildJourneyTripPoint(row,completed,fc);
     if(!itin[index+1]||itin[index+1].date!==row.date){
       var dayRows=itin.filter(function(item){return item.date===row.date;});
@@ -1718,6 +1721,12 @@ function buildJourneyTrip(d,fc){
     }
   });
   return html+'</div>';
+}
+
+function buildJourneySceneControl(d,row){
+  var tripName=d.meta&&d.meta.tripName||'',id=sceneOverrideId(tripName,row),value=readSceneOverrides()[id]||'';
+  var options='<option value="">Automatic</option>'+Object.keys(HOME_SCENES).filter(function(key){return !/generic|home|travelling/.test(key);}).map(function(key){return'<option value="'+key+'"'+(value===key?' selected':'')+'>'+key.charAt(0).toUpperCase()+key.slice(1)+'</option>';}).join('')+DESTINATION_SCENES.map(function(scene){return'<option value="'+scene.key+'"'+(value===scene.key?' selected':'')+'>'+scene.key.charAt(0).toUpperCase()+scene.key.slice(1)+'</option>';}).join('');
+  return '<div class="journey-scene-control"><span>Background for '+escapeDoHtml(row.location||'this phase')+'</span><select data-id="'+escapeDoHtml(id)+'" onchange="saveSceneOverride(this.dataset.id,this.value)">'+options+'</select></div>';
 }
 
 function tripReviewActivityCategory(activity){
@@ -2355,7 +2364,6 @@ var HOME_SCENES={
   alpine:{asset:'assets/scenes/alpine.jpg',enabled:true,position:'78% center',tabletPosition:'64% center',widePosition:'center 46%'},
   coast:{asset:'assets/scenes/coast.jpg',enabled:true,position:'72% center',tabletPosition:'61% center',widePosition:'center 48%'},
   // No dedicated Highlands image yet: keep its explicit context atmospheric.
-  highlands:{asset:'',enabled:false,position:'center 42%',tabletPosition:'center 45%',widePosition:'center 48%'},
   // Travelling uses the mountain asset only when the drive state is explicit.
   travelling:{asset:'assets/scenes/mountains.jpg',enabled:true,position:'52% center',tabletPosition:'48% center',widePosition:'center 48%'},
   christmas:{asset:'assets/scenes/christmas-motorhome.png',enabled:true,position:'72% center',tabletPosition:'68% center',widePosition:'center 52%'},
@@ -2443,7 +2451,7 @@ function getHomeScene(d,context){
   else if(context.mode==='ski')key='alpine';
   // These matches are only against explicit payload labels, never place names.
   else if(/coast|coastal|water|beach|sea/.test(explicit))key='coast';
-  else if(/highlands|rural/.test(explicit))key='highlands';
+  else if(/highlands|rural/.test(explicit))key='mountains';
   else if(/mountain|mountains|alpine/.test(explicit))key=meta.season==='winter'?'alpine':'mountains';
 
   var hour=(new Date()).getHours();
