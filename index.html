@@ -1335,7 +1335,6 @@ function buildMoreView(d,fc){
   // An array with no rows is an expected forecast-horizon absence, not a
   // broken Weather screen. An omitted weather payload remains distinguishable.
   if(Array.isArray(d.weather))trip.push(buildWeatherSection(d.weather,{allowUnavailable:true}));
-  if(d.snowStatus&&isSkiTrip(d))trip.push(buildSnowSection(d.snowStatus,meta,d.itinerary));
   if(d.budget)trip.push(buildBudgetSection(d.budget));
   if(!trip.length)trip.push('<div class="more-data-note">Detailed trip information will appear here when forecast, snow or budget data is available.</div>');
   var timestamp=d.timestamp&&!isNaN(new Date(d.timestamp).getTime())?new Date(d.timestamp).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Unavailable';
@@ -6642,18 +6641,11 @@ function buildSkiScreen(snow, meta) {
       + '<div>Snow data appears here during the December-April ski window.<br>Resorts configured in Settings.</div>'
       + '</div>';
   }
- 
-  // Resort selector tabs
-  var html = '<div style="display:flex;gap:5px;padding:8px 14px;border-bottom:1px solid var(--border);overflow-x:auto">';
-  snow.resorts.forEach(function(r, i) {
-    html += '<span class="act-chip' + (i===0?' active':'') + '" onclick="switchSkiResort(' + i + ',this)">' + r.name + '</span>';
-  });
-  html += '</div>';
- 
-  // Resort detail — first resort by default
-  html += '<div id="act-ski-detail">' + buildSkiResortDetail(snow.resorts[0], meta) + '</div>';
- 
-  return html;
+
+  // Keep the full resort intelligence in Do, where it supports an
+  // immediate decision. More is reserved for deeper settings and history;
+  // rendering the same SnowSure panel there created an unnecessary duplicate.
+  return buildSnowSection(snow, meta, currentData && currentData.itinerary);
 }
  
 function switchSkiResort(idx, el) {
