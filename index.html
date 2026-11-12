@@ -5272,7 +5272,10 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
     if(outdoor)candidates.outdoor.push(entry);
     var isLowEffortRoute=entry.kind==='route'&&routeEffortBand_(item)==='low'&&(!isFinite(km)||km<=15)&&(/walk|hike|trail|cycle|bike|gravel|mtb/.test(type)||!type);
     var isNearbyNonRoute=!entry.kind||entry.kind!=='route';
-    if(isLowEffortRoute||(isNearbyNonRoute&&!sheltered&&isFinite(km)&&km<=6))candidates.easy.push(entry);
+    // A nearby cultural place can be a genuinely lighter fallback as well as
+    // a sheltered option; the cross-slot `used` guard below ensures it is
+    // only displayed once.
+    if(isLowEffortRoute||(isNearbyNonRoute&&(!sheltered||category==='culture')&&isFinite(km)&&km<=6))candidates.easy.push(entry);
     if(sheltered)candidates.sheltered.push(entry);
   });
   var labels={outdoor:'BEST OUTDOOR ROUTE',easy:'LOWER-EFFORT OPTION',sheltered:'SHELTERED / SOCIAL'};
@@ -5290,7 +5293,13 @@ function buildDoAdaptiveOptions(options,d,result,weatherProfile,primaryTitle){
       }
       return (b.score-bPenalty)-(a.score-aPenalty)||a.index-b.index;
     });
-    var entry=pool.find(function(candidate){return !used[String(candidate.item.title||candidate.item.name||'').toLowerCase()];})||pool[0];if(!entry)return null;
+    // Never repeat a candidate across the adaptive slots.  The old fallback
+    // reused pool[0] when a category had only one viable option, which made
+    // Best Outdoor and Lower-effort (or Sheltered / Social) show the same
+    // activity.  It is better to omit an unavailable alternative than to
+    // present a misleading duplicate.
+    var entry=pool.find(function(candidate){return !used[String(candidate.item.title||candidate.item.name||'').toLowerCase()];});
+    if(!entry)return null;
     used[String(entry.item.title||entry.item.name||'').toLowerCase()]=true;
     return{kind:kind,label:labels[kind],title:title(entry),copy:entry.kind==='route'?'Use a saved route that matches the current context.':entry.kind==='event'?'A timely local option if you fancy something social.':'A nearby option with a good balance of interest and effort.',reasons:reason(entry,kind),url:entry.item.url||entry.item.googleMapsUrl||entry.item.otmUrl||entry.item.driveUrl||entry.item.driveFileUrl||''};
   }).filter(Boolean);
