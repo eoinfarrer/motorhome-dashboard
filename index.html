@@ -1074,6 +1074,12 @@ function toggleSection(id){
   var el=document.getElementById('sec-'+id);
   if(!el)return;
   var collapsed=el.classList.toggle('collapsed');
+  var body=el.querySelector('.section-body');
+  // Keep the inline height in sync with the class.  This matters after a
+  // section has been collapsed from another view: the CSS `!important`
+  // height of zero otherwise leaves the weather body visually closed when
+  // the More accordion is opened directly.
+  if(body)body.style.maxHeight=collapsed?'0px':body.scrollHeight+'px';
   setCollapsed(id,collapsed);
 }
 function openMoreSection(id){
