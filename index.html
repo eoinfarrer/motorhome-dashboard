@@ -3510,7 +3510,8 @@ function buildSnowOutlookBanner(snow,meta){
   return '<div style="padding:11px 14px;border-bottom:1px solid var(--border);background:var(--bg2)"><div style="font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:3px">'+title+'</div><div style="font-size:11px;line-height:1.5;color:var(--text-dim)">'+copy+'</div></div>';
 }
 
-function buildSnowSection(snow, meta, itin) {
+function buildSnowSection(snow, meta, itin, options) {
+  options=options||{};
   if (!snow || !snow.resorts || !snow.resorts.length) return '';
   if (meta.season !== 'winter') return '';
  
@@ -3753,7 +3754,10 @@ function buildSnowSection(snow, meta, itin) {
   }).join('');
  
   var body = buildSnowOutlookBanner(snow,meta) + roadRiskHtml + resortStrip + vanStrip + resortsHtml;
-  return makeSection('snow', 'Snow &middot; Conditions', sectionMeta, '', body);
+  // In the Skiing browse tab this is already inside a dedicated screen, so
+  // do not carry over the old More accordion header/chevron. Keep the
+  // collapsible section for Home and other legacy callers.
+  return options.inline?body:makeSection('snow', 'Snow &middot; Conditions', sectionMeta, '', body);
 }
  
 // Toggle individual resort card
@@ -6694,7 +6698,7 @@ function buildSkiScreen(snow, meta) {
   // Keep the full resort intelligence in Do, where it supports an
   // immediate decision. More is reserved for deeper settings and history;
   // rendering the same SnowSure panel there created an unnecessary duplicate.
-  return buildSnowSection(snow, meta, currentData && currentData.itinerary);
+  return buildSnowSection(snow, meta, currentData && currentData.itinerary, {inline:true});
 }
  
 function switchSkiResort(idx, el) {
