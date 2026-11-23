@@ -35,7 +35,7 @@ vm.runInContext([
   'storybookDateLabel', 'storybookHeroKey', 'storybookHeroAsset', 'storybookImageDimensions', 'storybookModel', 'storybookStat',
   'storybookPageNumber', 'storybookMomentTitle', 'storybookMomentImage',
   'storybookTimelineDate', 'storybookTimelineTitle', 'storybookTimelineComment', 'storybookTimelineMemories',
-  'buildStorybookTimeline', 'buildStorybookMap', 'buildStorybookCover', 'buildStorybookMoments',
+  'buildStorybookTimeline', 'buildStorybookMap', 'buildStorybookSkiSummary', 'buildStorybookCover', 'buildStorybookMoments',
   'buildStorybookDays', 'buildStorybookReflection', 'buildStorybook'
 ].map(functionSource).join('\n'), context);
 
@@ -240,4 +240,17 @@ test('Trip Review builds a live ski summary from Garmin activities', () => {
   assert.match(context.buildTripReview({meta:{tripName:'Dolomites'},activities:{tripItems:[
     {name:'Alta Badia morning',sportType:'AlpineSki',tripDate:'2026-12-10',distanceKm:24.5,elevationM:4200,movingMinutes:310,calories:1850}
   ]},memories:{items:[]},itinerary:[]}), /Ski summary so far/);
+});
+
+test('Storybook includes the ski summary page when ski activities exist', () => {
+  const model = context.storybookModel({
+    meta:{tripName:'Dolomites Winter',departDate:'2026-12-10',returnDate:'2026-12-14'},
+    itinerary:[],
+    activities:{tripItems:[{name:'Kronplatz laps',sportType:'AlpineSki',tripDate:'2026-12-12',distanceKm:31.1,elevationM:5100,movingMinutes:360}]},
+    memories:{items:[]}
+  });
+  const html = context.buildStorybookSkiSummary(model, 2);
+  assert.match(html, /Skiing so far/);
+  assert.match(html, /Kronplatz/);
+  assert.match(html, /Distance skied/);
 });

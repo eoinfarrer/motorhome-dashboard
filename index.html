@@ -713,6 +713,7 @@ body.trip-editor-open{overflow:hidden;}
 .vehicle-reference-row{display:grid;grid-template-columns:minmax(92px,1fr) minmax(0,1.55fr) auto;align-items:center;gap:8px;padding:7px 10px;font-size:10px;min-height:35px}
 .vehicle-reference-row strong{font-size:11px;line-height:1.25}
 .vehicle-reference-copy-btn{padding:3px 6px;font-size:9px;flex-shrink:0}
+.storybook-ski-summary-copy{margin-top:18px;color:#b7b9b0;font-size:12px;line-height:1.55}
 </style>
 </head>
 <body>
@@ -2226,6 +2227,14 @@ function buildStorybookMap(map){
   return'<div class="storybook-map-frame"><div class="storybook-map-tiles">'+tiles+'</div><svg class="storybook-map-svg" viewBox="0 0 '+width+' '+height+'">'+routeSvg+pins+'</svg><div class="storybook-map-caption">© OpenStreetMap contributors</div></div><div class="storybook-map-legend">'+legend+'</div>';
 }
 
+function buildStorybookSkiSummary(model,page){
+  var ski=model&&model.review&&model.review.skiSummary;
+  if(!ski)return'';
+  var stats=storybookStat(ski.days,'Ski days')+storybookStat(ski.distanceKm.toFixed(1)+' km','Distance skied')+storybookStat(Math.round(ski.elevationM).toLocaleString()+' m','Climbing')+storybookStat(ski.hasCalories?Math.round(ski.calories).toLocaleString():'—','Calories');
+  var areas=ski.areas.length?ski.areas.map(escapeDoHtml).join(' · '):'Areas will be identified from activity names.';
+  return'<section class="storybook-page"><div class="storybook-kicker">Days on snow</div><div class="storybook-title">Skiing so far</div><div class="storybook-subtitle">A live record of the days, distance and mountains that have shaped the ski trip.</div><div class="storybook-stat-grid">'+stats+'</div><div class="storybook-ski-summary-copy">'+escapeDoHtml(ski.activities+' recorded ski activit'+(ski.activities===1?'y':'ies')+' across '+ski.days+' day'+(ski.days===1?'':'s')+'.')+'</div><div class="storybook-kicker" style="margin-top:22px">Areas visited</div><div class="storybook-theme-grid"><div class="storybook-theme"><span class="storybook-theme-dot"></span><div class="storybook-theme-copy">'+areas+'</div></div></div>'+storybookPageNumber(page)+'</section>';
+}
+
 function buildStorybookCover(model,page){
   var r=model.review,def=model.defining,range=[storybookDateLabel(model.start),storybookDateLabel(model.end)].filter(Boolean).join(' - '),themes=r.themes.slice(0,4);
   return'<section class="storybook-page storybook-cover"><div class="storybook-cover-image" style="background-image:url(\''+escapeDoHtml(model.hero)+'\')"><div class="storybook-cover-heading"><div class="storybook-kicker">Audrey Travel Storybook</div><div class="storybook-title">'+escapeDoHtml(model.name)+'</div><div class="storybook-subtitle" style="color:#f3efe6">'+escapeDoHtml(range)+'</div></div><div class="storybook-cover-tagline">A journey remembered.</div></div><div class="storybook-cover-body"><div class="storybook-kicker">The journey at a glance</div><div class="storybook-stat-grid">'+storybookStat(model.days,'Days')+storybookStat(Math.round(r.distanceKm).toLocaleString(),'Kilometres')+storybookStat(r.activities.length,'Activities')+storybookStat(r.memories.length,'Moments')+storybookStat(r.photoCount,'Photos')+'</div><div class="storybook-kicker" style="margin-top:22px">What made this trip special</div><div class="storybook-theme-grid">'+(themes.length?themes.map(function(theme){return'<div class="storybook-theme"><span class="storybook-theme-dot"></span><div><div class="storybook-theme-title">'+escapeDoHtml(theme.title)+'</div><div class="storybook-theme-copy">'+escapeDoHtml(theme.copy)+'</div></div></div>';}).join(''):'<div class="storybook-theme-copy">Themes will emerge as the trip gathers Moments and activities.</div>')+'</div><div class="storybook-defining"><div class="storybook-kicker">Defining Moment</div><div class="storybook-defining-title">'+escapeDoHtml(def?storybookMomentTitle(def):'Waiting for the Moment that defines this trip')+'</div><div class="storybook-defining-meta">'+escapeDoHtml(def?[def.locationName,storybookDateLabel(def.date||def.timestamp)].filter(Boolean).join(' · '):'Add a Favourite Moment during the trip')+'</div></div></div>'+storybookPageNumber(page)+'</section>';
@@ -2255,6 +2264,7 @@ function buildStorybook(d){
   var model=storybookModel(d),pages=[],number=1;
   pages.push(buildStorybookCover(model,number++));
   pages.push('<section class="storybook-page"><div class="storybook-kicker">The route</div><div class="storybook-title">The journey in places</div><div class="storybook-subtitle">A story map of the stops that shaped the trip.</div>'+buildStorybookMap(model.review.map)+storybookPageNumber(number++)+'</section>');
+  var skiSummary=buildStorybookSkiSummary(model,number);if(skiSummary){pages.push(skiSummary);number++;}
   var timeline=buildStorybookTimeline(model,number);pages.push(timeline.html);number+=timeline.pages;
   var moments=buildStorybookMoments(model,number);if(moments){pages.push(moments);number++;}
   var days=buildStorybookDays(model,number);if(days){pages.push(days);number++;}
