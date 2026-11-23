@@ -27,7 +27,7 @@ const context = {
 vm.createContext(context);
 vm.runInContext([
   'tripDayNumber', 'dailyStoryLocation', 'dailyStoryActivityLabel', 'dailyStoryModel',
-  'tripReviewActivityCategory', 'isFavouriteMoment', 'momentMeaningScore',
+  'tripReviewActivityCategory', 'tripReviewSkiSummary', 'isFavouriteMoment', 'momentMeaningScore',
   'tripReviewThemes', 'tripReviewCoordinates', 'tripReviewMapLegMode', 'tripReviewMapModel',
   'buildTripReviewMapFallback', 'buildTripReviewMap', 'travelogueWorldPoint',
   'travelogueMapFitView', 'travelogueMapTileUrl', 'travelogueMapPointerDown',
@@ -224,4 +224,20 @@ test('Trip Review has useful empty states before the Christmas trip begins', () 
   assert.match(html, /Your five-star and favourite Moments will appear here/);
   assert.match(html, /Save your first Moment/);
   assert.match(html, /Insights will appear/);
+});
+
+test('Trip Review builds a live ski summary from Garmin activities', () => {
+  const summary = context.tripReviewSkiSummary([
+    {name:'Alta Badia morning', sportType:'AlpineSki', tripDate:'2026-12-10', distanceKm:24.5, elevationM:4200, movingMinutes:310, calories:1850},
+    {name:'Tre Cime Lavaredo day', sportType:'AlpineSki', tripDate:'2026-12-12', distanceKm:18.2, elevationM:2900, movingMinutes:245, calories:1400},
+    {name:'Kronplatz laps', sportType:'AlpineSki', tripDate:'2026-12-13', distanceKm:31.1, elevationM:5100, movingMinutes:360}
+  ]);
+  assert.equal(summary.days, 3);
+  assert.equal(summary.activities, 3);
+  assert.equal(summary.distanceKm, 73.8);
+  assert.deepEqual(summary.areas, ['Alta Badia', 'Tre Cime', 'Kronplatz']);
+  assert.equal(summary.hasCalories, true);
+  assert.match(context.buildTripReview({meta:{tripName:'Dolomites'},activities:{tripItems:[
+    {name:'Alta Badia morning',sportType:'AlpineSki',tripDate:'2026-12-10',distanceKm:24.5,elevationM:4200,movingMinutes:310,calories:1850}
+  ]},memories:{items:[]},itinerary:[]}), /Ski summary so far/);
 });
