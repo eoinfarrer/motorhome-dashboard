@@ -1778,6 +1778,32 @@ function tripReviewActivityCategory(activity){
   return{key:'other',label:'Other activities',icon:'●'};
 }
 
+function tripReviewSkiSummary(activities){
+  activities=activities||[];
+  var ski=activities.filter(function(activity){
+    return /ski|snowboard/.test([activity.sportType,activity.category,activity.name].filter(Boolean).join(' ').toLowerCase());
+  });
+  if(!ski.length)return null;
+  var dates={},areas={},distanceKm=0,elevationM=0,movingMinutes=0,calories=0,hasCalories=false;
+  var areaAliases=[
+    ['Tre Cime',/tre\s*-?\s*cime|lavaredo|misurina|auronzo|rifugio locatelli/i],
+    ['Kronplatz',/kronplatz|plan de corones/i],
+    ['Arabba',/arabba/i],
+    ['Val Gardena',/val gardena|selva di val gardena|ortisei|santa cristina/i],
+    ['Alta Badia',/alta badia|corvara|san cassiano|st kassian|armentarola/i],
+    ['Val di Fassa',/val di fassa|canazei|marmolada/i]
+  ];
+  ski.forEach(function(activity){
+    var date=String(activity.tripDate||activity.date||activity.start||'').slice(0,10);if(date)dates[date]=true;
+    distanceKm+=Number(activity.distanceKm)||0;elevationM+=Number(activity.elevationM)||0;
+    movingMinutes+=Number(activity.movingMinutes)||Number(activity.elapsedMinutes)||0;
+    var raw=String(activity.name||activity.location||'');
+    areaAliases.forEach(function(pair){if(pair[1].test(raw))areas[pair[0]]=true;});
+    if(activity.calories!==null&&activity.calories!==undefined&&isFinite(Number(activity.calories))){calories+=Number(activity.calories);hasCalories=true;}
+  });
+  return{days:Object.keys(dates).length,activities:ski.length,distanceKm:Math.round(distanceKm*10)/10,elevationM:Math.round(elevationM),movingMinutes:Math.round(movingMinutes),calories:Math.round(calories),hasCalories:hasCalories,areas:Object.keys(areas)};
+}
+
 function tripReviewModel(d){
   d=d||{};
   var memories=d.memories&&Array.isArray(d.memories.items)?d.memories.items.slice():[];
@@ -1793,6 +1819,7 @@ function tripReviewModel(d){
     entry.count++;entry.distanceKm+=Number(activity.distanceKm)||0;entry.movingMinutes+=Number(activity.movingMinutes)||0;
   });
   var activityCategories=Object.keys(categoryMap).map(function(key){return categoryMap[key];}).sort(function(a,b){return b.count-a.count;});
+  var skiSummary=tripReviewSkiSummary(activities);
   var meaningful=memories.slice().sort(function(a,b){return momentMeaningScore(b)-momentMeaningScore(a)||new Date(b.timestamp)-new Date(a.timestamp);});
   var highlights=meaningful.slice(0,8);
   var definingMoments=meaningful.filter(function(memory){return isFavouriteMoment(memory)||Number(memory.rating)>=5||String(memory.comment||'').length>=80;}).slice(0,4);
@@ -1810,7 +1837,7 @@ function tripReviewModel(d){
   if(memorableDay)insights.push({icon:'♥',title:'Most memorable day',copy:'Day '+memorableDay+' held the richest collection of rated and favourite Moments.'});
   var storyDates={};itinerary.forEach(function(row){if(row.date)storyDates[row.date]=true;});
   var stories=Object.keys(storyDates).sort().map(function(date){return{date:date,dayNumber:tripDayNumber(d,date),momentCount:memories.filter(function(memory){return String(memory.date||memory.timestamp||'').slice(0,10)===date||Number(memory.tripDay)===tripDayNumber(d,date);}).length,activityCount:activities.filter(function(activity){return(activity.tripDate||activity.date)===date;}).length};});
-  return{distanceKm:distanceKm,memories:memories,activities:activities,averageRating:averageRating,photoCount:memories.reduce(function(sum,memory){return sum+(Number(memory.photoCount)||0);},0),favourites:favourites,activityCategories:activityCategories,highlights:highlights,definingMoments:definingMoments,themes:themes,insights:insights,stories:stories,map:tripReviewMapModel(d,memories,activities)};
+  return{distanceKm:distanceKm,memories:memories,activities:activities,averageRating:averageRating,photoCount:memories.reduce(function(sum,memory){return sum+(Number(memory.photoCount)||0);},0),favourites:favourites,activityCategories:activityCategories,skiSummary:skiSummary,highlights:highlights,definingMoments:definingMoments,themes:themes,insights:insights,stories:stories,map:tripReviewMapModel(d,memories,activities)};
 }
 
 function isFavouriteMoment(memory){return memory&&((memory.favourite===true)||String(memory.favourite).toLowerCase()==='true'||String(memory.type)==='favourite');}
@@ -2018,6 +2045,7 @@ function buildTripReview(d){
   var html='<div class="trip-review"><section class="trip-review-hero"><div class="journey-kicker">Trip Review</div><div class="trip-review-heading">'+escapeDoHtml(name)+'</div><div class="trip-review-copy">A deterministic summary built from your itinerary, activities and Moments. It will become richer as the trip progresses.</div><div class="trip-review-stats">'+stats.map(function(stat){return'<div class="trip-review-stat"><div class="trip-review-stat-value">'+stat[0]+'</div><div class="trip-review-stat-label">'+stat[1]+'</div></div>';}).join('')+'</div><div class="trip-review-storybook-action"><div class="trip-review-storybook-copy">A compact keepsake generated from this trip’s stories, activities and Moments.</div><button class="trip-review-storybook-btn" type="button" onclick="openStorybook()">📖 Preview Storybook</button></div></section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">❤️ Favourite Moments</div>'+(review.favourites.length?'<div class="trip-review-list">'+review.favourites.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Your five-star and favourite Moments will appear here.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">Activities</div>'+(review.activityCategories.length?'<div class="trip-review-list">'+review.activityCategories.map(function(category){var meta=[category.distanceKm?formatActivityNumber(category.distanceKm,1)+' km':'',category.movingMinutes?fmtDuration(category.movingMinutes):''].filter(Boolean).join(' · ');return'<div class="trip-review-activity"><div class="trip-review-icon">'+category.icon+'</div><div><div class="trip-review-item-title">'+category.label+'</div><div class="trip-review-item-meta">'+category.count+' recorded'+(meta?' · '+meta:'')+'</div></div></div>';}).join('')+'</div>':'<div class="trip-review-empty">Completed trip activities will be summarised here.</div>')+'</section>';
+  if(review.skiSummary){var ski=review.skiSummary,skiMeta=[ski.days+' ski day'+(ski.days===1?'':'s'),ski.activities+' activit'+(ski.activities===1?'y':'ies')].join(' · '),skiStats=[[''+formatActivityNumber(ski.distanceKm,1)+' km','Distance skied'],[Math.round(ski.elevationM).toLocaleString()+' m','Climbing'],[fmtDuration(Math.round(ski.movingMinutes)),'Activity time'],[ski.hasCalories?Math.round(ski.calories).toLocaleString():'—','Calories']];html+='<section class="trip-review-section trip-review-ski"><div class="journey-kicker">⛷ Ski summary so far</div><div class="trip-review-copy">'+skiMeta+'. This live summary will continue to update as Garmin activities sync.</div><div class="trip-review-stats">'+skiStats.map(function(stat){return'<div class="trip-review-stat"><div class="trip-review-stat-value">'+stat[0]+'</div><div class="trip-review-stat-label">'+stat[1]+'</div></div>';}).join('')+'</div>'+(ski.areas.length?'<div class="trip-review-item-meta" style="margin-top:12px">Areas visited: '+ski.areas.map(escapeDoHtml).join(' · ')+'</div>':'<div class="trip-review-empty">Ski area will be identified from activity names as they are synced.</div>')+'</section>';}
   html+='<section class="trip-review-section"><div class="journey-kicker">Trip Highlights</div>'+(review.highlights.length?'<div class="trip-review-list">'+review.highlights.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Highly rated and richly described Moments will form the trip highlights.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">🏆 Defining Moments</div>'+(review.definingMoments.length?'<div class="trip-review-list">'+review.definingMoments.map(function(memory){return tripReviewMemoryRow(memory,false);}).join('')+'</div>':'<div class="trip-review-empty">Favourite, five-star and richly described Moments will appear here.</div>')+'</section>';
   html+='<section class="trip-review-section"><div class="journey-kicker">What Made This Trip Special</div>'+(review.themes.length?'<div class="trip-review-themes">'+review.themes.map(function(theme){return'<div class="trip-review-theme"><div class="trip-review-icon">'+theme.icon+'</div><div><div class="trip-review-item-title">'+escapeDoHtml(theme.title)+'</div><div class="trip-review-item-meta">'+escapeDoHtml(theme.copy)+'</div></div></div>';}).join('')+'</div>':'<div class="trip-review-empty">Themes will emerge as Moments and activities are added.</div>')+'</section>';
