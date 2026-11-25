@@ -1143,7 +1143,8 @@ async function fetchAudreyJson(url,options){
         throw new Error('Invalid response from Audrey');
       }
       if(!response.ok){
-        var httpError=new Error(data.error||('HTTP '+response.status));
+        var diagnostic=data&&data.code?' ['+data.code+']':'';
+        var httpError=new Error((data&&data.error||('HTTP '+response.status))+diagnostic);
         httpError.status=response.status;
         throw httpError;
       }
