@@ -391,6 +391,8 @@ async function proxyApi(request, env, fetchImpl) {
         envelope.gw_ts = String(timestamp);
         envelope.gw_sig = signature;
         envelope.gw_payload = payload;
+        const payloadDigest = await crypto.subtle.digest('SHA-256', encoder.encode(payload));
+        envelope.gw_payload_hash = bytesToHex(new Uint8Array(payloadDigest));
         upstreamBody = JSON.stringify(envelope);
       }
     } catch (_error) {
