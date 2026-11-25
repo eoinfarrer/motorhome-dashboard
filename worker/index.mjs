@@ -390,6 +390,7 @@ async function proxyApi(request, env, fetchImpl) {
       if (envelope && typeof envelope === 'object' && !Array.isArray(envelope)) {
         envelope.gw_ts = String(timestamp);
         envelope.gw_sig = signature;
+        envelope.gw_payload = payload;
         upstreamBody = JSON.stringify(envelope);
       }
     } catch (_error) {
