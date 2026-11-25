@@ -600,6 +600,11 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   }
 
   const url = new URL(request.url);
+  if (url.pathname === '/debug/gateway-fingerprint') {
+    const secret = String(env.AUDREY_GATEWAY_SECRET || '');
+    const digest = await crypto.subtle.digest('SHA-256', encoder.encode(secret));
+    return json({length: secret.length, fingerprint: bytesToHex(new Uint8Array(digest))});
+  }
   if (url.pathname === '/health') {
     return json({ok: true, authenticated: true});
   }
