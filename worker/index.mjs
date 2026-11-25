@@ -604,7 +604,10 @@ export async function handleRequest(request, env, ctx, fetchImpl = fetch) {
   if (url.pathname === '/debug/gateway-fingerprint') {
     const secret = String(env.AUDREY_GATEWAY_SECRET || '');
     const digest = await crypto.subtle.digest('SHA-256', encoder.encode(secret));
-    return json({length: secret.length, fingerprint: bytesToHex(new Uint8Array(digest))});
+    const vectorTimestamp = '1700000000';
+    const vectorPayload = '{"action":"gateway_vector","value":"audrey"}';
+    const vectorSignature = await signGatewayRequest(secret, 'POST', vectorTimestamp, vectorPayload);
+    return json({length: secret.length, fingerprint: bytesToHex(new Uint8Array(digest)), vectorTimestamp, vectorPayload, vectorSignature});
   }
   if (url.pathname === '/health') {
     return json({ok: true, authenticated: true});
