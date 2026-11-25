@@ -2810,7 +2810,7 @@ async function saveMoment(){
   var wasEditing=momentDraft.editing,savedMemory=null;
   try{
     var result=await fetchAudreyJson(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
-    if(!result.success)throw new Error(result.error||'Moment could not be saved');
+    if(!result.success)throw new Error((result.error||'Moment could not be saved')+(result.code?' ['+result.code+']':''));
     savedMemory=result.memory;updateLocalMemory(savedMemory,!wasEditing);
     momentDraft.editing=true;momentDraft.memoryId=savedMemory.memoryId;momentDraft.thumbnailDriveId=savedMemory.thumbnailDriveId||momentDraft.thumbnailDriveId;
     if(momentDraft.thumbnailBase64){
